@@ -3,7 +3,7 @@ name: Run tests
 on:
   push:
     paths:
-    - 'in/**'
+    - 'dev/**'
 
 ## The action created based on the description from https://github.com/marketplace/actions/mongodb-in-github-actions
 
