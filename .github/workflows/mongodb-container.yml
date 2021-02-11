@@ -1,4 +1,4 @@
-name: Run tests
+name: Run tests with mongodb docker
 
 on:
   push:
@@ -23,10 +23,10 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: Start MongoDB
-      uses: supercharge/mongodb-github-action@1.3.0
-      with:
-        mongodb-version: ${{ matrix.mongodb-version }}
+#    - name: Start MongoDB
+#      uses: supercharge/mongodb-github-action@1.3.0
+#      with:
+#        mongodb-version: ${{ matrix.mongodb-version }}
 
     - name: Build with Maven
       run: cd mongodb-container && mvn clean install
