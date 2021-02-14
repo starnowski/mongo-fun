@@ -1,0 +1,12 @@
+srv:
+  questions:
+  - srv
+  - srv ?
+  references:
+  - srv-address
+srv-address:
+  questions:
+  - What is srv address ?
+  - What is srv uri ?
+  answers:
+  - TODO
