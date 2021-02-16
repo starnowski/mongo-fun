@@ -34,7 +34,10 @@ public class MongoDbContainerConfiguration {
         MongoDbContainer mongoDbContainer = getMongoDbContainer();
         TestPropertyValues values = TestPropertyValues.of(
                 "spring.data.mongodb.host=" + mongoDbContainer.getContainerIpAddress(),
-                "spring.data.mongodb.port=" + mongoDbContainer.getPort()
+                "spring.data.mongodb.port=" + mongoDbContainer.getPort(),
+                "spring.data.mongodb.username=" + MONGO_ADMIN_NAME,
+                "spring.data.mongodb.password=" + MONGO_ADMIN_PASSWORD,
+                "spring.data.mongodb.authentication-database=" + "admin"
 
         );
         values.applyTo(configurableApplicationContext);
