@@ -12,6 +12,9 @@ import javax.annotation.PostConstruct;
 @Configuration
 public class MongoDbContainerConfiguration {
 
+    public static final String MONGO_ADMIN_NAME = "mongoadmin";
+    public static final String MONGO_ADMIN_PASSWORD = "pass123";
+
     @Autowired
     private ConfigurableApplicationContext configurableApplicationContext;
 
@@ -19,6 +22,8 @@ public class MongoDbContainerConfiguration {
     public MongoDbContainer getMongoDbContainer()
     {
         MongoDbContainer mongoDbContainer = new MongoDbContainer();
+        mongoDbContainer.addEnv("MONGO_INITDB_ROOT_USERNAME", MONGO_ADMIN_NAME);
+        mongoDbContainer.addEnv("MONGO_INITDB_ROOT_PASSWORD", MONGO_ADMIN_PASSWORD);
         mongoDbContainer.start();
         return mongoDbContainer;
     }
