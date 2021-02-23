@@ -10,3 +10,26 @@ srv-address:
   - What is srv uri ?
   answers:
   - TODO
+projections:
+  questions:
+  - How to add projection ?
+  references:
+  - projections-java
+projections-java:
+  questions:
+  - How to add projection in java ?
+  answers:  |
+
+    import com.mongodb.client.model.Projections;
+    import org.bson.conversions.Bson;
+
+    Bson projection = Projections.include("title");
+    List<Document> movies = new ArrayList<>();
+    moviesCollection
+                .find(queryFilter)
+                .projection(projection)
+                .iterator()
+                .forEachRemaining(movies::add);
+
+  links:
+  - https://docs.mongodb.com/manual/tutorial/project-fields-from-query-results/
