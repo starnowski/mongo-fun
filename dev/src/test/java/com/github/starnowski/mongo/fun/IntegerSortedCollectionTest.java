@@ -74,4 +74,25 @@ public class IntegerSortedCollectionTest {
         Assertions.assertEquals(expectedCount, projection.get(0).getInteger("count"));
     }
 
+    @Test
+    @DisplayName("should return 314 as count result after stage that skips 686 records")
+    public void shouldReturnCorrectCountNumberAfterSkipping()
+    {
+        // GIVEN
+        int expectedCount = 314;
+        Bson skipBson = Aggregates.skip(686);
+        Bson countBson = Aggregates.count();
+        List<Document> projection = new ArrayList<>();
+        List<Bson> pipeline = new ArrayList<>();
+        pipeline.add(skipBson);
+        pipeline.add(countBson);
+
+        // WHEN
+        sortable.aggregate(pipeline).into(projection);
+
+        // THEN
+        Assertions.assertEquals(1, projection.size());
+        Assertions.assertEquals(expectedCount, projection.get(0).getInteger("count"));
+    }
+
 }
