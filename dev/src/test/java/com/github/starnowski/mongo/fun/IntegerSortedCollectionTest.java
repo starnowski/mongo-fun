@@ -52,7 +52,27 @@ public class IntegerSortedCollectionTest {
 
         // THEN
         Assertions.assertEquals(1, projection.size());
-        Assertions.assertEquals(1000, projection.get(0).getInteger("count"));
+        Assertions.assertEquals(expectedCount, projection.get(0).getInteger("count"));
+    }
+
+    @Test
+    public void shouldReturnCorrectNumberForCountOperationAfterLimit()
+    {
+        // GIVEN
+        int expectedCount = 500;
+        Bson limitBson = Aggregates.limit(500);
+        Bson countBson = Aggregates.count();
+        List<Document> projection = new ArrayList<>();
+        List<Bson> pipeline = new ArrayList<>();
+        pipeline.add(limitBson);
+        pipeline.add(countBson);
+
+        // WHEN
+        sortable.aggregate(pipeline).into(projection);
+
+        // THEN
+        Assertions.assertEquals(1, projection.size());
+        Assertions.assertEquals(expectedCount, projection.get(0).getInteger("count"));
     }
 
 }
