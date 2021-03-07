@@ -121,7 +121,8 @@ public class IntegerSortedCollectionTest {
     private static Stream<Arguments> provide_shouldReturnCorrectCountNumberAfterSeveralStagesWithDifferentCursorOperations()
     {
         return Stream.of(
-                Arguments.of((List<Bson>)asList(Aggregates.limit(600), Aggregates.skip(170), Aggregates.skip(200)), 230, "limit 600, skip 170, skip 200")
+                Arguments.of((List<Bson>)asList(Aggregates.limit(600), Aggregates.skip(170), Aggregates.skip(200)), 230, "limit 600, skip 170, skip 200"),
+                Arguments.of((List<Bson>)asList(Aggregates.skip(300), Aggregates.limit(400), Aggregates.skip(200)), 200, "skip 300, limit 400, skip 200")
         );
     }
 }
