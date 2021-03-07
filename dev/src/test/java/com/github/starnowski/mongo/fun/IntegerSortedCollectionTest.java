@@ -7,6 +7,9 @@ import org.bson.conversions.Bson;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,7 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 @DataMongoTest
@@ -95,4 +100,28 @@ public class IntegerSortedCollectionTest {
         Assertions.assertEquals(expectedCount, projection.get(0).getInteger("count"));
     }
 
+    @ParameterizedTest(name = "should return expected count number {1} after several stage operations : {2}")
+    @MethodSource("provide_shouldReturnCorrectCountNumberAfterSeveralStagesWithDifferentCursorOperations")
+    public void shouldReturnCorrectCountNumberAfterSeveralStagesWithDifferentCursorOperations(List<Bson> stages, int expectedCount, String message)
+    {
+        // GIVEN
+        List<Document> projection = new ArrayList<>();
+        List<Bson> pipeline = new ArrayList<>();
+        pipeline.addAll(stages);
+        pipeline.add(Aggregates.count());
+
+        // WHEN
+        sortable.aggregate(pipeline).into(projection);
+
+        // THEN
+        Assertions.assertEquals(1, projection.size());
+        Assertions.assertEquals(expectedCount, projection.get(0).getInteger("count"));
+    }
+
+    private static Stream<Arguments> provide_shouldReturnCorrectCountNumberAfterSeveralStagesWithDifferentCursorOperations()
+    {
+        return Stream.of(
+                Arguments.of((List<Bson>)asList(Aggregates.limit(600), Aggregates.skip(170), Aggregates.skip(200)), 230, "limit 600, skip 170, skip 200")
+        );
+    }
 }
