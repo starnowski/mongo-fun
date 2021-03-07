@@ -4,10 +4,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +37,7 @@ public class IntegerSortedCollectionTest {
     }
 
     @Test
+    @DisplayName("should return 1000 as count result")
     public void shouldReturnCorrectNumberForCountOperation()
     {
         // GIVEN
@@ -56,6 +54,7 @@ public class IntegerSortedCollectionTest {
     }
 
     @Test
+    @DisplayName("should return 500 as count result after stage that limits result to 500 records")
     public void shouldReturnCorrectNumberForCountOperationAfterLimit()
     {
         // GIVEN
