@@ -18,6 +18,7 @@
 
     <properties>
         <org.testcontainers.version>1.15.2</org.testcontainers.version>
+        <org.junit.jupiter.version>5.6.3</org.junit.jupiter.version>
     </properties>
 
     <dependencies>
@@ -38,7 +39,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>RELEASE</version>
+            <version>${org.junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${org.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <!--https://nirajsonawane.github.io/2019/12/25/Testcontainers-With-Spring-Boot-For-Integration-Testing/-->
