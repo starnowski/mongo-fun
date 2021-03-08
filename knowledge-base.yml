@@ -33,3 +33,22 @@ projections-java:
 
   links:
   - https://docs.mongodb.com/manual/tutorial/project-fields-from-query-results/
+cursor-methods-appended-order:
+  questions:
+  - Does order how cursor methods are appended is important ?
+  - Does the order of appending cursor methods impact results ?
+  references:
+  - cursor-methods-appended-order-aggregates
+  - cursor-methods-appended-order-find
+cursor-methods-appended-order-aggregates:
+  questions:
+  - Does order how cursor methods are appended in aggregation stages is important ?
+  - Does the order of appending cursor methods in aggregation stages impact results ?
+  answers: "Yes"
+cursor-methods-appended-order-find:
+  questions:
+    - Does order how cursor methods are appended in find operation is important ?
+    - Does order how cursor methods are appended in find iterable is important ?
+    - Does the order of appending cursor methods in find operation impact results ?
+    - Does the order of appending cursor methods in find iterable impact results ?
+  answers: "No"
