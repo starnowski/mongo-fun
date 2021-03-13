@@ -13,7 +13,6 @@ class CommentDaoTest {
     @Autowired
     CommentDao commentDao;
 
-
     @ParameterizedTest
     @ValueSource(strings = {"comment1", "comment2", "commentFinal"})
     public void shouldSavePost(String commentText) {

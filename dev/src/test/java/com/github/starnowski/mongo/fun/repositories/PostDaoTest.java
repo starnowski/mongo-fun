@@ -10,10 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class PostDaoTest {
 
-
     @Autowired
     PostDao postDao;
-
 
     @ParameterizedTest
     @ValueSource(strings = {"post1", "post2", "postFinal"})
