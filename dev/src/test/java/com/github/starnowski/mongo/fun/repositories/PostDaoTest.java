@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 class PostDaoTest {
 
 
@@ -26,6 +28,7 @@ class PostDaoTest {
         Post result = postDao.save(post);
 
         // THEN
+        result = postDao.find(result.getOid());
         Assertions.assertNotNull(result.getId());
         Assertions.assertEquals(postText, result.getText());
         Assertions.assertEquals(email, result.getEmail());
