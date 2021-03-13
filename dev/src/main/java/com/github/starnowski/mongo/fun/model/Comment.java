@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
@@ -28,7 +29,7 @@ public class Comment {
     @BsonIgnore
     private String postId;
 
-    @BsonId
+    @BsonProperty("post_id")
     @JsonIgnore
     private ObjectId postObjectId;
 
