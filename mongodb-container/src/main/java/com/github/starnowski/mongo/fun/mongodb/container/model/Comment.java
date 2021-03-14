@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
-import java.util.List;
 
-public class Post {
+import static com.github.starnowski.mongo.fun.mongodb.container.repositories.DaoProperties.COMMENTS_POSTS_ID_COLLUMN_NAME;
+
+public class Comment {
+
     @JsonProperty("_id")
     @BsonIgnore
     private String id;
@@ -24,28 +27,39 @@ public class Post {
 
     private String email;
 
-    @JsonIgnore
-    private List<Comment> comments;
+    @JsonProperty(COMMENTS_POSTS_ID_COLLUMN_NAME)
+    @BsonIgnore
+    private String postId;
 
-    public Post withText(String text) {
+    @BsonProperty(COMMENTS_POSTS_ID_COLLUMN_NAME)
+    @JsonIgnore
+    private ObjectId postObjectId;
+
+    public Comment withText(String text) {
         this.text = text;
         return this;
     }
 
-    public Post withDate(Date date) {
+    public Comment withDate(Date date) {
         this.date = date;
         return this;
     }
 
-    public Post withEmail(String email) {
+    public Comment withEmail(String email) {
         this.email = email;
         return this;
     }
 
-    public Post withComments(List<Comment> comments) {
-        this.comments = comments;
+    public Comment withPostId(String postId) {
+        this.setPostId(postId);
         return this;
     }
+
+    public Comment withPostObjectId(ObjectId postObjectId) {
+        this.setPostObjectId(postObjectId);
+        return this;
+    }
+
     public String getId() {
         return id;
     }
@@ -88,11 +102,21 @@ public class Post {
         this.email = email;
     }
 
-    public List<Comment> getComments() {
-        return comments;
+    public ObjectId getPostObjectId() {
+        return postObjectId;
     }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
+    public void setPostObjectId(ObjectId postObjectId) {
+        this.postObjectId = postObjectId;
+        this.postId = postObjectId.toHexString();
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+        this.postObjectId = new ObjectId(postId);
     }
 }
