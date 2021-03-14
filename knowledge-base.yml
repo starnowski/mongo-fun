@@ -60,3 +60,46 @@ upsert-what-is-it:
     This feature is not only limited for mongodb. The lion share of SQL databases have also such feture.
   links:
     - https://docs.mongodb.com/manual/reference/method/db.collection.update/#update-upsert
+lookup-what-is-it:
+  questions:
+    - What is lookup ?
+  answers:  |
+    It is aggreagtion stage which fetch results from other unshared collection to result output.
+    Performs a left outer join to an unsharded collection in the same database to filter in documents from the “joined” collection for processing.
+    Examples:
+    //java
+        public Post findAndFetchComments(ObjectId oid) {
+
+            List<Bson> pipeline = new ArrayList<Bson>();
+            pipeline.add(Aggregates.match(Filters.eq("_id", oid)));
+            pipeline.add(Aggregates.lookup(DaoProperties.COMMENTS_COLLECTION_NAME, "_id", COMMENTS_POSTS_ID_COLLUMN_NAME, "comments"));
+
+            AggregateIterable<Post> results = collection.aggregate(pipeline);
+            return results.first();
+        }
+
+        public Document getMovie(String movieId) {
+            if (!validIdValue(movieId)) {
+                return null;
+            }
+
+
+            AggregateIterable<Document> results = moviesCollection.aggregate(Arrays.asList(new Document("$match",
+                            new Document("_id",
+                                    new ObjectId(movieId))),
+                    new Document("$lookup",
+                            new Document("from", "comments")
+                                    .append("let",
+                                            new Document("m_id", "$_id"))
+                                    .append("pipeline", Arrays.asList(new Document("$match",
+                                                    new Document("$expr",
+                                                            new Document("$eq", Arrays.asList("$movie_id", "$$m_id")))),
+                                            new Document("$sort",
+                                                    new Document("date", -1L))))
+                                    .append("as", "comments"))));
+
+            Document movie = results.first();
+            return movie;
+        }
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/
