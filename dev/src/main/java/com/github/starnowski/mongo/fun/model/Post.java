@@ -26,6 +26,25 @@ public class Post {
 
     private List<Comment> comments;
 
+    public Post withText(String text) {
+        this.text = text;
+        return this;
+    }
+
+    public Post withDate(Date date) {
+        this.date = date;
+        return this;
+    }
+
+    public Post withEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public Post withComments(List<Comment> comments) {
+        this.comments = comments;
+        return this;
+    }
     public String getId() {
         return id;
     }

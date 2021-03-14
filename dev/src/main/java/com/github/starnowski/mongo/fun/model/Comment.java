@@ -33,6 +33,31 @@ public class Comment {
     @JsonIgnore
     private ObjectId postObjectId;
 
+    public Comment withText(String text) {
+        this.text = text;
+        return this;
+    }
+
+    public Comment withDate(Date date) {
+        this.date = date;
+        return this;
+    }
+
+    public Comment withEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public Comment withPostId(String postId) {
+        this.setPostId(postId);
+        return this;
+    }
+
+    public Comment withPostObjectId(ObjectId postObjectId) {
+        this.setPostObjectId(postObjectId);
+        return this;
+    }
+
     public String getId() {
         return id;
     }
