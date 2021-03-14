@@ -31,7 +31,7 @@ public class PostDao extends AbstractDao<Post> {
 
     public Post findAndFetchComments(ObjectId oid) {
 
-        List<Bson> pipeline = new ArrayList<>();
+        List<Bson> pipeline = new ArrayList<Bson>();
         pipeline.add(Aggregates.match(Filters.eq("_id", oid)));
         pipeline.add(Aggregates.lookup(DaoProperties.COMMENTS_COLLECTION_NAME, "_id", COMMENTS_POSTS_ID_COLLUMN_NAME, "comments"));
 
