@@ -3,6 +3,7 @@ package com.github.starnowski.mongo.fun.services;
 import com.github.starnowski.mongo.fun.model.Comment;
 import com.github.starnowski.mongo.fun.model.Post;
 import com.github.starnowski.mongo.fun.repositories.CommentDao;
+import com.github.starnowski.mongo.fun.repositories.PostDao;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +25,9 @@ class PostServiceTest {
 
     @Autowired
     CommentDao commentDao;
+
+    @Autowired
+    PostDao postDao;
 
     @Autowired
     PostService tested;
@@ -82,6 +86,22 @@ class PostServiceTest {
             assertEquals(comment.getEmail(), entity.getEmail());
             assertEquals(comment.getText(), entity.getText());
         });
+    }
+
+    @ParameterizedTest
+    @MethodSource("provide_shouldCreatePostWithComments")
+    public void shouldCreatePostWithCommentsThatAreNotStoredAsNestedArray(Post post) {
+        // WHEN
+        Post result = tested.save(post);
+
+        // THEN
+        assertNotNull(result.getId());
+        result = postDao.find(result.getOid());
+        assertEquals(post.getText(), result.getText());
+        assertEquals(post.getEmail(), result.getEmail());
+        assertNotNull(result.getComments());
+        assertTrue(result.getComments().isEmpty());
+
     }
 
     private Set<String> extractCommentsTextContents(List<Comment> comments) {
