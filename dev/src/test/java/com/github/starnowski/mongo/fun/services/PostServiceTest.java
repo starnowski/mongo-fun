@@ -2,6 +2,7 @@ package com.github.starnowski.mongo.fun.services;
 
 import com.github.starnowski.mongo.fun.model.Comment;
 import com.github.starnowski.mongo.fun.model.Post;
+import com.github.starnowski.mongo.fun.repositories.CommentDao;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,10 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class PostServiceTest {
+
+    @Autowired
+    CommentDao commentDao;
 
     @Autowired
     PostService tested;
@@ -42,10 +51,10 @@ class PostServiceTest {
         Post result = tested.save(post);
 
         // THEN
-        Assertions.assertNotNull(result.getId());
+        assertNotNull(result.getId());
         result = tested.find(result.getOid());
-        Assertions.assertEquals(text, result.getText());
-        Assertions.assertEquals(email, result.getEmail());
+        assertEquals(text, result.getText());
+        assertEquals(email, result.getEmail());
         Assertions.assertTrue(result.getComments() == null);
     }
 
@@ -56,13 +65,26 @@ class PostServiceTest {
         Post result = tested.save(post);
 
         // THEN
-        Assertions.assertNotNull(result.getId());
+        assertNotNull(result.getId());
         result = tested.find(result.getOid());
-        Assertions.assertEquals(post.getText(), result.getText());
-        Assertions.assertEquals(post.getEmail(), result.getEmail());
-        Assertions.assertNotNull(result.getComments());
-        Assertions.assertFalse(result.getComments().isEmpty());
-        Assertions.assertEquals(post.getComments().size(), result.getComments().size());
-        //TODO Compare comments text
+        assertEquals(post.getText(), result.getText());
+        assertEquals(post.getEmail(), result.getEmail());
+        assertNotNull(result.getComments());
+        assertFalse(result.getComments().isEmpty());
+        assertEquals(post.getComments().size(), result.getComments().size());
+        assertIterableEquals(extractCommentsTextContents(post.getComments()), extractCommentsTextContents(result.getComments()));
+        result.getComments().forEach(comment ->
+        {
+
+            assertNotNull(comment.getId());
+            Comment entity = commentDao.find(comment.getId());
+            assertNotNull(entity);
+            assertEquals(comment.getEmail(), entity.getEmail());
+            assertEquals(comment.getText(), entity.getText());
+        });
+    }
+
+    private Set<String> extractCommentsTextContents(List<Comment> comments) {
+        return comments.stream().map(Comment::getText).collect(Collectors.toSet());
     }
 }
