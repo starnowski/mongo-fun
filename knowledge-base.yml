@@ -52,3 +52,11 @@ cursor-methods-appended-order-find:
     - Does the order of appending cursor methods in find operation impact results ?
     - Does the order of appending cursor methods in find iterable impact results ?
   answers: "No"
+upsert-what-is-it:
+  questions:
+    - What is upsert operation ?
+  answers:  |
+    The upsert feature is situation when we try to update object but in case when object does not exists it is being inserted.
+    This feature is not only limited for mongodb. The lion share of SQL databases have also such feture.
+  links:
+    - https://docs.mongodb.com/manual/reference/method/db.collection.update/#update-upsert
