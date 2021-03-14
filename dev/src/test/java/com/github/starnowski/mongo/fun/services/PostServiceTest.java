@@ -24,7 +24,7 @@ class PostServiceTest {
                 Arguments.of(new Post().withEmail("john.doe.21@gmail.com").withText("post1 test")
                         .withComments(Arrays.asList(new Comment().withEmail("gosia.talarz.14@interia.pl").withText("comment1 post1"),
                                 new Comment().withEmail("magie.talarz.123@interia.pl").withText("comment2 post1")))),
-                Arguments.of(new Post().withEmail("john.doe.21@gmail.com").withText("post2 test")
+                Arguments.of(new Post().withEmail("mike.doe.21@gmail.com").withText("post2 test")
                         .withComments(Arrays.asList(new Comment().withEmail("bill.doe.14@interia.pl").withText("comment1 post2"))))
         );
     }
@@ -51,7 +51,7 @@ class PostServiceTest {
 
     @ParameterizedTest
     @MethodSource("provide_shouldCreatePostWithComments")
-    public void shouldCreatePostWithComments(Post post) {
+    public void shouldCreatePostWithCommentsThatAreStoredInOtherCollection(Post post) {
         // WHEN
         Post result = tested.save(post);
 
@@ -62,7 +62,7 @@ class PostServiceTest {
         Assertions.assertEquals(post.getEmail(), result.getEmail());
         Assertions.assertNotNull(result.getComments());
         Assertions.assertFalse(result.getComments().isEmpty());
-        Assertions.assertEquals(post.getComments().size(), result.getComments());
+        Assertions.assertEquals(post.getComments().size(), result.getComments().size());
         //TODO Compare comments text
     }
 }
