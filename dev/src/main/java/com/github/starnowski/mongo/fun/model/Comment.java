@@ -9,6 +9,8 @@ import org.bson.types.ObjectId;
 
 import java.util.Date;
 
+import static com.github.starnowski.mongo.fun.repositories.DaoProperties.COMMENTS_POSTS_ID_COLLUMN_NAME;
+
 public class Comment {
 
     @JsonProperty("_id")
@@ -25,11 +27,11 @@ public class Comment {
 
     private String email;
 
-    @JsonProperty("post_id")
+    @JsonProperty(COMMENTS_POSTS_ID_COLLUMN_NAME)
     @BsonIgnore
     private String postId;
 
-    @BsonProperty("post_id")
+    @BsonProperty(COMMENTS_POSTS_ID_COLLUMN_NAME)
     @JsonIgnore
     private ObjectId postObjectId;
 

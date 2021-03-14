@@ -1,18 +1,40 @@
 package com.github.starnowski.mongo.fun.repositories;
 
 import com.github.starnowski.mongo.fun.model.Post;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.github.starnowski.mongo.fun.repositories.DaoProperties.COMMENTS_POSTS_ID_COLLUMN_NAME;
+import static com.github.starnowski.mongo.fun.repositories.DaoProperties.POSTS_COLLECTION_NAME;
 
 @Repository
 public class PostDao extends AbstractDao<Post> {
 
     @Override
     protected String getCollectionName() {
-        return "posts";
+        return POSTS_COLLECTION_NAME;
     }
 
     @Override
     protected Class<Post> getDocumentClass() {
         return Post.class;
     }
+
+    public Post findAndFetchComments(ObjectId oid) {
+
+        List<Bson> pipeline = new ArrayList<>();
+        pipeline.add(Aggregates.match(Filters.eq("_id", oid)));
+        pipeline.add(Aggregates.lookup(DaoProperties.COMMENTS_COLLECTION_NAME, "_id", COMMENTS_POSTS_ID_COLLUMN_NAME, "comments"));
+
+        AggregateIterable<Post> results = collection.aggregate(pipeline);
+        return results.first();
+    }
+
 }
