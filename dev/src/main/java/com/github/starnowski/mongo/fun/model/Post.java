@@ -24,7 +24,7 @@ public class Post {
 
     private String email;
 
-    @BsonIgnore
+    @JsonIgnore
     private List<Comment> comments;
 
     public Post withText(String text) {

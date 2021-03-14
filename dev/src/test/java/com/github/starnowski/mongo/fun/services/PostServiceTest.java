@@ -55,7 +55,7 @@ class PostServiceTest {
         result = tested.find(result.getOid());
         assertEquals(text, result.getText());
         assertEquals(email, result.getEmail());
-        Assertions.assertTrue(result.getComments() == null);
+        Assertions.assertTrue(result.getComments().isEmpty());
     }
 
     @ParameterizedTest
