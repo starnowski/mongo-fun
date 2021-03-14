@@ -99,9 +99,7 @@ class PostServiceTest {
         result = postDao.find(result.getOid());
         assertEquals(post.getText(), result.getText());
         assertEquals(post.getEmail(), result.getEmail());
-        assertNotNull(result.getComments());
-        assertTrue(result.getComments().isEmpty());
-
+        assertNull(result.getComments());
     }
 
     private Set<String> extractCommentsTextContents(List<Comment> comments) {

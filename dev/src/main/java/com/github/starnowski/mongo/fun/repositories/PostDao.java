@@ -4,6 +4,8 @@ import com.github.starnowski.mongo.fun.model.Post;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
@@ -35,6 +37,13 @@ public class PostDao extends AbstractDao<Post> {
 
         AggregateIterable<Post> results = collection.aggregate(pipeline);
         return results.first();
+    }
+
+    public Post save(Post post) {
+        post = super.save(post);
+        UpdateOptions options = new UpdateOptions();
+        collection.updateOne(Filters.eq("_id", post.getOid()), Updates.unset("comments"), options);
+        return find(post.getOid());
     }
 
 }
