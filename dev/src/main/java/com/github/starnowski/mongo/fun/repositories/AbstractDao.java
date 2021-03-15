@@ -45,6 +45,11 @@ public abstract class AbstractDao<T> {
         return collection.find(new Document(getIdPropertyName(), oid)).first();
     }
 
+    public MongoCollection<T> getCollection()
+    {
+        return collection;
+    }
+
     protected String getIdPropertyName() {
         return "_id";
     }

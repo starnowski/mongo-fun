@@ -64,6 +64,16 @@ public class Post {
         this.id = oid.toHexString();
     }
 
+    public Post withId(String id) {
+        this.setId(id);
+        return this;
+    }
+
+    public Post withOid(ObjectId oid) {
+        this.setOid(oid);
+        return this;
+    }
+
     public String getText() {
         return text;
     }
