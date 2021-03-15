@@ -51,4 +51,12 @@ public class PostAuthor {
     public int hashCode() {
         return Objects.hash(id, numPosts);
     }
+
+    @Override
+    public String toString() {
+        return "PostAuthor{" +
+                "id='" + id + '\'' +
+                ", numPosts=" + numPosts +
+                '}';
+    }
 }

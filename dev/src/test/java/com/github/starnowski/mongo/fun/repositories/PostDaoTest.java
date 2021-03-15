@@ -1,22 +1,33 @@
 package com.github.starnowski.mongo.fun.repositories;
 
 import com.github.starnowski.mongo.fun.model.Post;
+import com.github.starnowski.mongo.fun.model.PostAuthor;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.bulk.BulkWriteResult;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Sorts.descending;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -24,6 +35,19 @@ class PostDaoTest {
 
     @Autowired
     PostDao postDao;
+
+    private static Post postForAuthor(String author) {
+        return new Post().withText("test").withEmail(author);
+    }
+
+    private static Stream<Arguments> provide_shouldGroupPostAuthorsWithDescendingOrder() {
+        return Stream.of(
+                Arguments.of(Arrays.asList(postForAuthor("ala@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("mike@gmail.com")),
+                        Arrays.asList(new PostAuthor("szymon132@hot.mail", 3), new PostAuthor("ala@hot.mail", 2), new PostAuthor("mike@gmail.com", 1))),
+                Arguments.of(Arrays.asList(postForAuthor("kylie@hot.mail"), postForAuthor("kylie@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("kylie@hot.mail")),
+                        Arrays.asList(new PostAuthor("kylie@hot.mail", 3), new PostAuthor("ala@hot.mail", 2), new PostAuthor("szymon132@hot.mail", 1)))
+        );
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"post1", "post2", "postFinal"})
@@ -115,6 +139,37 @@ class PostDaoTest {
         assertNotNull(postDao.find(postOid1));
         assertNotNull(postDao.find(postOid3));
         assertNotNull(postDao.find(postOid5));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provide_shouldGroupPostAuthorsWithDescendingOrder")
+    public void shouldGroupPostAuthorsWithDescendingOrder(List<Post> posts, List<PostAuthor> expectedMostActivePostAuthors) {
+        // GIVEN
+        posts.forEach(post ->
+        {
+            postDao.save(post);
+        });
+        List<PostAuthor> mostActive = new ArrayList<>();
+        List<Bson> pipeLine = new ArrayList<>();
+        pipeLine.add(group("$email", Accumulators.sum("count", 1L)));
+        pipeLine.add(sort(descending("count")));
+        pipeLine.add(limit(20));
+
+        // WHEN
+        AggregateIterable<PostAuthor> aggregate = postDao.getCollection()
+//                .withReadConcern(ReadConcern.MAJORITY) // Not crucial for tests case
+                .aggregate(pipeLine, PostAuthor.class);
+        List<PostAuthor> results = new ArrayList<>();
+        aggregate.forEach(new Consumer<PostAuthor>() {
+                              @Override
+                              public void accept(PostAuthor critic) {
+                                  results.add(critic);
+                              }
+                          }
+        );
+
+        // THEN
+        Assertions.assertIterableEquals(expectedMostActivePostAuthors, results);
     }
 
     private InsertOneModel<Post> insertOneModelForPostOid(ObjectId objectId) {
