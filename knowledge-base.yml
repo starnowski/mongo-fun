@@ -125,10 +125,10 @@ recoverable-exceptions:
       com.mongodb.MongoNotPrimaryException --> Yes. An exception indicating that the server is a member of a replica set but is not the primary, and therefore refused to execute either a write operation or a read operation that required a primary. This can happen during a replica set election.
       com.mongodb.MongoQueryException
         com.mongodb.MongoCursorNotFoundException --> No, not sure
-      com.mongodb.MongoWriteConcernException --> No, not sure. An exception indicating a failure to apply the write concern to the requested write operation https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoWriteConcernException.html
+      com.mongodb.MongoWriteConcernException --> No, not sure. An exception indicating a failure to apply the write concern to the requested write operation
       com.mongodb.MongoWriteException --> No, not sure. An exception indicating the failure of a write operation.
-      com.mongodb.WriteConcernException --> No, not sure. An exception representing an error reported due to a write failure. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/WriteConcernException.html
-        com.mongodb.DuplicateKeyException --> No. Subclass of WriteConcernException representing a duplicate key exception https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/DuplicateKeyException.html
+      com.mongodb.WriteConcernException --> No, not sure. An exception representing an error reported due to a write failure.
+        com.mongodb.DuplicateKeyException --> No. Subclass of WriteConcernException representing a duplicate key exception
     com.mongodb.MongoSocketException
       com.mongodb.MongoSocketClosedException --> Yes. This exception is thrown when trying to read or write from a closed socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketClosedException.html
       com.mongodb.MongoSocketOpenException --> Yes. This exception is thrown when there is an exception opening a Socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketOpenException.html
