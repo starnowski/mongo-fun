@@ -68,6 +68,34 @@ class PostDaoTest extends AbstractITTest {
     }
 
     @Test
+    public void shouldSaveAllRecordsWhenUsingOrderedBulkWriteAndAllInsertsAreSuccessful() {
+        // GIVEN
+        ObjectId postOid1 = returnNonExistedObjectId();
+        ObjectId postOid2 = returnNonExistedObjectId();
+        ObjectId postOid3 = returnNonExistedObjectId();
+        ObjectId postOid4 = returnNonExistedObjectId();
+        ObjectId postOid5 = returnNonExistedObjectId();
+        List<WriteModel<Post>> bulkWrites = new ArrayList<>();
+        bulkWrites.add(insertOneModelForPostOid(postOid1));
+        bulkWrites.add(insertOneModelForPostOid(postOid2));
+        bulkWrites.add(insertOneModelForPostOid(postOid3));
+        bulkWrites.add(insertOneModelForPostOid(postOid4));
+        bulkWrites.add(insertOneModelForPostOid(postOid5));
+        BulkWriteOptions bulkWriteOptions = new BulkWriteOptions().ordered(true);
+
+        // WHEN
+        BulkWriteResult bulkWriteResult = postDao.getCollection().bulkWrite(bulkWrites, bulkWriteOptions);
+
+        // THEN
+        assertEquals(5, bulkWriteResult.getInsertedCount());
+        assertNotNull(postDao.find(postOid1));
+        assertNotNull(postDao.find(postOid2));
+        assertNotNull(postDao.find(postOid3));
+        assertNotNull(postDao.find(postOid4));
+        assertNotNull(postDao.find(postOid5));
+    }
+
+    @Test
     public void shouldSaveAllRecordsBeforeFailedWriteWhenUsingOrderedBulkWrite() {
         // GIVEN
         // Create one post that will cause bulk write failure
