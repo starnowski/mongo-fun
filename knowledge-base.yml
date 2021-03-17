@@ -110,10 +110,10 @@ recoverable-exceptions:
   answers:  |
   com.mongodb.MongoException
     com.mongodb.MongoClientException
-      com.mongodb.MongoConfigurationException --> No. An exception indicating a configuration error in the client. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoConfigurationException.html
-      com.mongodb.MongoSecurityException --> No. This exception is thrown when there is an error reported by the underlying client authentication mechanism. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSecurityException.html
-      com.mongodb.MongoTimeoutException --> Yes. An exception indicating that the driver has timed out waiting for either a server or a connection to become available. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoTimeoutException.html
-      MongoWaitQueueFullException --> Yes. An exception indicating that the queue for waiting for a pooled connection is full. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoWaitQueueFullException.html
+      com.mongodb.MongoConfigurationException --> No. An exception indicating a configuration error in the client.
+      com.mongodb.MongoSecurityException --> No. This exception is thrown when there is an error reported by the underlying client authentication mechanism.
+      com.mongodb.MongoTimeoutException --> Yes. An exception indicating that the driver has timed out waiting for either a server or a connection to become available.
+      MongoWaitQueueFullException --> Yes. An exception indicating that the queue for waiting for a pooled connection is full.
     com.mongodb.MongoExecutionTimeoutException --> Yes. Exception indicating that the execution of the current operation timed out as a result of the maximum operation time being exceeded. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoExecutionTimeoutException.html
     com.mongodb.MongoInternalException --> No, not sure. A Mongo exception internal to the driver, not carrying any error code. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoInternalException.html
     com.mongodb.MongoInterruptedException --> Yes, not sure, dependeds on java and framework and if code executes "Thread.currentThread().interrupt()", A non-checked exception indicating that the driver has been interrupted by a call to Thread.interrupt. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoInterruptedException.html
