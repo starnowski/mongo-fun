@@ -130,11 +130,11 @@ recoverable-exceptions:
       com.mongodb.WriteConcernException --> No, not sure. An exception representing an error reported due to a write failure.
         com.mongodb.DuplicateKeyException --> No. Subclass of WriteConcernException representing a duplicate key exception
     com.mongodb.MongoSocketException
-      com.mongodb.MongoSocketClosedException --> Yes. This exception is thrown when trying to read or write from a closed socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketClosedException.html
-      com.mongodb.MongoSocketOpenException --> Yes. This exception is thrown when there is an exception opening a Socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketOpenException.html
-      com.mongodb.MongoSocketReadException --> Yes. This exception is thrown when there is an exception reading a response from a Socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketReadException.html
-      com.mongodb.MongoSocketReadTimeoutException --> Yes. This exception is thrown when there is a timeout reading a response from the socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketReadTimeoutException.html
-      com.mongodb.MongoSocketWriteException --> Yes. This exception is thrown when there is an exception writing a response to a Socket. https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoSocketWriteException.html
+      com.mongodb.MongoSocketClosedException --> Yes. This exception is thrown when trying to read or write from a closed socket.
+      com.mongodb.MongoSocketOpenException --> Yes. This exception is thrown when there is an exception opening a Socket.
+      com.mongodb.MongoSocketReadException --> Yes. This exception is thrown when there is an exception reading a response from a Socket.
+      com.mongodb.MongoSocketReadTimeoutException --> Yes. This exception is thrown when there is a timeout reading a response from the socket.
+      com.mongodb.MongoSocketWriteException --> Yes. This exception is thrown when there is an exception writing a response to a Socket.
 
   links:
     - https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoException.html
