@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.repositories;
 
+import com.github.starnowski.mongo.fun.AbstractITTest;
 import com.github.starnowski.mongo.fun.model.Post;
 import com.github.starnowski.mongo.fun.model.PostAuthor;
 import com.mongodb.MongoBulkWriteException;
@@ -11,7 +12,6 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +30,7 @@ import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Sorts.descending;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-class PostDaoTest {
+class PostDaoTest extends AbstractITTest {
 
     @Autowired
     PostDao postDao;
@@ -48,13 +46,6 @@ class PostDaoTest {
                 Arguments.of(Arrays.asList(postForAuthor("kylie@hot.mail"), postForAuthor("kylie@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("kylie@hot.mail")),
                         Arrays.asList(new PostAuthor("kylie@hot.mail", 3), new PostAuthor("ala@hot.mail", 2), new PostAuthor("szymon132@hot.mail", 1)))
         );
-    }
-
-    @AfterEach
-    public void deletePostsAfterTests()
-    {
-        // Delete posts
-        postDao.deleteAll();
     }
 
     @ParameterizedTest
