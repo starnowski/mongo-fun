@@ -138,3 +138,20 @@ recoverable-exceptions:
 
   links:
     - https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoException.html
+
+what-are-types-of-bulk-writes:
+  questions:
+    - What are types of bulk writes ?
+  answers:  |
+    Bulk write operations can be either ordered or unordered.
+  links:
+    - https://docs.mongodb.com/manual/core/bulk-write-operations/
+what-is-bulk-ordered-write:
+  questions:
+    - What is bulk ordered write ?
+  answers:  |
+    With an ordered list of operations, MongoDB executes the operations serially.
+    If an error occurs during the processing of one of the write operations, MongoDB will return without processing any remaining write operations in the list.
+  links:
+    - https://docs.mongodb.com/manual/core/bulk-write-operations/
+    -
