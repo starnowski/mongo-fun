@@ -14,6 +14,7 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Sorts.descending;
@@ -34,6 +37,19 @@ class PostDaoTest {
 
     @Autowired
     PostDao postDao;
+
+    private static Post postForAuthor(String author) {
+        return new Post().withText("test").withEmail(author);
+    }
+
+    private static Stream<Arguments> provide_shouldGroupPostAuthorsWithDescendingOrder() {
+        return Stream.of(
+                Arguments.of(Arrays.asList(postForAuthor("ala@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("mike@gmail.com")),
+                        Arrays.asList(new PostAuthor("szymon132@hot.mail", 3), new PostAuthor("ala@hot.mail", 2), new PostAuthor("mike@gmail.com", 1))),
+                Arguments.of(Arrays.asList(postForAuthor("kylie@hot.mail"), postForAuthor("kylie@hot.mail"), postForAuthor("szymon132@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("ala@hot.mail"), postForAuthor("kylie@hot.mail")),
+                        Arrays.asList(new PostAuthor("kylie@hot.mail", 3), new PostAuthor("ala@hot.mail", 2), new PostAuthor("szymon132@hot.mail", 1)))
+        );
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"post1", "post2", "postFinal"})
