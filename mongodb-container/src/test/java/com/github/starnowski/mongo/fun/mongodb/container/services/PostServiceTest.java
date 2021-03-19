@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.services;
 
+import com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Comment;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Post;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.CommentDao;
@@ -10,8 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,9 +20,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ContextConfiguration
-class PostServiceTest {
+class PostServiceTest extends AbstractITTest {
 
     @Autowired
     CommentDao commentDao;

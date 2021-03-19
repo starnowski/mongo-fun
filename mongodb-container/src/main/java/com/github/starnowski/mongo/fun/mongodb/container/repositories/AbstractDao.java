@@ -2,6 +2,8 @@ package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -55,5 +57,10 @@ public abstract class AbstractDao<T> {
 
     public MongoCollection<T> getCollection() {
         return collection;
+    }
+
+    public boolean deleteAll() {
+        DeleteResult result = collection.deleteMany(Filters.exists(getIdPropertyName()));
+        return result.getDeletedCount() > 0;
     }
 }

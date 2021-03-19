@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
+import com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Post;
 import com.github.starnowski.mongo.fun.mongodb.container.model.PostAuthor;
 import com.mongodb.MongoBulkWriteException;
@@ -18,8 +19,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +30,7 @@ import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Sorts.descending;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ContextConfiguration
-class PostDaoTest {
+class PostDaoTest extends AbstractITTest {
 
     @Autowired
     PostDao postDao;
