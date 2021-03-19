@@ -162,4 +162,8 @@ what-is-bulk-ordered-write:
     If an error occurs during the processing of one of the write operations, MongoDB will return without processing any remaining write operations in the list.
   links:
     - https://docs.mongodb.com/manual/core/bulk-write-operations/
-    -
+can-where-used-in-math:
+  questions:
+    - Can the where used in match ?
+    - Can the $where used in $match ?
+  answers:  "No"
