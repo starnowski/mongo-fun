@@ -31,9 +31,11 @@ jobs:
           node-version: 12.x
 
       - run: npm install
+        working-directory: ./aggregation
         env:
           CI: true
 
-      - run: npm test .aggregation/test/setup.js
+      - run: npm test ./test/setup.js
+        working-directory: ./aggregation
         env:
           CI: true
