@@ -138,7 +138,15 @@ recoverable-exceptions:
 
   links:
     - https://mongodb.github.io/mongo-java-driver/3.7/javadoc/com/mongodb/MongoException.html
-
+what-is-bulk-writes:
+  questions:
+    - What is bulk writes ?
+  answers:  |
+      MongoDB provides clients the ability to perform write operations in bulk.
+      Bulk write operations affect a single collection.
+      MongoDB allows applications to determine the acceptable level of acknowledgement required for bulk write operations.
+  links:
+    - https://docs.mongodb.com/manual/core/bulk-write-operations/
 what-are-types-of-bulk-writes:
   questions:
     - What are types of bulk writes ?
