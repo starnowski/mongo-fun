@@ -52,4 +52,8 @@ public abstract class AbstractDao<T> {
     abstract protected String getCollectionName();
 
     abstract protected Class<T> getDocumentClass();
+
+    public MongoCollection<T> getCollection() {
+        return collection;
+    }
 }
