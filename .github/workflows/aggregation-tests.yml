@@ -35,12 +35,12 @@ jobs:
         env:
           CI: true
 
-      - run: npm test ./test/setup.js
+      - run: npm test ./test/hapi/setup.js
         working-directory: ./aggregation
         env:
           CI: true
 
-      - run: npm test-jest ./test/jest-start.spec.js
+      - run: npm test-jest ./test/jest/jest-start.spec.js
         working-directory: ./aggregation
         env:
           CI: true
