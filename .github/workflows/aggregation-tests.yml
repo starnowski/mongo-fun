@@ -39,3 +39,8 @@ jobs:
         working-directory: ./aggregation
         env:
           CI: true
+
+      - run: npm test-jest ./test/jest-start.spec.js
+        working-directory: ./aggregation
+        env:
+          CI: true

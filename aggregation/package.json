@@ -19,6 +19,7 @@
   "scripts": {
     "list-tests": "lab --assert @hapi/code --dry --verbose",
     "test": "lab --assert @hapi/code --leaks --coverage --lint --reporter console --output stdout --reporter html --output ./coverage/coverage.html",
-    "test-single": "lab --assert @hapi/code --leaks --lint --id"
+    "test-single": "lab --assert @hapi/code --leaks --lint --id",
+    "test-jest": "jest"
   }
 }
