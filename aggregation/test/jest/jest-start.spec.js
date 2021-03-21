@@ -1,5 +1,10 @@
 //https://www.valentinog.com/blog/jest/
 
+//const Lab = require('@hapi/lab')
+//const { expect } = require('@hapi/code')
+//
+//const { describe, it } = (exports.lab = Lab.script())
+
 describe("Filter function", () => {
   test("it should filter by a search term (link)", () => {
     const input = [
