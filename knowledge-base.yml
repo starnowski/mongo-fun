@@ -167,3 +167,25 @@ can-where-used-in-math:
     - Can the where used in match ?
     - Can the $where used in $match ?
   answers:  "No"
+create-database:
+  questions:
+    - How to create database ?
+  references:
+    - create-database-js
+create-database-js:
+  questions:
+    - How to create database in javascript ?
+  answers:  |
+    To create a database in MongoDB, start by creating a MongoClient object, then specify a connection URL with the correct ip address and the name of the database you want to create.
+    MongoDB will create the database if it does not exist, and make a connection to it.
+    Example:
+    var MongoClient = require('mongodb').MongoClient;
+    var url = "mongodb://localhost:27017/mydb";
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      console.log("Database created!");
+      db.close();
+    });
+  links:
+    - https://www.w3schools.com/nodejs/nodejs_mongodb_create_db.asp
