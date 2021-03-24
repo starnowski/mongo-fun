@@ -21,14 +21,23 @@ const client = new MongoClient(uri, {
 //const db = client.db("admin").command({ ping: 1 });
 //const db = client.db("admin");
 
+var db = null;
+var pizzaCollection = null;
+beforeAll( async () => {
+  await client.connect();
+  db = await client.db("aggregation-tests");
+});
 
 describe("Basic mongo operations", () => {
+  beforeAll(async () => {
+    pizzaCollection = db.collection('pizzaCollection');
+  });
   test("should insert simple documents", async () => {
 
-    await client.connect();
+//    await client.connect();
     // Establish and verify connection
-    const db = await client.db("aggregation-tests");
-    const pizzaCollection = db.collection('pizzaCollection');
+//    const db = await client.db("aggregation-tests");
+//    const pizzaCollection = db.collection('pizzaCollection');
     const options = { ordered: true };
 
     const pizzaDocument = {
