@@ -6,6 +6,9 @@
 //How to create database in mongoDB
 //https://www.w3schools.com/nodejs/nodejs_mongodb_create_db.asp
 
+// Setup and TearDown
+//https://jestjs.io/docs/setup-teardown
+
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
