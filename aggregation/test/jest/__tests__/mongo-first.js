@@ -17,13 +17,11 @@ const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
-//client.connect();
-//const db = client.db("admin").command({ ping: 1 });
-//const db = client.db("admin");
 
 var db = null;
 var pizzaCollection = null;
 beforeAll( async () => {
+  // Establish and verify connection
   await client.connect();
   db = await client.db("aggregation-tests");
 });
@@ -34,12 +32,7 @@ describe("Basic mongo operations", () => {
   });
   test("should insert simple documents", async () => {
 
-//    await client.connect();
-    // Establish and verify connection
-//    const db = await client.db("aggregation-tests");
-//    const pizzaCollection = db.collection('pizzaCollection');
     const options = { ordered: true };
-
     const pizzaDocument = {
       name: "Neapolitan pizza",
       shape: "round",
