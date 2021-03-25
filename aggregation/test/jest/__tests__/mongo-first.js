@@ -32,6 +32,11 @@ beforeAll( async () => {
   db = await client.db("aggregation-tests");
 });
 
+afterAll(async () => {
+  // Close client
+  await client.close();
+});
+
 describe("Basic mongo operations", () => {
   beforeAll(async () => {
     pizzaCollection = db.collection('pizzaCollection');
