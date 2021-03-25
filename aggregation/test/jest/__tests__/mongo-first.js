@@ -33,6 +33,10 @@ describe("Basic mongo operations", () => {
   beforeAll(async () => {
     pizzaCollection = db.collection('pizzaCollection');
   });
+  beforeEach(async () => {
+      const query = { _id: {$exists: true} };
+      await pizzaCollection.deleteMany(query);
+  });
   test("should insert simple documents", async () => {
 
     const options = { ordered: true };
