@@ -46,7 +46,7 @@ describe("Basic mongo operations", () => {
     const pizzaDocument = {
       name: "Neapolitan pizza",
       shape: "round",
-      toppings: [ "San Marzano tomatoes", "mozzarella di bufala cheese" ],
+      toppings: [ "San Marzano tomatoes", "mozzarella di bufala cheese" ]
     };
     const result = await pizzaCollection.insertOne(pizzaDocument);
     expect(result.insertedCount).toEqual(1);
