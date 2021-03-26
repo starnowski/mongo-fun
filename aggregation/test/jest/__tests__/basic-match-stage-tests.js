@@ -50,17 +50,35 @@ describe("Basic mongo operations", () => {
           { t_id: "t1", name: "Jill", town: "Kanto", languages: ["English", "Spanish"] },
           { t_id: "t2", name: "Joe", town: "Kanto", languages: ["Russian"] },
           { t_id: "t3", name: "Joe", town: "Harris", languages: ["Germany", "Russian"] },
-          { t_id: "t4", name: "Leon", town: "Galar", languages: ["Germany", "English", "Spanish"] },
+          { t_id: "t4", name: "Leon", town: "Galar", languages: ["English", "Germany", "Spanish"] },
           { t_id: "t5", name: "Anonim", town: "Gal", languages: ["Italian", "English", "Russian"] }
         ];
     await matchCollection.insertMany(translators, options);
   });
   test("should count all documents", async () => {
+    // WHEN
     const result = await matchCollection.aggregate([{ $match: { _id: { $exists: true } }},
                                                     { $count: "countResult" }
                                                     ]).toArray();
+
+    // THEN
     console.log('result: ' + result);
     console.log(result);
     expect(result[0].countResult).toEqual(5);
+  });
+  test("should find all documents for $all operator", async () => {
+    //GIVEN
+    const expectedTranslatorIds = ["t1", "t4"];
+
+    // WHEN
+    var result = await matchCollection.aggregate([{ $match: { languages: { $all: [ "English" , "Spanish" ]} }}
+                                                    ]).toArray();
+
+    // THEN
+    console.log('result: ' + result);
+    console.log(result);
+    result = result.map(function (doc) { return doc.t_id })
+    expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
+    expect(result.length).toEqual(2);
   });
 });
