@@ -238,3 +238,16 @@ how-to-add-additional-field-to-projection:
                                                       ]).toArray();
   links:
     - https://docs.mongodb.com/manual/reference/operator/aggregation/addFields/
+how-to-count-number-of-elements-for-array:
+  questions:
+    - How to count number of elements in array ?
+    - How to count number of elements for array ?
+    - How to count how many elements are in array ?
+  answers:  |
+    Use $size operator, for example:
+    For the below example the $size operator count number of elements in the array that contains words split by operator $split based on value for field the description
+    var result = await matchCollection.aggregate([{ $match: { _id: {$exists: true} }},
+                                                    {$addFields: { numberOfWords: {$size: { $split: [ "$description", " " ] } } }}
+                                                      ]).toArray();
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/size/
