@@ -213,3 +213,13 @@ how-to-check-if-array-contains-at-least-one-element:
   links:
     - https://docs.mongodb.com/manual/reference/operator/aggregation/in/
     - https://docs.mongodb.com/manual/reference/operator/query/in/
+how-to-check-if-array-does-not-contains-any-of-one-elements:
+  questions:
+    - How to check if array does not contains any of of elements ?
+  answers:  |
+    Use $nin operator, for example:
+    For array "language" check if there are documents that do not contains languages Germany or Spanish.
+    var result = await matchCollection.aggregate([{ $match: { "languages": { $nin: ["Spanish", "Germany"] } }}
+                                                    ]).toArray();
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/query/nin/
