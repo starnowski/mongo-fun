@@ -81,4 +81,19 @@ describe("Basic mongo operations", () => {
     expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
     expect(result.length).toEqual(2);
   });
+    test("should find all documents that do not contains Spanish or Germany", async () => {
+      //GIVEN
+      const expectedTranslatorIds = ["t2", "t5"];
+
+      // WHEN
+      var result = await matchCollection.aggregate([{ $match: { $and: [ { "languages": { $not: { $in: ["Spanish", "Germany"] } } } ] }}
+                                                      ]).toArray();
+
+      // THEN
+      console.log('result: ' + result);
+      console.log(result);
+      result = result.map(function (doc) { return doc.t_id })
+      expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
+      expect(result.length).toEqual(2);
+    });
 });
