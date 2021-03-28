@@ -251,3 +251,22 @@ how-to-count-number-of-elements-for-array:
                                                       ]).toArray();
   links:
     - https://docs.mongodb.com/manual/reference/operator/aggregation/size/
+how-to-check-what-are-same-elements-for-arrays:
+  questions:
+    - How to check what elements are the same for arrays ?
+    - How to check what elements exist in both arrays ?
+  answers:  |
+    Use $setIntersection operator, for example:
+    For the below example the $setIntersection operator returns an array with elements that exist in specified arrays
+      var result = await arraysCollection.aggregate([{ $match: { _id: {$exists: true} }},
+                                                    {$project: { t_id: 1, fullstackDevelopers: {$setIntersection: [ "$developers.fronted", "$developers.backend" ] },
+                                                        fullstackDevelopersNumber:  {
+                                                                $size: { $setIntersection: [ "$developers.fronted", "$developers.backend" ] }
+                                                            }
+                                                        }
+                                                    },
+                                                    { $match: { "fullstackDevelopersNumber": { $gte: 1 } } }
+                                                      ]).toArray();
+    Operator $setIntersection takes two or more arrays and returns an array that contains the elements that appear in every input array.
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/setIntersection/
