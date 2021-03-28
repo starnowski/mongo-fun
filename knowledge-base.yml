@@ -189,3 +189,15 @@ create-database-js:
     });
   links:
     - https://www.w3schools.com/nodejs/nodejs_mongodb_create_db.asp
+how-to-check-if-array-contains-all-elements:
+  questions:
+    - How to check if array contains all elements ?
+    - How to check if array contains all elements in query ?
+    - How to check if array contains all elements in aggregation ?
+  answers:  |
+    Use $all operator, for example:
+    For array "language" check if there are documents that contains languages English and Spanish.
+    var result = await matchCollection.aggregate([{ $match: { languages: { $all: [ "English" , "Spanish" ]} }}
+                                                    ]).toArray();
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/query/all/
