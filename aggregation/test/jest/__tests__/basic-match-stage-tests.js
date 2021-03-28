@@ -47,11 +47,11 @@ describe("Basic mongo operations", () => {
     // this option prevents additional documents from being inserted if one fails
     const options = { ordered: true };
     const translators = [
-          { t_id: "t1", personalName: { name: "Jill", town: "Kanto" }, languages: ["English", "Spanish"] },
-          { t_id: "t2", personalName: { name: "Joe", town: "Kanto" }, languages: ["Russian"] },
-          { t_id: "t3", personalName: { name: "Joe", town: "Harris" }, languages: ["Germany", "Russian"] },
-          { t_id: "t4", personalName: { name: "Leon", town: "Galar" }, languages: ["English", "Germany", "Spanish"] },
-          { t_id: "t5", personalName: { name: "Anonim", town: "Gal" }, languages: ["Italian", "English", "Russian"] }
+          { t_id: "t1", personalName: { firstName: "Jill", lastName: "Kanto" }, languages: ["English", "Spanish"] },
+          { t_id: "t2", personalName: { firstName: "Joe", lastName: "Kanto" }, languages: ["Russian"] },
+          { t_id: "t3", personalName: { firstName: "Joe", lastName: "Harris" }, languages: ["Germany", "Russian"] },
+          { t_id: "t4", personalName: { firstName: "Leon", lastName: "Galar" }, languages: ["English", "Germany", "Spanish"] },
+          { t_id: "t5", personalName: { firstName: "Anonim", lastName: "Gal" }, languages: ["Italian", "English", "Russian"] }
         ];
     await matchCollection.insertMany(translators, options);
   });
@@ -110,5 +110,20 @@ describe("Basic mongo operations", () => {
       result = result.map(function (doc) { return doc.t_id })
       expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
       expect(result.length).toEqual(2);
+    });
+    test("should find all documents by searching by nested fields", async () => {
+      //GIVEN
+      const expectedTranslatorIds = ["t3"];
+
+      // WHEN
+      var result = await matchCollection.aggregate([{ $match: { $and: [ {"personalName.firstName": "Joe"}, {"personalName.lastName": { $eq: "Harris" }} ] }}
+                                                      ]).toArray();
+
+      // THEN
+      console.log('result: ' + result);
+      console.log(result);
+      result = result.map(function (doc) { return doc.t_id })
+      expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
+      expect(result.length).toEqual(1);
     });
 });
