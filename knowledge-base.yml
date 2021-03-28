@@ -223,3 +223,18 @@ how-to-check-if-array-does-not-contains-any-of-one-elements:
                                                     ]).toArray();
   links:
     - https://docs.mongodb.com/manual/reference/operator/query/nin/
+how-to-add-additional-field-to-projection:
+  questions:
+    - How to add additional field to project ?
+    - How to add additional field to aggregation results ?
+    - How to add additional field to query results ?
+    - How to add field to project ?
+    - How to add field to query results ?
+  answers:  |
+    Use $addFields operator, for example:
+    For final output add field numberOfWords that contains number of words from field description
+    var result = await matchCollection.aggregate([{ $match: { _id: {$exists: true} }},
+                                                    {$addFields: { numberOfWords: {$size: { $split: [ "$description", " " ] } } }}
+                                                      ]).toArray();
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/addFields/
