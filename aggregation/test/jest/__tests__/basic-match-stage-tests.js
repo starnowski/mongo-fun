@@ -126,4 +126,26 @@ describe("Basic mongo operations", () => {
       expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
       expect(result.length).toEqual(1);
     });
+    test("should return all documents with additional filed that contains number of words in description", async () => {
+      //GIVEN
+      const expectedTranslatorResults = [JSON.stringify({t_id: "t1", numberOfWords: 9}),
+            JSON.stringify({t_id: "t2", numberOfWords: 5}),
+            JSON.stringify({t_id: "t3", numberOfWords: 5}),
+            JSON.stringify({t_id: "t4", numberOfWords: 11}),
+            JSON.stringify({t_id: "t5", numberOfWords: 7})];
+
+      // WHEN
+      var result = await matchCollection.aggregate([{ $match: { _id: {$exists: true} }},
+                                                    {$addFields: { numberOfWords: {$size: { $split: [ "$description", " " ] } } }}
+                                                      ]).toArray();
+
+      // THEN
+      console.log('result: ' + result);
+      console.log(result);
+      result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, numberOfWords: doc.numberOfWords }) });
+      console.log('current results: ' + result);
+      console.log('expected results: ' + expectedTranslatorResults);
+      expect(result.every(elem => expectedTranslatorResults.includes(elem))).toBeTruthy();
+      expect(result.length).toEqual(5);
+    });
 });
