@@ -47,11 +47,11 @@ describe("Basic mongo operations", () => {
     // this option prevents additional documents from being inserted if one fails
     const options = { ordered: true };
     const translators = [
-          { t_id: "t1", name: "Jill", town: "Kanto", languages: ["English", "Spanish"] },
-          { t_id: "t2", name: "Joe", town: "Kanto", languages: ["Russian"] },
-          { t_id: "t3", name: "Joe", town: "Harris", languages: ["Germany", "Russian"] },
-          { t_id: "t4", name: "Leon", town: "Galar", languages: ["English", "Germany", "Spanish"] },
-          { t_id: "t5", name: "Anonim", town: "Gal", languages: ["Italian", "English", "Russian"] }
+          { t_id: "t1", personalName: { name: "Jill", town: "Kanto" }, languages: ["English", "Spanish"] },
+          { t_id: "t2", personalName: { name: "Joe", town: "Kanto" }, languages: ["Russian"] },
+          { t_id: "t3", personalName: { name: "Joe", town: "Harris" }, languages: ["Germany", "Russian"] },
+          { t_id: "t4", personalName: { name: "Leon", town: "Galar" }, languages: ["English", "Germany", "Spanish"] },
+          { t_id: "t5", personalName: { name: "Anonim", town: "Gal" }, languages: ["Italian", "English", "Russian"] }
         ];
     await matchCollection.insertMany(translators, options);
   });
