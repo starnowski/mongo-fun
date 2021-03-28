@@ -86,7 +86,7 @@ describe("Basic mongo operations", () => {
       const expectedTranslatorIds = ["t2", "t5"];
 
       // WHEN
-      var result = await matchCollection.aggregate([{ $match: { $and: [ { "languages": { $not: { $in: ["Spanish", "Germany"] } } } ] }}
+      var result = await matchCollection.aggregate([{ $match: { "languages": { $not: { $in: ["Spanish", "Germany"] } } }}
                                                       ]).toArray();
 
       // THEN
