@@ -57,21 +57,26 @@ describe("Arrays mongo operations", () => {
             ];
      await arraysCollection.insertMany(developersTeam, options);
      const expectedTeams = [JSON.stringify({t_id: "t1", fullstackDevelopers: ["Mike"]}),
-                JSON.stringify({t_id: "t3", fullstackDevelopers: ["Simon", "Jake"]})];
+                JSON.stringify({t_id: "t3", fullstackDevelopers: ["Jake", "Simon"]})];
 
       // WHEN
       var result = await arraysCollection.aggregate([{ $match: { _id: {$exists: true} }},
-                                                    {$project: { t_id: 1, fullstackDevelopers: {$setIntersection: [ "$developers.fronted", "$developers.backend" ] } }},
-                                                    { $where: "this.fullstackDevelopers.length > 0" }
+                                                    {$project: { t_id: 1, fullstackDevelopers: {$setIntersection: [ "$developers.fronted", "$developers.backend" ] },
+                                                        fullstackDevelopersNumber:  {
+                                                                $size: { $setIntersection: [ "$developers.fronted", "$developers.backend" ] }
+                                                            }
+                                                        }
+                                                    },
+                                                    { $match: { "fullstackDevelopersNumber": { $gte: 1 } } }
                                                       ]).toArray();
 
       // THEN
       console.log('result: ' + result);
       console.log(result);
-      result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, numberOfWords: doc.numberOfWords }) });
-      console.log('current results: ' + result);
-      console.log('expected results: ' + expectedTranslatorResults);
-      expect(result.every(elem => expectedTranslatorResults.includes(elem))).toBeTruthy();
-      expect(result.length).toEqual(5);
+      result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, fullstackDevelopers: doc.fullstackDevelopers }) });
+      console.log('current teams: ' + result);
+      console.log('expected teams: ' + expectedTeams);
+      expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
+      expect(result.length).toEqual(2);
     });
 });
