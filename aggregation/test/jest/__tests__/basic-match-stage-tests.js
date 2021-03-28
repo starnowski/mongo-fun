@@ -47,11 +47,11 @@ describe("Basic mongo operations", () => {
     // this option prevents additional documents from being inserted if one fails
     const options = { ordered: true };
     const translators = [
-          { t_id: "t1", personalName: { firstName: "Jill", lastName: "Kanto" }, languages: ["English", "Spanish"] },
-          { t_id: "t2", personalName: { firstName: "Joe", lastName: "Kanto" }, languages: ["Russian"] },
-          { t_id: "t3", personalName: { firstName: "Joe", lastName: "Harris" }, languages: ["Germany", "Russian"] },
-          { t_id: "t4", personalName: { firstName: "Leon", lastName: "Galar" }, languages: ["English", "Germany", "Spanish"] },
-          { t_id: "t5", personalName: { firstName: "Anonim", lastName: "Gal" }, languages: ["Italian", "English", "Russian"] }
+          { t_id: "t1", personalName: { firstName: "Jill", lastName: "Kanto" }, languages: ["English", "Spanish"], description: "I am English native speaker and also know Spanish" },//9 words
+          { t_id: "t2", personalName: { firstName: "Joe", lastName: "Kanto" }, languages: ["Russian"], description: "I am Russian language only" },//5 words
+          { t_id: "t3", personalName: { firstName: "Joe", lastName: "Harris" }, languages: ["German", "Russian"], description: "Knows Russian and German language" },//5 words
+          { t_id: "t4", personalName: { firstName: "Leon", lastName: "Galar" }, languages: ["English", "German", "Spanish"], description: "I know three language which are Russian and German and Spanish" },//11 words
+          { t_id: "t5", personalName: { firstName: "Anonim", lastName: "Gal" }, languages: ["Italian", "English", "Russian"], description: "Knows Russian and Italian and English language" },//7 words
         ];
     await matchCollection.insertMany(translators, options);
   });
@@ -81,12 +81,12 @@ describe("Basic mongo operations", () => {
     expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
     expect(result.length).toEqual(2);
   });
-    test("should find all documents that do not contains Spanish or Germany", async () => {
+    test("should find all documents that do not contains Spanish or German", async () => {
       //GIVEN
       const expectedTranslatorIds = ["t2", "t5"];
 
       // WHEN
-      var result = await matchCollection.aggregate([{ $match: { "languages": { $not: { $in: ["Spanish", "Germany"] } } }}
+      var result = await matchCollection.aggregate([{ $match: { "languages": { $not: { $in: ["Spanish", "German"] } } }}
                                                       ]).toArray();
 
       // THEN
@@ -96,12 +96,12 @@ describe("Basic mongo operations", () => {
       expect(result.every(elem => expectedTranslatorIds.includes(elem))).toBeTruthy();
       expect(result.length).toEqual(2);
     });
-    test("should find all documents that do not contains Spanish or Germany with usage of $nin operator", async () => {
+    test("should find all documents that do not contains Spanish or German with usage of $nin operator", async () => {
       //GIVEN
       const expectedTranslatorIds = ["t2", "t5"];
 
       // WHEN
-      var result = await matchCollection.aggregate([{ $match: { "languages": { $nin: ["Spanish", "Germany"] } }}
+      var result = await matchCollection.aggregate([{ $match: { "languages": { $nin: ["Spanish", "German"] } }}
                                                       ]).toArray();
 
       // THEN
