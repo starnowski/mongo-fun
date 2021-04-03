@@ -57,6 +57,7 @@ describe("Basic mongo operations", () => {
           { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], description: "I am electrician" },
           { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], description: "I am amateur scuba diver" },
           { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" }
+          { t_id: "t11", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natashe"], description: "I am world start actor, playing in action movies" }
         ];
     await matchCollection.insertMany(translators, options);
   });
