@@ -57,7 +57,8 @@ describe("Basic mongo operations", () => {
           { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], description: "I am electrician" },
           { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], description: "I am amateur scuba diver" },
           { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" },
-          { t_id: "t11", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natasha"], description: "I am world start actor, playing in action movies" }
+          { t_id: "t11", name: "Mike Johnson", languages: ["German"], kids: ["Arnold", "Billy"], description: "I am artist" },
+          { t_id: "t12", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natasha"], description: "I am world start actor, playing in action movies" }
         ];
     await matchCollection.insertMany(translators, options);
   });
@@ -70,11 +71,21 @@ describe("Basic mongo operations", () => {
     // THEN
     console.log('result: ' + result);
     console.log(result);
-    expect(result[0].countResult).toEqual(11);
+    expect(result[0].countResult).toEqual(12);
   });
     test("should return correct single facet for all documents", async () => {
+      // GIVEN
+      const expectedFacetResult = [
+            JSON.stringify({ _id: 0, count: 4 }),
+            JSON.stringify({ _id: 1, count: 3 }),
+            JSON.stringify({ _id: 2, count: 3 }),
+            JSON.stringify({ _id: 3, count: 1 }),
+            JSON.stringify({ _id: 'More then four', count: 1 })
+          ]
+
+
       // WHEN
-      const result = await matchCollection.aggregate([
+      var result = await matchCollection.aggregate([
                                                         {$project: {
                                                             _id: 0,
                                                             number_of_kids: {
@@ -92,7 +103,12 @@ describe("Basic mongo operations", () => {
                                                       ]).toArray();
 
       // THEN
+      console.log('query result: ' + result);
+      result = result.map(function (doc) { return JSON.stringify({ _id: doc._id, count: doc.count }) });
       console.log('result: ' + result);
       console.log(result);
+      console.log('expectedFacetResult: ' + expectedFacetResult);
+      console.log(expectedFacetResult);
+      expect(result.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
     });
 });
