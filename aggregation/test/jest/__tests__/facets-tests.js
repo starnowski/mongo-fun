@@ -57,7 +57,7 @@ describe("Basic mongo operations", () => {
           { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], description: "I am electrician" },
           { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], description: "I am amateur scuba diver" },
           { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" }
-          { t_id: "t11", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natashe"], description: "I am world start actor, playing in action movies" }
+          { t_id: "t11", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natasha"], description: "I am world start actor, playing in action movies" }
         ];
     await matchCollection.insertMany(translators, options);
   });
@@ -70,6 +70,24 @@ describe("Basic mongo operations", () => {
     // THEN
     console.log('result: ' + result);
     console.log(result);
-    expect(result[0].countResult).toEqual(10);
+    expect(result[0].countResult).toEqual(11);
   });
+    test("should return correct single facet for all documents", async () => {
+      // WHEN
+      const result = await matchCollection.aggregate([
+                                                        {$project: {
+                                                            _id: 0,
+                                                            t_id: 1,
+                                                            number_of_kids: {
+                                                                $cond: { if: { $isArray: "$kids" }, then: {$size: "$kids"}, else: 0 }
+                                                            }
+                                                        }}
+                                                      { $: "countResult" }
+                                                      ]).toArray();
+
+      // THEN
+      console.log('result: ' + result);
+      console.log(result);
+      expect(result[0].countResult).toEqual(11);
+    });
 });
