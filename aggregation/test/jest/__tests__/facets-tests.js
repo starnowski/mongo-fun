@@ -56,7 +56,7 @@ describe("Basic mongo operations", () => {
           { t_id: "t7", name: "Konrad Anonim", languages: ["Polish"], kids: ["Jagoda"], description: "I am electrician" },
           { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], description: "I am electrician" },
           { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], description: "I am amateur scuba diver" },
-          { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" }
+          { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" },
           { t_id: "t11", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natasha"], description: "I am world start actor, playing in action movies" }
         ];
     await matchCollection.insertMany(translators, options);
@@ -77,17 +77,22 @@ describe("Basic mongo operations", () => {
       const result = await matchCollection.aggregate([
                                                         {$project: {
                                                             _id: 0,
-                                                            t_id: 1,
                                                             number_of_kids: {
                                                                 $cond: { if: { $isArray: "$kids" }, then: {$size: "$kids"}, else: 0 }
                                                             }
                                                         }}
-                                                      { $: "countResult" }
+                                                        ,
+                                                        {
+                                                            $bucket: {
+                                                                groupBy: "$number_of_kids",
+                                                                boundaries: [ 0, 1, 2, 3, 4 ],
+                                                                default: "More then four"
+                                                            }
+                                                        }
                                                       ]).toArray();
 
       // THEN
       console.log('result: ' + result);
       console.log(result);
-      expect(result[0].countResult).toEqual(11);
     });
 });
