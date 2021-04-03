@@ -54,6 +54,9 @@ describe("Basic mongo operations", () => {
           { t_id: "t5", name: "Andrea Doe", languages: ["English", "German"], kids: [], description: "Beautician" },
           { t_id: "t6", name: "Judy Anonim", languages: ["English", "German"], kids: [], description: "I am Scrum master" },
           { t_id: "t7", name: "Konrad Anonim", languages: ["Polish"], kids: ["Jagoda"], description: "I am electrician" },
+          { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], description: "I am electrician" },
+          { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], description: "I am amateur scuba diver" },
+          { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" }
         ];
     await matchCollection.insertMany(translators, options);
   });
@@ -66,6 +69,6 @@ describe("Basic mongo operations", () => {
     // THEN
     console.log('result: ' + result);
     console.log(result);
-    expect(result[0].countResult).toEqual(7);
+    expect(result[0].countResult).toEqual(10);
   });
 });
