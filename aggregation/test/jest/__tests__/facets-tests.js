@@ -146,4 +146,62 @@ describe("Basic mongo operations", () => {
       console.log(expectedFacetResult);
       expect(result.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
     });
+    test("should return correct single facet for all documents based on $sortByCount stage", async () => {
+      //TODO GIVEN
+      const expectedFacetResult = [
+            JSON.stringify({ _id: 0, count: 4 }),
+            JSON.stringify({ _id: 1, count: 3 }),
+            JSON.stringify({ _id: 2, count: 3 }),
+            JSON.stringify({ _id: 3, count: 1 }),
+            JSON.stringify({ _id: 4, count: 1 })
+          ]
+
+
+      //TODO WHEN
+      var result = await matchCollection.aggregate([
+                                                        {$project: {
+                                                            _id: 0,
+                                                            number_of_kids: {
+                                                                $cond: { if: { $isArray: "$kids" }, then: {$size: "$kids"}, else: 0 }
+                                                            }
+                                                        }}
+                                                        ,
+                                                        {
+                                                            $facet: {
+                                                                lowestSalaryWorkers: [
+                                                                    {$sort: { "salary": 1 }},
+                                                                    {$limit: 5},
+                                                                    {$project: {
+                                                                            _id: 0,
+                                                                            t_id: 1,
+                                                                            salary: 1
+                                                                        }
+                                                                    }
+                                                                ]
+                                                                ,
+                                                                highestSalaryWorkers: [
+                                                                    {$sort: { "salary": -1 }},
+                                                                    {$limit: 5},
+                                                                    {$project: {
+                                                                            _id: 0,
+                                                                            t_id: 1,
+                                                                            salary: 1
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+
+                                                        }
+                                                        { $sortByCount:  "$number_of_kids" }
+                                                      ]).toArray();
+
+      //TODO THEN
+      console.log('query result: ' + result);
+      result = result.map(function (doc) { return JSON.stringify({ _id: doc._id, count: doc.count }) });
+      console.log('result: ' + result);
+      console.log(result);
+      console.log('expectedFacetResult: ' + expectedFacetResult);
+      console.log(expectedFacetResult);
+      expect(result.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
+    });
 });
