@@ -50,18 +50,18 @@ describe("Basic mongo operations", () => {
     // this option prevents additional documents from being inserted if one fails
     const options = { ordered: true };
     const translators = [
-          { t_id: "t1", name: "Szymon Tarnowski", languages: ["English", "Polish"], description: "I am amateur scuba diver and runner" },
-          { t_id: "t2", name: "Michael Anonim", languages: ["Polish"], kids: [], description: "I am amateur runner" },
-          { t_id: "t3", name: "Kuba Doe", languages: ["Polish", "English", "Russian"], kids: ["John", "Jack", "Alexandra", "Michael"], description: "I am runner and climber" },
-          { t_id: "t4", name: "Bill Clinton", languages: ["English"], kids: ["Chelsea"], description: "I am former president" },
-          { t_id: "t5", name: "Andrea Doe", languages: ["English", "German"], kids: [], description: "Beautician" },
-          { t_id: "t6", name: "Judy Anonim", languages: ["English", "German"], kids: [], description: "I am Scrum master" },
-          { t_id: "t7", name: "Konrad Anonim", languages: ["Polish"], kids: ["Jagoda"], description: "I am electrician" },
-          { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], description: "I am electrician" },
-          { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], description: "I am amateur scuba diver" },
-          { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], description: "I am model" },
-          { t_id: "t11", name: "Mike Johnson", languages: ["German"], kids: ["Arnold", "Billy"], description: "I am artist" },
-          { t_id: "t12", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natasha"], description: "I am world start actor, playing in action movies" }
+          { t_id: "t1", name: "Szymon Tarnowski", languages: ["English", "Polish"], salary: 233.225,description: "I am amateur scuba diver and runner" },
+          { t_id: "t2", name: "Michael Anonim", languages: ["Polish"], kids: [], salary: 133.225,description: "I am amateur runner" },
+          { t_id: "t3", name: "Kuba Doe", languages: ["Polish", "English", "Russian"], kids: ["John", "Jack", "Alexandra", "Michael"], salary: 65.225,description: "I am runner and climber" },
+          { t_id: "t4", name: "Bill Clinton", languages: ["English"], kids: ["Chelsea"], salary: 88.225,description: "I am former president" },
+          { t_id: "t5", name: "Andrea Doe", languages: ["English", "German"], kids: [], salary: 233.225,description: "Beautician" },
+          { t_id: "t6", name: "Judy Anonim", languages: ["English", "German"], kids: [], salary: 44.225,description: "I am Scrum master" },
+          { t_id: "t7", name: "Konrad Anonim", languages: ["Polish"], kids: ["Jagoda"], salary: 76.225,description: "I am electrician" },
+          { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], salary: 2.334 ,description: "I am electrician" },
+          { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], salary: 55.225,description: "I am amateur scuba diver" },
+          { t_id: "t10", name: "Viki Doe", languages: ["English"], kids: ["Arnold", "Henry"], salary: 199.225,description: "I am model" },
+          { t_id: "t11", name: "Mike Johnson", languages: ["German"], kids: ["Arnold", "Billy"], salary: 79.10,description: "I am artist" },
+          { t_id: "t12", name: "Van Diesel", languages: ["English"], kids: ["Berny", "Carl", "Natasha"], salary: 12999.225,description: "I am world start actor, playing in action movies" }
         ];
     await matchCollection.insertMany(translators, options);
   });
