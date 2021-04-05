@@ -45,9 +45,10 @@ function assertJsonArraysEquals(resultArray, expectedArray)
       result = resultArray.map(function (doc) { return JSON.stringify(doc) });
       console.log('resultArray: ' + result);
       console.log(result);
-      console.log('expectedArray: ' + expectedArray);
-      console.log(expectedArray);
-      expect(result.every(elem => expectedArray.includes(elem))).toBeTruthy();
+      const expectedJsonObjectArray = expectedArray.map(function (doc) { return JSON.stringify(doc) });
+      console.log('expectedArray: ' + expectedJsonObjectArray);
+      console.log(expectedJsonObjectArray);
+      expect(result.every(elem => expectedJsonObjectArray.includes(elem))).toBeTruthy();
 }
 
 describe("Facet operations", () => {
@@ -158,58 +159,48 @@ describe("Facet operations", () => {
     test("should return correct multi facets", async () => {
       //TODO GIVEN
       const expectedLowestSalaryWorkers = [
-                        JSON.stringify(
-            			{
+                        {
             				"t_id": "t8",
             				"salary": 2.3
-            			}),
-            			JSON.stringify(
+            			},
             			{
             				"t_id": "t9",
             				"salary": 55.2
-            			}),
-            			JSON.stringify(
+            			},
             			{
             				"t_id": "t3",
             				"salary": 65.2
-            			}),
-            			JSON.stringify(
+            			},
             			{
             				"t_id": "t7",
             				"salary": 76.2
-            			}),
-            			JSON.stringify(
+            			},
             			{
             				"t_id": "t11",
             				"salary": 79.1
-            			})
+            			}
             		];
 		const expectedHighestSalaryWorkers = [
-		    JSON.stringify(
-			{
+		    {
 				"t_id": "t12",
 				"salary": 12999.2
-			}),
-			JSON.stringify(
+			},
 			{
 				"t_id": "t4",
 				"salary": 2088.2
-			}),
-			JSON.stringify(
+			},
 			{
 				"t_id": "t1",
 				"salary": 233.2
-			}),
-			JSON.stringify(
+			},
 			{
 				"t_id": "t10",
 				"salary": 199.2
-			}),
-			JSON.stringify(
+			},
 			{
 				"t_id": "t2",
 				"salary": 133.2
-			})
+			}
 		]
 
 
