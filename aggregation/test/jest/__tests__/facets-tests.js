@@ -40,8 +40,17 @@ afterAll(async () => {
   await client.close();
 });
 
+function assertJsonArraysEquals(resultArray, expectedArray)
+{
+      result = resultArray.map(function (doc) { return JSON.stringify(doc) });
+      console.log('resultArray: ' + result);
+      console.log(result);
+      console.log('expectedArray: ' + expectedArray);
+      console.log(expectedArray);
+      expect(result.every(elem => expectedArray.includes(elem))).toBeTruthy();
+}
 
-describe("Basic mongo operations", () => {
+describe("Facet operations", () => {
   beforeAll(async () => {
     matchCollection = db.collection('facets-tests');
     const query = { _id: {$exists: true} };
@@ -146,7 +155,7 @@ describe("Basic mongo operations", () => {
       console.log(expectedFacetResult);
       expect(result.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
     });
-    test("should return correct single facet for all documents based on $sortByCount stage", async () => {
+    test("should return correct multi facets", async () => {
       //TODO GIVEN
       const expectedFacetResult = [
             JSON.stringify({ _id: 0, count: 4 }),
@@ -155,16 +164,70 @@ describe("Basic mongo operations", () => {
             JSON.stringify({ _id: 3, count: 1 }),
             JSON.stringify({ _id: 4, count: 1 })
           ]
+      const expectedLowestSalaryWorkers = [
+                        JSON.stringify(
+            			{
+            				"t_id": "t8",
+            				"salary": 2.3
+            			}),
+            			JSON.stringify(
+            			{
+            				"t_id": "t6",
+            				"salary": 44.2
+            			}),
+            			JSON.stringify(
+            			{
+            				"t_id": "t9",
+            				"salary": 55.2
+            			}),
+            			JSON.stringify(
+            			{
+            				"t_id": "t3",
+            				"salary": 65.2
+            			}),
+            			JSON.stringify(
+            			{
+            				"t_id": "t7",
+            				"salary": 76.2
+            			})
+            		];
+		const expectedHighestSalaryWorkers = [
+		    JSON.stringify(
+			{
+				"t_id": "t12",
+				"salary": 12999.2
+			}),
+			JSON.stringify(
+			{
+				"t_id": "t5",
+				"salary": 233.2
+			}),
+			JSON.stringify(
+			{
+				"t_id": "t1",
+				"salary": 233.2
+			}),
+			JSON.stringify(
+			{
+				"t_id": "t10",
+				"salary": 199.2
+			}),
+			JSON.stringify(
+			{
+				"t_id": "t2",
+				"salary": 133.2
+			})
+		]
 
 
       //TODO WHEN
       var result = await matchCollection.aggregate([
-                                                        {$project: {
-                                                            _id: 0,
-                                                            number_of_kids: {
-                                                                $cond: { if: { $isArray: "$kids" }, then: {$size: "$kids"}, else: 0 }
+                                                        {$addFields: {
+                                                                number_of_kids: {
+                                                                    $cond: { if: { $isArray: "$kids" }, then: {$size: "$kids"}, else: 0 }
+                                                                }
                                                             }
-                                                        }}
+                                                        }
                                                         ,
                                                         {
                                                             $facet: {
@@ -174,7 +237,7 @@ describe("Basic mongo operations", () => {
                                                                     {$project: {
                                                                             _id: 0,
                                                                             t_id: 1,
-                                                                            salary: 1
+                                                                            salary: {$round : [ "$salary", 1 ]}
                                                                         }
                                                                     }
                                                                 ]
@@ -185,23 +248,18 @@ describe("Basic mongo operations", () => {
                                                                     {$project: {
                                                                             _id: 0,
                                                                             t_id: 1,
-                                                                            salary: 1
+                                                                            salary: {$round : [ "$salary", 1 ]}
                                                                         }
                                                                     }
                                                                 ]
                                                             }
 
                                                         }
-                                                        { $sortByCount:  "$number_of_kids" }
                                                       ]).toArray();
 
       //TODO THEN
-      console.log('query result: ' + result);
-      result = result.map(function (doc) { return JSON.stringify({ _id: doc._id, count: doc.count }) });
-      console.log('result: ' + result);
-      console.log(result);
-      console.log('expectedFacetResult: ' + expectedFacetResult);
-      console.log(expectedFacetResult);
-      expect(result.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
+      console.log('facets results: ' + JSON.stringify(result));
+      assertJsonArraysEquals(result[0].lowestSalaryWorkers, expectedLowestSalaryWorkers);
+      assertJsonArraysEquals(result[0].highestSalaryWorkers, expectedHighestSalaryWorkers);
     });
 });
