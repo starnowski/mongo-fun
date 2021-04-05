@@ -270,3 +270,11 @@ how-to-check-what-are-same-elements-for-arrays:
     Operator $setIntersection takes two or more arrays and returns an array that contains the elements that appear in every input array.
   links:
     - https://docs.mongodb.com/manual/reference/operator/aggregation/setIntersection/
+how-to-create-collection-in-pipeline:
+  questions:
+    - how to create collection based on pipeline results ?
+    - how to create collection based on other collection ?
+  answers:  |
+    Use the $out stage option.
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/out/
