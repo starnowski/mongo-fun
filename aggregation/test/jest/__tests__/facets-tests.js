@@ -65,7 +65,7 @@ describe("Facet operations", () => {
           { t_id: "t3", name: "Kuba Doe", languages: ["Polish", "English", "Russian"], kids: ["John", "Jack", "Alexandra", "Michael"], salary: 65.225, job: "software tester",description: "I am runner and climber" },
           { t_id: "t4", name: "Bill Clinton", languages: ["English"], kids: ["Chelsea"], salary: 2088.225, job: "president", description: "I am former president" },
           { t_id: "t5", name: "Andrea Doe", languages: ["English", "German"], kids: [], salary: 80.225, job: "beautician", description: "Beautician" },
-          { t_id: "t6", name: "Judy Anonim", languages: ["English", "German"], kids: [], salary: 99.225, job: "scrum maste",description: "I am Scrum master" },
+          { t_id: "t6", name: "Judy Anonim", languages: ["English", "German"], kids: [], salary: 99.225, job: "scrum master",description: "I am Scrum master" },
           { t_id: "t7", name: "Konrad Anonim", languages: ["Polish"], kids: ["Jagoda"], salary: 76.225, job: "electrician",description: "I am electrician" },
           { t_id: "t8", name: "Mikka Anonim", languages: ["Polish"], kids: ["Jill"], salary: 2.334, job: "receptionist" ,description: "I am electrician" },
           { t_id: "t9", name: "Daniel Doe", languages: ["Italian"], kids: ["Carmen", "Michael"], salary: 55.225, job: "scuba diver",description: "I am amateur scuba diver" },
@@ -202,7 +202,68 @@ describe("Facet operations", () => {
 				"salary": 133.2
 			}
 		]
-
+        const expectedSalaryGroups = [
+			{
+				"_id": 0,
+				"count": 1,
+				"avgNumberOfKids": 1,
+				"avgSalary": 2.3,
+				"jobs": [
+					"receptionist"
+				]
+			},
+			{
+				"_id": 50,
+				"count": 6,
+				"avgNumberOfKids": 1.5,
+				"avgSalary": 75.9,
+				"jobs": [
+					"artist",
+					"beautician",
+					"electrician",
+					"scrum master",
+					"scuba diver",
+					"software tester"
+				]
+			},
+			{
+				"_id": 100,
+				"count": 1,
+				"avgNumberOfKids": 0,
+				"avgSalary": 133.2,
+				"jobs": [
+					"accountant"
+				]
+			},
+			{
+				"_id": 150,
+				"count": 1,
+				"avgNumberOfKids": 2,
+				"avgSalary": 199.2,
+				"jobs": [
+					"model"
+				]
+			},
+			{
+				"_id": 200,
+				"count": 1,
+				"avgNumberOfKids": 0,
+				"avgSalary": 233.2,
+				"jobs": [
+					"software engineer"
+				]
+			},
+			{
+				"_id": 500,
+				"count": 2,
+				"avgNumberOfKids": 2,
+				"avgSalary": 7543.7,
+				"jobs": [
+					"actor",
+					"president"
+				]
+			}
+		];
 
       //TODO WHEN
       var result = await matchCollection.aggregate([
@@ -267,5 +328,11 @@ describe("Facet operations", () => {
       console.log('facets results: ' + JSON.stringify(result));
       assertJsonArraysEquals(result[0].lowestSalaryWorkers, expectedLowestSalaryWorkers);
       assertJsonArraysEquals(result[0].highestSalaryWorkers, expectedHighestSalaryWorkers);
+      //Sort job arrays
+      result[0].salaryGroups = result[0].salaryGroups.map(function (doc) {
+        doc.jobs = doc.jobs.sort();
+        return doc;
+      });
+      assertJsonArraysEquals(result[0].salaryGroups, expectedSalaryGroups);
     });
 });
