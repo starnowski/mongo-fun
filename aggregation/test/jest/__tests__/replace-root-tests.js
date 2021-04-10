@@ -85,11 +85,11 @@ describe("Out operations", () => {
     test("should change document root and set nested document", async () => {
       // GIVEN
       const expectedResult = [
-            JSON.stringify({ _id: 0, count: 4 }),
-            JSON.stringify({ _id: 1, count: 3 }),
-            JSON.stringify({ _id: 2, count: 3 }),
-            JSON.stringify({ _id: 3, count: 1 }),
-            JSON.stringify({ _id: 'More then four', count: 1 })
+            JSON.stringify({ k_id: "a", name: "Chelsea" }),
+            JSON.stringify({ k_id: "b", name: "Jack" }),
+            JSON.stringify({ k_id: "c", name: "Alexandra" }),
+            JSON.stringify({ k_id: "d", name: "John" }),
+            JSON.stringify({ k_id: "e", name: "Michael" })
           ]
 
       // WHEN
@@ -108,7 +108,7 @@ describe("Out operations", () => {
 
       // THEN
       console.log('results: ' + JSON.stringify(results));
-      results = results.map(function (doc) { return JSON.stringify({ _id: doc._id, count: doc.count }) });
+      results = results.map(function (doc) { return JSON.stringify({ k_id: doc.k_id, name: doc.name }) });
       console.log('results: ' + results);
       console.log(results);
       console.log('expectedResult: ' + expectedResult);
