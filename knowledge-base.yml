@@ -278,3 +278,15 @@ how-to-create-collection-in-pipeline:
     Use the $out stage option.
   links:
     - https://docs.mongodb.com/manual/reference/operator/aggregation/out/
+how-to-replace-root-element-in-pipeline:
+  questions:
+    - how to replace root element in pipeline ?
+    - how to replace root element with nested element ?
+    - how to set nested element as root ?
+  answers:  |
+    Use the $replaceRoot stage option.
+    Replaces the input document with the specified document.
+    The operation replaces all existing fields in the input document, including the _id field.
+    You can promote an existing embedded document to the top level, or create a new document for promotion (see example).
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/replaceRoot/
