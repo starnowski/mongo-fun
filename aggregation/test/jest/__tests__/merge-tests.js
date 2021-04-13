@@ -90,7 +90,52 @@ describe("Merge operations", () => {
     records.forEach((record) => {delete record._id});
 
     // WHEN
-    const expectedRecords = await inputCollection.aggregate([
+    await inputCollection.aggregate([
+                                                                                  {
+                                                                                    $merge: {
+                                                                                        into: "outputCollection",
+                                                                                        on: "name",
+                                                                                        whenMatched: "merge",
+                                                                                        whenNotMatched: "insert"
+                                                                                    }
+                                                                                  }
+                                                                                  ]).toArray();
+
+      // THEN
+      const results = await outputCollection.aggregate([
+                                                    {$match: { _id: { $exists: true } }}
+                                                    ,
+                                                    {$project:
+                                                        {
+                                                            _id: 0
+                                                        }
+                                                    }
+                                                    ]).toArray();
+      console.log('query results : ' + results);
+      assertJsonArraysEquals(mapToObject(results), records);
+    });
+    test("should export all converted output from inputCollection to outputCollection", async () => {
+      // GIVEN
+    const records = [
+          { t_id: "t1", name: "Szymon Tarnowski", salary: 233.225, job: {title: "software engineer"} },
+          { t_id: "t2", name: "Michael Anonim", salary: 133.225, job: {title: "accountant"} },
+          { t_id: "t3", name: "Kuba Doe", salary: 65.225, job: {title: "software tester"} }
+        ];
+    const expectedRecords = [
+          { t_id: "t1", name: "Szymon Tarnowski", salary: 233.225, job: "software engineer" },
+          { t_id: "t2", name: "Michael Anonim", salary: 133.225, job: "accountant" },
+          { t_id: "t3", name: "Kuba Doe", salary: 65.225, job: "software tester" }
+        ];
+    const options = { ordered: true };
+    await inputCollection.insertMany(records, options);
+    records.forEach((record) => {delete record._id});
+
+    // WHEN
+    await inputCollection.aggregate([
+                                                            {
+                                                                $replaceRoot: { newRoot: { $mergeObjects: [ "$$ROOT", { job: "$job.title"} ] } }
+                                                            }
+                                                            ,
                                                                                   {
                                                                                     $merge: {
                                                                                         into: "outputCollection",
@@ -112,6 +157,6 @@ describe("Merge operations", () => {
                                                     }
                                                     ]).toArray();
       console.log('query results : ' + results);
-      assertJsonArraysEquals(mapToObject(results), records);
+      assertJsonArraysEquals(mapToObject(results), mapToObject(expectedRecords));
     });
 });
