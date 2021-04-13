@@ -60,6 +60,11 @@ function assertJsonArraysEquals(resultArray, expectedArray)
       expect(result.every(elem => expectedJsonObjectArray.includes(elem))).toBeTruthy();
 }
 
+function mapToObject(queryResults)
+{
+    return queryResults.map(function (doc) { return { t_id: doc.t_id, name: doc.name, salary: doc.salary, job: doc.job, description: doc.description } });
+}
+
 describe("Merge operations", () => {
 
   beforeAll(async () => {
@@ -82,6 +87,7 @@ describe("Merge operations", () => {
         ];
     const options = { ordered: true };
     await inputCollection.insertMany(records, options);
+    records.forEach((record) => {delete record._id});
 
     // WHEN
     const expectedRecords = await inputCollection.aggregate([
@@ -105,7 +111,7 @@ describe("Merge operations", () => {
                                                         }
                                                     }
                                                     ]).toArray();
-      console.log('exported results: ' + JSON.stringify(results));
-      assertJsonArraysEquals(results, records);
+      console.log('query results : ' + results);
+      assertJsonArraysEquals(mapToObject(results), records);
     });
 });
