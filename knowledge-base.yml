@@ -290,3 +290,16 @@ how-to-replace-root-element-in-pipeline:
     You can promote an existing embedded document to the top level, or create a new document for promotion (see example).
   links:
     - https://docs.mongodb.com/manual/reference/operator/aggregation/replaceRoot/
+how-to-export-query-results-to-shared-collection-in-pipeline:
+  questions:
+    - how to export collection to other collection ?
+    - how to export collection to other shared collection ?
+    - how to export pipeline results to other shared collection ?
+    - how to export pipeline output to other shared collection ?
+    - how to export query output to other shared collection ?
+  answers:  |
+    Use the $merge stage option.
+    Writes the results of the aggregation pipeline to a specified collection.
+    The $merge operator must be the last stage in the pipeline.
+  links:
+    - https://docs.mongodb.com/manual/reference/operator/aggregation/merge/
