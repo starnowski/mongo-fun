@@ -121,14 +121,13 @@ describe("Facet operations", () => {
 
       // THEN
       console.log('query result: ' + result);
-//      const resultObject = result.map(function (doc) { return JSON.stringify({ results: doc.results, count: doc.count }) });
-      const resultObject = result;
-      console.log('result ids: ' + resultObject);
-      console.log(resultObject);
+      const resultObject = result.map(function (doc) { return JSON.stringify({ results: doc.results, count: doc.count }) });
+      console.log('resultObject: ' + resultObject);
       console.log('expectedFacetResult: ' + expectedFacetResult);
       console.log(expectedFacetResult);
 //      expect(ids.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
-      console.log('result with limits: ' + resultObject.results);
-      assertJsonArraysEquals(resultObject.results, expectedFacetResult);
+      const ids = result[0].results.map(function (doc) { return JSON.stringify({ t_id: doc.t_id }) });
+      console.log('result with limits: ' + ids);
+      assertJsonArraysEquals(ids, expectedFacetResult);
     });
 });
