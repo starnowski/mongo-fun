@@ -135,4 +135,62 @@ describe("Facet operations", () => {
       const count = result[0].count.map(function (doc) { return JSON.stringify({ number_of_records: doc.number_of_records }) });
       assertJsonArraysEquals(count, expectedCountFacetResult);
     });
+
+    test("should return correct facet with paginated ids and count", async () => {
+      // GIVEN
+      const expectedFacetResult = [
+            "t1", "t10", "t11"
+          ];
+      const expectedCountFacetResult = [
+            JSON.stringify({ number_of_records: 12 })
+          ];
+
+
+      // WHEN
+      var result = await matchCollection.aggregate([
+                                                        {$project: {
+                                                            _id: 0,
+                                                            t_id: 1
+                                                        }}
+                                                        ,
+                                                        {
+                                                            $facet: {
+                                                                results: [
+                                                                    {$sort: { "t_id": 1 }},
+                                                                    {$limit: 3}
+                                                                ]
+                                                                ,
+                                                                count: [
+                                                                    {$count: "number_of_records"}
+                                                                ]
+                                                            }
+                                                        }
+                                                        ,
+                                                        {$project: {
+                                                            count: 1,
+                                                            results: {
+                                                                "$map": {
+                                                                    "input": "$results",
+                                                                    "as": "result",
+                                                                    "in": "$$result.t_id"
+                                                                }
+                                                            }
+                                                        }}
+                                                      ]).toArray();
+
+      // THEN
+      console.log('query result: ' + result);
+      const resultObject = result.map(function (doc) { return JSON.stringify({ results: doc.results, count: doc.count }) });
+      console.log('resultObject: ' + resultObject);
+      console.log('expectedFacetResult: ' + expectedFacetResult);
+      console.log(expectedFacetResult);
+//      expect(ids.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
+//      const ids = result[0].results.map(function (doc) { return JSON.stringify({ t_id: doc.t_id }) });
+      const ids = result[0].results;
+      console.log('result with limits: ' + ids);
+//      assertJsonArraysEquals(ids, expectedFacetResult);
+      expect(ids).toEqual(expectedFacetResult);
+      const count = result[0].count.map(function (doc) { return JSON.stringify({ number_of_records: doc.number_of_records }) });
+      assertJsonArraysEquals(count, expectedCountFacetResult);
+    });
 });
