@@ -128,7 +128,6 @@ describe("Facet operations", () => {
       console.log('resultObject: ' + resultObject);
       console.log('expectedFacetResult: ' + expectedFacetResult);
       console.log(expectedFacetResult);
-//      expect(ids.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
       const ids = result[0].results.map(function (doc) { return JSON.stringify({ t_id: doc.t_id }) });
       console.log('result with limits: ' + ids);
       assertJsonArraysEquals(ids, expectedFacetResult);
@@ -184,11 +183,8 @@ describe("Facet operations", () => {
       console.log('resultObject: ' + resultObject);
       console.log('expectedFacetResult: ' + expectedFacetResult);
       console.log(expectedFacetResult);
-//      expect(ids.every(elem => expectedFacetResult.includes(elem))).toBeTruthy();
-//      const ids = result[0].results.map(function (doc) { return JSON.stringify({ t_id: doc.t_id }) });
       const ids = result[0].results;
       console.log('result with limits: ' + ids);
-//      assertJsonArraysEquals(ids, expectedFacetResult);
       expect(ids).toEqual(expectedFacetResult);
       const count = result[0].count.map(function (doc) { return JSON.stringify({ number_of_records: doc.number_of_records }) });
       assertJsonArraysEquals(count, expectedCountFacetResult);
