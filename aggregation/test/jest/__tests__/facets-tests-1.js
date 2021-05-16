@@ -96,6 +96,9 @@ describe("Facet operations", () => {
             JSON.stringify({ t_id: "t12" }),
             JSON.stringify({ t_id: "t2" })
           ];
+      const expectedCountFacetResult = [
+            JSON.stringify({ number_of_records: 12 })
+          ];
 
 
       // WHEN
@@ -129,5 +132,7 @@ describe("Facet operations", () => {
       const ids = result[0].results.map(function (doc) { return JSON.stringify({ t_id: doc.t_id }) });
       console.log('result with limits: ' + ids);
       assertJsonArraysEquals(ids, expectedFacetResult);
+      const count = result[0].count.map(function (doc) { return JSON.stringify({ number_of_records: doc.number_of_records }) });
+      assertJsonArraysEquals(count, expectedCountFacetResult);
     });
 });
