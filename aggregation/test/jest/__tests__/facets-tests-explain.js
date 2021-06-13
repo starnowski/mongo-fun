@@ -58,7 +58,7 @@ function assertJsonArraysEquals(resultArray, expectedArray)
       expect(result.every(elem => expectedJsonObjectArray.includes(elem))).toBeTruthy();
 }
 
-describe("Facet operations", () => {
+describe("Performance - create single index operations", () => {
   beforeAll(async () => {
     per1Collection = db.collection('performance-single-index-tests');
     const query = { _id: {$exists: true} };
