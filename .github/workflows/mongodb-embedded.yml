@@ -1,4 +1,4 @@
-name: Run tests with mongodb docker
+name: Run tests with embedded mongodb
 
 on:
   push:
