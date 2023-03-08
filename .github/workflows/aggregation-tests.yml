@@ -3,6 +3,7 @@ name: Aggregation tests
 on:
   push:
     paths:
+      - '.github/workflows/aggregation-tests.yml'
       - 'aggregation/**'
 
 ## https://github.com/supercharge/mongodb-github-action/blob/master/.github/workflows/test-single-instance.yml

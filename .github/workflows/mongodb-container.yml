@@ -3,6 +3,7 @@ name: Run tests with mongodb docker
 on:
   push:
     paths:
+    - '.github/workflows/mongodb-container.yml'
     - 'mongodb-container/**'
 
 ## The action created based on the description from https://github.com/marketplace/actions/mongodb-in-github-actions

@@ -3,6 +3,7 @@ name: Run tests for embeded mongodb
 on:
   push:
     paths:
+    - '.github/workflows/dev1-e2e-tests.yml'
     - 'dev/**'
 
 ## The action created based on the description from https://github.com/marketplace/actions/mongodb-in-github-actions
