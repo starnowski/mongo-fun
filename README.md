@@ -3,7 +3,7 @@
 [![Run tests with mongodb docker](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-container.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-container.yml)
 [![Aggregation tests](https://github.com/starnowski/mongo-fun/actions/workflows/aggregation-tests.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/aggregation-tests.yml)
 [![Run tests with embedded mongodb](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded.yml)
-
+[![Run tests with embedded mongodb for quarkus](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded-quarkus.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded-quarkus.yml)
 
 ### Performance
 https://www.mongodb.com/blog/post/performance-best-practices-indexing
