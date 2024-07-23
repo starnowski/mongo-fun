@@ -57,12 +57,10 @@
             <version>${org.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--https://nirajsonawane.github.io/2019/12/25/Testcontainers-With-Spring-Boot-For-Integration-Testing/-->
-        <!--https://dev.to/silaev/the-testcontainers-mongodb-module-and-spring-data-mongodb-in-action-53ng-->
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>3.3.1</version>
+            <version>4.16.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
