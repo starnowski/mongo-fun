@@ -3,19 +3,21 @@ package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 import com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Comment;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Post;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
+@QuarkusTest
 class CommentDaoTest extends AbstractITTest {
 
-    @Autowired
+    @Inject
     PostDao postDao;
 
-    @Autowired
+    @Inject
     CommentDao tested;
 
     private ObjectId postObjectId;

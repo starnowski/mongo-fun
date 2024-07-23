@@ -3,19 +3,19 @@ package com.github.starnowski.mongo.fun.mongodb.container.services;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Post;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.CommentDao;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.PostDao;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import static java.util.stream.Collectors.toList;
 
-@Service
+@ApplicationScoped
 public class PostService {
 
-    @Autowired
+    @Inject
     private PostDao postDao;
 
-    @Autowired
+    @Inject
     private CommentDao commentDao;
 
     public Post save(Post post) {

@@ -1,11 +1,11 @@
 package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import com.github.starnowski.mongo.fun.mongodb.container.model.Comment;
-import org.springframework.stereotype.Repository;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import static com.github.starnowski.mongo.fun.mongodb.container.repositories.DaoProperties.COMMENTS_COLLECTION_NAME;
 
-@Repository
+@ApplicationScoped
 public class CommentDao extends AbstractDao<Comment> {
 
     @Override

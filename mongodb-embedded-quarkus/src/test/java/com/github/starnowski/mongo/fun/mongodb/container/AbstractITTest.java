@@ -2,19 +2,21 @@ package com.github.starnowski.mongo.fun.mongodb.container;
 
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.CommentDao;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.PostDao;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.ResourceArg;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.mongodb.MongoTestResource;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest
-@ContextConfiguration
+@QuarkusTest
+@QuarkusTestResource(EmbeddedMongoResource.class)
 public class AbstractITTest {
 
-    @Autowired
+    @Inject
     protected PostDao postDao;
 
-    @Autowired
+    @Inject
     protected CommentDao commentDao;
 
     @AfterEach

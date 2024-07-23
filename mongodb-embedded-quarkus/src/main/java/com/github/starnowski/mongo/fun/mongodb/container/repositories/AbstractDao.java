@@ -1,25 +1,24 @@
 package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
-import javax.annotation.PostConstruct;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public abstract class AbstractDao<T> {
 
-    @Autowired
-    protected MongoTemplate mongoTemplate;
+    @Inject
+    protected MongoClient mongoClient;
     protected MongoCollection<T> collection;
 
     @PostConstruct
@@ -29,7 +28,7 @@ public abstract class AbstractDao<T> {
                         MongoClientSettings.getDefaultCodecRegistry(),
                         fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         this.collection =
-                mongoTemplate.getDb().getCollection(getCollectionName(), getDocumentClass()).withCodecRegistry(pojoCodecRegistry);
+                mongoClient.getDatabase("test").getCollection(getCollectionName(), getDocumentClass()).withCodecRegistry(pojoCodecRegistry);
     }
 
     public T save(T document) {

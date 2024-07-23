@@ -1,18 +1,20 @@
 package com.github.starnowski.mongo.fun.mongodb.container;
 
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.common.ResourceArg;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.mongodb.MongoTestResource;
+import jakarta.inject.Inject;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +23,13 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
-@ContextConfiguration
+@QuarkusTest
+@QuarkusTestResource(EmbeddedMongoResource.class)
 public class IntegerSortedCollectionTest {
     private static final String INTEGER_COLUMN = "integer_col";
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    @Inject
+    private MongoClient mongoClient;
     private MongoCollection<Document> sortable;
 
     private static Stream<Arguments> provide_shouldReturnCorrectCountNumberAfterSeveralStagesWithDifferentCursorOperations() {
@@ -48,7 +49,7 @@ public class IntegerSortedCollectionTest {
 
     @BeforeAll
     public void setUp() {
-        sortable = mongoTemplate.getCollection("integerSortedCollection");
+        sortable = mongoClient.getDatabase("test").getCollection("integerSortedCollection");
         List<Document> documents = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             documents.add(new Document(INTEGER_COLUMN, i));

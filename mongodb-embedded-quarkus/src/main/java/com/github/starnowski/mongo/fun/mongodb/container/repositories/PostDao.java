@@ -6,9 +6,9 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import static com.github.starnowski.mongo.fun.mongodb.container.repositories.Dao
 import static com.github.starnowski.mongo.fun.mongodb.container.repositories.DaoProperties.POSTS_COLLECTION_NAME;
 
 
-@Repository
+@ApplicationScoped
 public class PostDao extends AbstractDao<Post> {
 
     @Override
