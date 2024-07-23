@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container;
 
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
 public class IntegerSortedCollectionTest {
@@ -49,7 +51,7 @@ public class IntegerSortedCollectionTest {
 
     @BeforeAll
     public void setUp() {
-        sortable = mongoClient.getDatabase("test").getCollection("integerSortedCollection");
+        sortable = mongoClient.getDatabase("test").getCollection("integerSortedCollection").withWriteConcern(WriteConcern.W1);
         List<Document> documents = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             documents.add(new Document(INTEGER_COLUMN, i));

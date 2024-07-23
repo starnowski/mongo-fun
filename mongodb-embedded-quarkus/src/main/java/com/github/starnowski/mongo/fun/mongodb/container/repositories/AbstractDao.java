@@ -1,6 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import com.mongodb.MongoClientSettings;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -28,7 +29,7 @@ public abstract class AbstractDao<T> {
                         MongoClientSettings.getDefaultCodecRegistry(),
                         fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         this.collection =
-                mongoClient.getDatabase("test").getCollection(getCollectionName(), getDocumentClass()).withCodecRegistry(pojoCodecRegistry);
+                mongoClient.getDatabase("test").getCollection(getCollectionName(), getDocumentClass()).withCodecRegistry(pojoCodecRegistry).withWriteConcern(WriteConcern.W1);
     }
 
     public T save(T document) {
