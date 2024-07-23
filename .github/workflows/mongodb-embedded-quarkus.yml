@@ -1,4 +1,4 @@
-name: Run tests with embedded mongodb
+name: Run tests with embedded mongodb for quarkus
 
 on:
   push:
