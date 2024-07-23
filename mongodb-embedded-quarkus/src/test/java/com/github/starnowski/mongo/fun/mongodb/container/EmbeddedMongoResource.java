@@ -26,7 +26,6 @@ public class EmbeddedMongoResource implements QuarkusTestResourceLifecycleManage
             MongodConfig mongodConfig = MongodConfig.builder()
                     .version(Version.Main.PRODUCTION)
                     .net(new de.flapdoodle.embed.mongo.config.Net(port, Network.localhostIsIPv6()))
-                    .version(Version.V5_0_5)
                     .replication(new Storage(null, null, 0)) // Enable journaling
                     .cmdOptions(MongoCmdOptions.builder().useNoJournal(true).build())
                     .build();
