@@ -36,12 +36,7 @@ jobs:
         env:
           CI: true
 
-#      - run: npm test ./test/hapi/setup.js
-#        working-directory: ./mongo_js
-#        env:
-#          CI: true
-
-      - run: npm run test-jest ./test/jest/*
+      - run: npm run test-jest
         working-directory: ./mongo_js
         env:
           CI: true
