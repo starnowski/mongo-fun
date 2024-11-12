@@ -1,0 +1,47 @@
+name: Aggregation tests
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mongo-js-node-22.yml'
+      - 'mongo_js/**'
+
+## https://github.com/supercharge/mongodb-github-action/blob/master/.github/workflows/test-single-instance.yml
+## https://github.com/supercharge/mongodb-github-action
+
+jobs:
+  mongodb-action:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mongodb-version: [8.0]
+
+    name: Start MongoDB Server v${{ matrix.mongodb-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Start MongoDB Server
+        uses: supercharge/mongodb-github-action@1.3.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: 22.x
+
+      - run: npm install
+        working-directory: ./mongo_js
+        env:
+          CI: true
+
+#      - run: npm test ./test/hapi/setup.js
+#        working-directory: ./mongo_js
+#        env:
+#          CI: true
+
+      - run: npm run test-jest ./test/jest/*
+        working-directory: ./mongo_js
+        env:
+          CI: true
