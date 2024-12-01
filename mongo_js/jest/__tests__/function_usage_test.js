@@ -4,11 +4,15 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
+let mongoUrl = null;
+if (process.env.MONGO_HOST == null) {
+  mongoUrl = "mongodb://localhost:27017/aggregation-tests?readPreference=primary&ssl=false";
+} else {
+  mongoUrl = `mongodb://${process.env.MONGO_HOST}/aggregation-tests?readPreference=primary&ssl=false`;
+}
 // Connection URI
-const uri =
-  "mongodb://localhost:27017/aggregation-tests?readPreference=primary&ssl=false";
 // Create a new MongoClient
-const client = new MongoClient(uri, {
+const client = new MongoClient(mongoUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
