@@ -1,4 +1,4 @@
-name: Aggregation tests
+name: Javascript tests for Node 22
 
 on:
   push:

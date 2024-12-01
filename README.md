@@ -4,6 +4,7 @@
 [![Aggregation tests](https://github.com/starnowski/mongo-fun/actions/workflows/aggregation-tests.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/aggregation-tests.yml)
 [![Run tests with embedded mongodb](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded.yml)
 [![Run tests with embedded mongodb for quarkus](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded-quarkus.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded-quarkus.yml)
+[![Javascript tests for Node 22](https://github.com/starnowski/mongo-fun/actions/workflows/mongo-js-node-22.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongo-js-node-22.yml)
 
 ### Performance
 https://www.mongodb.com/blog/post/performance-best-practices-indexing
