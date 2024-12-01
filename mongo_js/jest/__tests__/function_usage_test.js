@@ -44,6 +44,7 @@ const getNamesInitials = function (names){
 
 describe("Arrays mongo operations", () => {
   beforeEach(async () => {
+    console.log("Running tests on mongodb : " + mongoUrl);
     arraysCollection = db.collection('arraysCollection');
     const query = { _id: {$exists: true} };
     await arraysCollection.deleteMany(query);
