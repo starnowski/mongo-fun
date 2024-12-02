@@ -20,9 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
-      - name: Run docker-compose
-        uses: hoverkraft-tech/compose-action@v2.0.1
+          
+      - uses: adambirds/docker-compose-action@v1.5.0
         with:
           compose-file: "./mongo_js/docker-compose.yml"
-          
+          test-container: "nodejs"
+          test-command: "npm run test-jest"
