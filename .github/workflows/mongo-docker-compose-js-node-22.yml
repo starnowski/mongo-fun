@@ -25,4 +25,4 @@ jobs:
         with:
           compose-file: "./mongo_js/docker-compose.yml"
           test-container: "nodejs"
-          test-command: "npm install && npm run test-jest"
+          test-command: "npm run test-jest"
