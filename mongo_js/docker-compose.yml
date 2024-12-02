@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:8
     container_name: mongodb
     ports:
       - "27017:27017" # Expose MongoDB on localhost for testing/debugging
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+    # environment:
+      # MONGO_INITDB_ROOT_USERNAME: root
+      # MONGO_INITDB_ROOT_PASSWORD: example
     networks:
       - app-network
 
@@ -21,8 +19,8 @@ services:
     command: sh -c "npm install && npm run test-jest"
     environment:
       MONGO_HOST: "mongodb:27017"
-      MONGO_USER: root
-      MONGO_PASSWORD: example
+      # MONGO_USER: root
+      # MONGO_PASSWORD: example
     depends_on:
       - mongodb
     networks:
