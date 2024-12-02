@@ -3,7 +3,7 @@ name: Javascript tests for Node 22 with docker compose
 on:
   push:
     paths:
-      - '.github/workflows/mongo-js-node-22.yml'
+      - '.github/workflows/mongo-docker-compose-js-node-22.yml'
       - 'mongo_js/**'
 
 ## https://github.com/supercharge/mongodb-github-action/blob/master/.github/workflows/test-single-instance.yml
