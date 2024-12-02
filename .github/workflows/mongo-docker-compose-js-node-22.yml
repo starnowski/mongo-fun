@@ -1,0 +1,27 @@
+name: Javascript tests for Node 22 with docker compose
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mongo-js-node-22.yml'
+      - 'mongo_js/**'
+
+## https://github.com/supercharge/mongodb-github-action/blob/master/.github/workflows/test-single-instance.yml
+## https://github.com/supercharge/mongodb-github-action
+
+jobs:
+  mongodb-action:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mongodb-version: [8.0]
+
+    name: Start MongoDB Server v${{ matrix.mongodb-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - run: docker-compose run --rm nodejs
+        working-directory: ./mongo_js
+        env:
+          CI: true
