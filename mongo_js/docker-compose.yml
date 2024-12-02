@@ -25,6 +25,11 @@ services:
       - mongodb
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "test", "-d", "node_modules"] # Check if node_modules directory exists
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 networks:
   app-network:
