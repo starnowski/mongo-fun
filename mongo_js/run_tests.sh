@@ -17,13 +17,19 @@ is_mongo_ready() {
 #   docker inspect -f '{{.State.Running}}' nodejs 2>/dev/null | grep -q "true"
 # }
 
+
 # Wait for MongoDB to start
+checkCount=1
+timeoutInSeconds=180
 printf "Waiting for MongoDB to start..."
 while ! is_mongo_ready; do
+  [[ $checkCount -ne $timeoutInSeconds ]] || break
+  checkCount=$(( checkCount+1 ))
   printf "."
   sleep 1
 done
 printf "\nMongoDB is ready.\n"
+
 
 # Wait for Nodejs to start
 # printf "Waiting for Nodejs to start..."
