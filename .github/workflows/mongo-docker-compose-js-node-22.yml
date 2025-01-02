@@ -21,8 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
           
-      - uses: adambirds/docker-compose-action@v1.5.0
-        with:
-          compose-file: "./mongo_js/docker-compose.yml"
-          test-container: "nodejs"
-          test-command: "npm run test-jest"
+      - run: ./run_tests.sh
+        working-directory: ./mongo_js
+        env:
+          CI: true
