@@ -17,7 +17,8 @@ services:
     volumes:
       - .:/app # Mount current directory to the /app directory in the container
     # command: sh -c "npm install && npm run test-jest"
-    command: sh -c "npm install && npm run test-jest"
+    # command: sh -c "npm install"
+    command: tail -f /dev/null
     environment:
       MONGO_HOST: "mongodb:27017"
       # MONGO_USER: root
@@ -26,11 +27,11 @@ services:
       - mongodb
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "test", "-d", "node_modules"] # Check if node_modules directory exists
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    # healthcheck:
+    #   test: ["CMD", "test", "-d", "node_modules"] # Check if node_modules directory exists
+    #   interval: 3s
+    #   timeout: 5s
+    #   retries: 3
 
 networks:
   app-network:
