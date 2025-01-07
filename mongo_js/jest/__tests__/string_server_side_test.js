@@ -35,7 +35,8 @@ const getUnicodeNormalizeName = function (developer){
     return developer.normalize("NFC");
 }
 //Change to true if tests should be executed
-const shouldRunTest = false;
+//const shouldRunTest = false;
+const shouldRunTest = true;
 
 describe("Server side mongo operations", () => {
   beforeEach(async () => {
