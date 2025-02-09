@@ -39,6 +39,50 @@ const testData = [
     expectedResults: [{ r_1: "t1" }, { r_1: "t8" }, {r_1: "t11"}],
     testDescription: "pipeline that matches document based on two criteria"
   }
+  ,
+  {
+    pipeline: [{
+          $match: {
+            $or: [
+              { prop1 : { $eq: "A"} },
+              { prop2 : { $eq: 443} }
+            ]
+          }
+      }
+      ,
+      {
+        $project:
+          {
+            r_1: 1, 
+            prop1: 1,
+            prop2: 2,
+            _id: 0,
+            rank:
+              {
+                $cond: { if: { "$eq" : [ "$prop1", "A"] }, then: 25, else: 0 }
+              }
+          }
+      }
+     ,
+     {
+      $project:
+        {
+          r_1: 1, 
+          rank:
+            {
+              $cond: { if: { "$eq" : [ "$prop2", 443] }, then: { $add: ["$rank", 50] }, else: "$rank" }
+            }
+        }
+      }
+     ,
+      {
+          $project: { r_1: 1, rank: 1}
+      }
+    ]
+    ,
+    expectedResults: [{ r_1: "t1", rank: 25 }, { r_1: "t8", rank: 25 }, {r_1: "t11", rank: 75}],
+    testDescription: "pipeline that matches document based on two criteria with rank"
+  }
 ];
 
 beforeAll( async () => {
@@ -95,7 +139,7 @@ describe("Aggregation mongo operations", () => {
 
     test("should return all documents with initila for fronted developers", async () => {
      //GIVEN
-     const expectedTeams = [{ r_1: "t1" }, { r_1: "t8" }, {r_1: "t11"}];
+     const expectedRecords = [{ r_1: "t1" }, { r_1: "t8" }, {r_1: "t11"}];
 
       // WHEN
       var result = await arraysCollection.aggregate([{
@@ -116,17 +160,17 @@ describe("Aggregation mongo operations", () => {
       console.log('result: ' + result);
       console.log(result);
       // result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, initialsFD: doc.initialsFD }) });
-      console.log('current teams: ' + result);
-      console.log('expected teams: ' + expectedTeams);
+      console.log('current documents: ' + JSON.stringify(result));
+      console.log('expected documents: ' + JSON.stringify(expectedRecords));
       // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
-      expect(expectedTeams).toEqual(result);
+      expect(expectedRecords).toEqual(result);
     });
 
 
     testData.forEach(testCase => {
       test(`should return expected documents based on aggeregation pipeline: ${testCase.testDescription}`, async () => {
         //GIVEN
-        const expectedTeams = testCase.expectedResults;
+        const expectedRecords = testCase.expectedResults;
    
          // WHEN
          var result = await arraysCollection.aggregate(testCase.pipeline).toArray();
@@ -135,10 +179,10 @@ describe("Aggregation mongo operations", () => {
          console.log('result: ' + result);
          console.log(result);
          // result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, initialsFD: doc.initialsFD }) });
-         console.log('current teams: ' + result);
-         console.log('expected teams: ' + expectedTeams);
+         console.log('current documents: ' + JSON.stringify(result));
+         console.log('expected documents: ' + JSON.stringify(expectedRecords));
          // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
-         expect(expectedTeams).toEqual(result);
+         expect(expectedRecords).toEqual(result);
        });
     });
 
