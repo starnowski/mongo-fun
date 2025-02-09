@@ -19,6 +19,28 @@ const client = new MongoClient(mongoUrl, {
 
 var db = null;
 var arraysCollection = null;
+
+const testData = [
+  {
+    pipeline: [{
+          $match: {
+            $or: [
+              { prop1 : { $eq: "A"} },
+              { prop2 : { $eq: 443} }
+            ]
+          }
+      }
+      ,
+      {
+          $project: { r_1: 1, _id: 0}
+      }
+    ]
+    ,
+    expectedResults: [{ r_1: "t1" }, { r_1: "t8" }, {r_1: "t11"}],
+    testDescription: "pipeline that matches document based on two criteria"
+  }
+];
+
 beforeAll( async () => {
   // Establish and verify connection
   await client.connect();
@@ -66,7 +88,7 @@ afterAll(async () => {
   await client.close();
 });
 
-describe("Arrays mongo operations", () => {
+describe("Aggregation mongo operations", () => {
   beforeEach(async () => {
     console.log("Running tests on mongodb : " + mongoUrl);
   });
@@ -98,6 +120,26 @@ describe("Arrays mongo operations", () => {
       console.log('expected teams: ' + expectedTeams);
       // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
       expect(expectedTeams).toEqual(result);
+    });
+
+
+    testData.forEach(testCase => {
+      test(`should return expected documents based on aggeregation pipeline: ${testCase.testDescription}`, async () => {
+        //GIVEN
+        const expectedTeams = testCase.expectedResults;
+   
+         // WHEN
+         var result = await arraysCollection.aggregate(testCase.pipeline).toArray();
+   
+         // THEN
+         console.log('result: ' + result);
+         console.log(result);
+         // result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, initialsFD: doc.initialsFD }) });
+         console.log('current teams: ' + result);
+         console.log('expected teams: ' + expectedTeams);
+         // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
+         expect(expectedTeams).toEqual(result);
+       });
     });
 
 });
