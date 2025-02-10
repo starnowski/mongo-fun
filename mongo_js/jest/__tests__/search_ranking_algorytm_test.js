@@ -162,6 +162,85 @@ const testData = [
     expectedResults: [{ items:[{r_1: "t11", rank: 75}], maxRank: [{ rank: 75, count: 1}] }],
     testDescription: "pipeline that matches document based on two criteria with rank and returns document with highest rank"
   }
+  ,
+  {
+    pipeline: [{
+          $match: {
+            $or: [
+              { prop1 : { $eq: "A"} },
+              { prop2 : { $eq: 443} }
+            ]
+          }
+      }
+      ,
+      {
+        $project:
+          {
+            r_1: 1, 
+            prop1: 1,
+            prop2: 2,
+            _id: 0,
+            rank:
+              {
+                $cond: { if: { "$eq" : [ "$prop1", "A"] }, then: 25, else: 0 }
+              }
+          }
+      }
+     ,
+     {
+      $project:
+        {
+          r_1: 1, 
+          rank:
+            {
+              $cond: { if: { "$eq" : [ "$prop2", 443] }, then: { $add: ["$rank", 50] }, else: "$rank" }
+            }
+        }
+      }
+     ,
+      {
+          $project: { r_1: 1, rank: 1}
+      }
+      ,
+      {
+        $facet: {
+          items: [
+            {
+              $sort: {
+                rank: 1
+              }
+            }
+            ,
+            { $limit : 1 }
+          ]
+          ,
+          maxRank: [
+            {
+              $group: {
+                _id: "$rank",
+                count: { $sum: 1 }
+             }
+            }
+            ,
+            {
+              $sort: {
+                _id: 1
+              }
+            }
+            ,
+            {
+              $project: { count: 1, rank: "$_id", _id: 0 }
+            }
+            ,
+            { $limit : 1 }
+          ]
+        }
+      }
+    ]
+    ,
+    expectedResults: [{ items:[{ r_1: "t1", rank: 25 }], maxRank: [{ rank: 25, count: 2}] }],
+    testDescription: "pipeline that matches document based on two criteria with rank and returns document with lowests rank"
+  }
 ];
 
 beforeAll( async () => {
