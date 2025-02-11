@@ -3,6 +3,7 @@
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
+const jp = require('jsonpath');
 
 let mongoUrl = null;
 if (process.env.MONGO_HOST == null) {
@@ -317,7 +318,13 @@ const testData = [
     ]
     ,
     expectedResults: [{ items:[{ r_1: "t1", rank: 25 }], maxRank: [{ rank: 25, count: 2}] }],
-    testDescription: "pipeline that matches document based on two criteria with rank and returns document with lowests rank, using setField operator"
+    testDescription: "pipeline that matches document based on two criteria with rank and returns document with lowests rank, using setField operator",
+    expectedQueryPlanIndexes: [
+      {
+        jsonPath: "$.stages[0].*.queryPlanner.winningPlan..*.indexName",
+        expectedValues: ['prop1_1', 'prop2_1']
+      }
+    ]
   }
 ];
 
@@ -423,12 +430,13 @@ describe("Aggregation mongo operations", () => {
     });
 
     testData.forEach(testCase => {
+      if (testCase.expectedQueryPlanIndexes) {
       test(`should return expected explain plan definition based on aggeregation pipeline: ${testCase.testDescription}`, async () => {
         //GIVEN
         const expectedRecords = testCase.expectedResults;
    
          // WHEN
-         var result = await arraysCollection.aggregate(testCase.pipeline).explain("executionStats");
+         const result = await arraysCollection.aggregate(testCase.pipeline).explain("executionStats");
    
          // THEN
          console.log('result: ' + result);
@@ -438,7 +446,13 @@ describe("Aggregation mongo operations", () => {
          console.log('expected documents: ' + JSON.stringify(expectedRecords));
          // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
         //  expect(expectedRecords).toEqual(result);
+        testCase.expectedQueryPlanIndexes.forEach(expectedJsonValues => {
+          const jsonValues = jp.query(result, expectedJsonValues.jsonPath);
+          expect(jsonValues).toEqual(expectedJsonValues.expectedValues);
+        });
        });
+      }
     });
+    
 
 });
