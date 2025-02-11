@@ -241,6 +241,84 @@ const testData = [
     expectedResults: [{ items:[{ r_1: "t1", rank: 25 }], maxRank: [{ rank: 25, count: 2}] }],
     testDescription: "pipeline that matches document based on two criteria with rank and returns document with lowests rank"
   }
+  ,
+  {
+    pipeline: [{
+          $match: {
+            $or: [
+              { prop1 : { $eq: "A"} },
+              { prop2 : { $eq: 443} }
+            ]
+          }
+      }
+      ,
+      { 
+        $replaceWith: {
+        $setField: {
+          field: "rank",
+          input: "$$ROOT",
+          value: {
+            $cond: { if: { "$eq" : [ "$prop1", "A"] }, then: 25, else: 0 }
+          }
+        }
+        }
+      }
+      ,
+      { 
+        $replaceWith: {
+          $setField: {
+            field: "rank",
+            input: "$$ROOT",
+            value: {
+              $cond: { if: { "$eq" : [ "$prop2", 443] }, then: { $add: ["$rank", 50] }, else: "$rank" }
+            }
+          }
+        }
+      }
+     ,
+      {
+          $project: { r_1: 1, rank: 1, _id: 0}
+      }
+      ,
+      {
+        $facet: {
+          items: [
+            {
+              $sort: {
+                rank: 1
+              }
+            }
+            ,
+            { $limit : 1 }
+          ]
+          ,
+          maxRank: [
+            {
+              $group: {
+                _id: "$rank",
+                count: { $sum: 1 }
+             }
+            }
+            ,
+            {
+              $sort: {
+                _id: 1
+              }
+            }
+            ,
+            {
+              $project: { count: 1, rank: "$_id", _id: 0 }
+            }
+            ,
+            { $limit : 1 }
+          ]
+        }
+      }
+    ]
+    ,
+    expectedResults: [{ items:[{ r_1: "t1", rank: 25 }], maxRank: [{ rank: 25, count: 2}] }],
+    testDescription: "pipeline that matches document based on two criteria with rank and returns document with lowests rank, using setField operator"
+  }
 ];
 
 beforeAll( async () => {
@@ -341,6 +419,25 @@ describe("Aggregation mongo operations", () => {
          console.log('expected documents: ' + JSON.stringify(expectedRecords));
          // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
          expect(expectedRecords).toEqual(result);
+       });
+    });
+
+    testData.forEach(testCase => {
+      test(`should return expected explain plan definition based on aggeregation pipeline: ${testCase.testDescription}`, async () => {
+        //GIVEN
+        const expectedRecords = testCase.expectedResults;
+   
+         // WHEN
+         var result = await arraysCollection.aggregate(testCase.pipeline).explain("executionStats");
+   
+         // THEN
+         console.log('result: ' + result);
+         console.log(result);
+         // result = result.map(function (doc) { return JSON.stringify({ t_id: doc.t_id, initialsFD: doc.initialsFD }) });
+         console.log('current documents: ' + JSON.stringify(result));
+         console.log('expected documents: ' + JSON.stringify(expectedRecords));
+         // expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
+        //  expect(expectedRecords).toEqual(result);
        });
     });
 
