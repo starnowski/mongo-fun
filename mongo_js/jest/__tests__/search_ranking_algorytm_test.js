@@ -325,6 +325,40 @@ const testData = [
         expectedValues: ['prop1_1', 'prop2_1']
       }
     ]
+  },
+  {
+    pipeline: [
+      {
+          $match: {
+            "singleKeyWords": {
+              "$in": ["A", "B", "C", "D","E", "F", "G", "R", "S"]
+            }
+          }
+      }
+      ,
+      { 
+        $project: {
+          _id: 0,
+          r_1: 1,
+          rank: { 
+            $size: {
+              $setIntersection: [ ["A", "B", "C", "D","E", "F", "G", "R", "S"], "$singleKeyWords"]
+            } 
+          }
+        }
+      }
+      ,
+      {
+        $sort: {
+          rank: -1
+        }
+      }
+      ,
+      { $limit : 3 }
+    ]
+    ,
+    expectedResults: [{r_1: "t1", rank: 4}, {r_1: "t2", rank: 3}, {r_1: "t8", rank: 2}],
+    testDescription: "pipeline that matches document based on intersection operator for tables and return object that has at least on element"
   }
 ];
 
