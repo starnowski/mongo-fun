@@ -398,6 +398,48 @@ const testData = [
     expectedResults: [{r_1: "t1", rank: 2}],
     testDescription: "pipeline that returns for specific document offest of first keyword from looking phrase that exists in the property array"
   }
+  ,
+  {
+    pipeline: [
+      {
+          $match: {
+            "r_1": "t1"
+          }
+      }
+      ,
+      {
+        "$set": {
+          "ngrams": {
+            "$reduce": {
+              "input": { "$range": [0, { "$subtract": [{ "$size": "$singleKeyWords" }, 2] }] },
+              "initialValue": [],
+              "in": {
+                "$concatArrays": [
+                  "$$value",
+                  [
+                    {
+                      "$slice": ["$singleKeyWords", "$$this", 3]
+                    }
+                  ]
+                ]
+              }
+            }
+          }
+        }
+      }
+      ,
+      { 
+        $project: {
+          _id: 0,
+          r_1: 1,
+          ngrams: 1
+        }
+      }
+    ]
+    ,
+    expectedResults: [{r_1: "t1", ngrams: [["A", "B", "C"], ["B", "C", "D"]]}],
+    testDescription: "pipeline that returns for specific document 3-ngram array"
+  }
 ];
 
 beforeAll( async () => {
