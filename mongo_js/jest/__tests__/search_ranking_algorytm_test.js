@@ -396,7 +396,7 @@ const testData = [
     ]
     ,
     expectedResults: [{r_1: "t1", rank: 2}],
-    testDescription: "pipeline that returns for specific document offest of first keyword from looking phrase that exists in property array"
+    testDescription: "pipeline that returns for specific document offest of first keyword from looking phrase that exists in the property array"
   }
 ];
 
