@@ -88,7 +88,23 @@ beforeAll( async () => {
                 { r_1: "t1", testCase: 1, keywords: ["ala", "ma", "kota", "oraz", "malego", "psa"], ngramT: 4 },
                 { r_1: "t2", testCase: 1, keywords: ["E", "F", "G", "H"], ngramT: 2 },
                 { r_1: "t3", testCase: 1, keywords: ["I", "J", "K", "L"], ngramT: 3 },
-                { r_1: "t4", testCase: 1, keywords: ["M", "N"], ngramT: 1 }
+                { r_1: "t4", testCase: 1, keywords: ["M", "N"], ngramT: 1 },
+
+                { r_1: "t11", testCase: 2, 
+                  keywords: [
+                    ["ala", "ma", "kota", "oraz"],
+                    ["ma", "kota", "oraz", "malego"],
+                    ["kota", "oraz", "malego", "psa"]
+                  ] // search - 0, dataset - 1
+                },
+                { r_1: "t12", testCase: 2, 
+                  keywords: [
+                    ["bob", "mial", "kota", "oraz"],
+                    ["mial", "kota", "oraz", "duzego"],
+                    ["kota", "oraz", "duzego", "zolwia"]
+                  ]//search - 1, dataset - 2
+                },
+                { r_1: "t13", testCase: 2, keywords: [["zolwia", "ktory", "jest", "zielony"]] }//search - 4, dataset - 0
               ];
   await arraysCollection.insertMany(developersTeam, options);
 });
