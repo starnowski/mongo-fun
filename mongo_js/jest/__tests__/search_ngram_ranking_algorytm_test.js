@@ -25,6 +25,12 @@ const testData = [
   {
     pipeline: [
       {
+        "$match": {
+          "testCase": 1
+        }
+      }
+      ,
+      {
         "$set": {
           "ngrams": {
             "$reduce": {
@@ -79,10 +85,10 @@ beforeAll( async () => {
   await arraysCollection.deleteMany(query);
   const options = { ordered: true };
   const developersTeam = [
-                { r_1: "t1", keywords: ["ala", "ma", "kota", "oraz", "malego", "psa"], ngramT: 4 },
-                { r_1: "t2", keywords: ["E", "F", "G", "H"], ngramT: 2 },
-                { r_1: "t3", keywords: ["I", "J", "K", "L"], ngramT: 3 },
-                { r_1: "t4", keywords: ["M", "N"], ngramT: 1 }
+                { r_1: "t1", testCase: 1, keywords: ["ala", "ma", "kota", "oraz", "malego", "psa"], ngramT: 4 },
+                { r_1: "t2", testCase: 1, keywords: ["E", "F", "G", "H"], ngramT: 2 },
+                { r_1: "t3", testCase: 1, keywords: ["I", "J", "K", "L"], ngramT: 3 },
+                { r_1: "t4", testCase: 1, keywords: ["M", "N"], ngramT: 1 }
               ];
   await arraysCollection.insertMany(developersTeam, options);
 });
