@@ -67,6 +67,78 @@ const testData = [
   ],
     testDescription: "pipeline that returns correct ngrams"
   }
+  ,
+  {
+    pipeline: [
+      {
+        "$match": {
+          "testCase": 2
+        }
+      }
+      ,
+      // https://www.mongodb.com/docs/v5.0/reference/operator/aggregation/first-array-element/
+      {
+        "$set": {
+          "firstNgram": {
+            "$first": {
+              "$setIntersection": [ [
+                  ["ma", "kota", "oraz", "malego"],
+                  ["kota", "oraz", "malego", "zolwia"],
+                  ["oraz", "malego", "zolwia", "ktory"],
+                  ["malego", "zolwia", "ktory", "jest"],
+                  ["zolwia", "ktory", "jest", "zielony"]
+                ]
+                , "$keywords"
+              ]
+            }
+          }
+        }
+      }
+      ,
+      //https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
+      {
+        "$set": {
+          "searchOffest": {
+            "$indexOfArray": [
+                [
+                  ["ma", "kota", "oraz", "malego"],
+                  ["kota", "oraz", "malego", "zolwia"],
+                  ["oraz", "malego", "zolwia", "ktory"],
+                  ["malego", "zolwia", "ktory", "jest"],
+                  ["zolwia", "ktory", "jest", "zielony"]
+                ]
+                ,
+                "$firstNgram"
+              ]
+          }
+          ,
+          "dataOffset": {
+            "$indexOfArray": [
+                "$keywords"
+                ,
+                "$firstNgram"
+              ]
+          }
+
+        }
+      }
+      ,
+      { 
+        $project: {
+          _id: 0,
+          r_1: 1,
+          searchOffest: 1,
+          dataOffset: 1
+        }
+      }
+    ]
+    ,
+    expectedResults: [{r_1: "t11", searchOffest: 0, dataOffset: 1},
+    {r_1: "t12", searchOffest: 1, dataOffset: 2},
+    {r_1: "t13", searchOffest: 4, dataOffset: 0}
+  ],
+    testDescription: "pipeline that returns correct ngrams"
+  }
 ];
 
 beforeAll( async () => {
@@ -101,7 +173,7 @@ beforeAll( async () => {
                   keywords: [
                     ["bob", "mial", "kota", "oraz"],
                     ["mial", "kota", "oraz", "duzego"],
-                    ["kota", "oraz", "duzego", "zolwia"]
+                    ["kota", "oraz", "malego", "zolwia"]
                   ]//search - 1, dataset - 2
                 },
                 { r_1: "t13", testCase: 2, keywords: [["zolwia", "ktory", "jest", "zielony"]] }//search - 4, dataset - 0
