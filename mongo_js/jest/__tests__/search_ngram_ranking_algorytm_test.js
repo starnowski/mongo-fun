@@ -172,11 +172,71 @@ beforeAll( async () => {
                 { r_1: "t12", testCase: 2, 
                   keywords: [
                     ["bob", "mial", "kota", "oraz"],
-                    ["mial", "kota", "oraz", "duzego"],
+                    ["mial", "kota", "oraz", "malego"],
                     ["kota", "oraz", "malego", "zolwia"]
                   ]//search - 1, dataset - 2
                 },
                 { r_1: "t13", testCase: 2, keywords: [["zolwia", "ktory", "jest", "zielony"]] }//search - 4, dataset - 0
+                ,
+                { r_1: "t21", testCase: 3, 
+                  keywords: [
+                    ["ala", "ma", "kota", "oraz"],
+                    ["ma", "kota", "oraz", "malego"],
+                    ["kota", "oraz", "malego", "psa"],
+                    ["ala", "ma", "kota"],
+                    ["ma", "kota", "oraz"],
+                    ["kota", "oraz", "malego"],
+                    ["oraz", "malego", "psa"],
+                    ["ala", "ma"],
+                    ["ma", "kota"],
+                    ["kota", "oraz"],
+                    ["oraz", "malego"],
+                    ["malego", "psa"],
+                    ["ala"],
+                    ["ma"],
+                    ["kota"],
+                    ["oraz"],
+                    ["malego"],
+                    ["psa"]
+					
+                  ]
+                },
+                { r_1: "t22", testCase: 3, 
+                  keywords: [
+                    ["bob", "mial", "kota", "oraz"],
+                    ["mial", "kota", "oraz", "malego"],
+                    ["kota", "oraz", "malego", "zolwia"],
+                    ["bob", "mial", "kota"],
+                    ["mial", "kota", "oraz"],
+                    ["kota", "oraz", "malego"],
+                    ["oraz", "malego", "zolwia"],
+                    ["bob", "mial"],
+                    ["mial", "kota"],
+                    ["kota", "oraz"],
+                    ["oraz", "malego"],
+                    ["malego", "zolwia"],
+                    ["bob"],
+                    ["mial"],
+                    ["kota"],
+                    ["oraz"],
+                    ["malego"],
+                    ["zolwia"]
+                  ]
+                },
+                { r_1: "t23", testCase: 3, 
+                  keywords: [
+                    ["zolwia", "ktory", "jest", "zielony"],
+                    ["zolwia", "ktory", "jest"],
+                    ["ktory", "jest", "zielony"],
+                    ["zolwia", "ktory"],
+                    ["ktory", "jest"],
+                    ["jest", "zielony"],
+                    ["zolwia"],
+                    ["ktory"],
+                    ["jest"],
+                    ["zielony"]
+                  ] 
+                }
               ];
   await arraysCollection.insertMany(developersTeam, options);
 });
