@@ -424,48 +424,127 @@ const testData = [
           }
         }
       }
-      // ,
-      //https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
-      // {
-      //   "$set": {
-      //     "searchOffest": {
-      //       "$indexOfArray": [
-      //           [
-      //             ["ma", "kota", "oraz", "malego"],
-      //             ["kota", "oraz", "malego", "zolwia"],
-      //             ["oraz", "malego", "zolwia", "ktory"],
-      //             ["malego", "zolwia", "ktory", "jest"],
-      //             ["zolwia", "ktory", "jest", "zielony"]
-      //           ]
-      //           ,
-      //           "$firstNgram"
-      //         ]
-      //     }
-      //     ,
-      //     "dataOffset": {
-      //       "$indexOfArray": [
-      //           "$keywords"
-      //           ,
-      //           "$firstNgram"
-      //         ]
-      //     }
+      ,
+      // https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
+      {
+        "$set": {
+          "searchOffest": {
+            "$switch": {
+              "branches": [
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 4] },
+                  "then": {
+                    "$indexOfArray": [
+                      [
+                        "ma kota oraz malego",
+                        "kota oraz malego zolwia",
+                        "oraz malego zolwia ktory",
+                        "malego zolwia ktory jest",
+                        "zolwia ktory jest zielony"
+                      ]
+                      ,
+                      "$firstMaxNgram.keyword"
+                    ]
+                  }
+                }
+                ,
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 3] },
+                  "then": {
+                    "$indexOfArray": [
+                      [
+                        "ma kota oraz",
+                        "kota oraz malego",
+                        "oraz malego zolwia",
+                        "malego zolwia ktory",
+                        "zolwia ktory jest",
+                        "ktory jest zielony"
+                      ]
+                      ,
+                      "$firstMaxNgram.keyword"
+                    ]
+                  }
+                }
+                ,
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 2] },
+                  "then": {
+                    "$indexOfArray": [
+                      [
+                        "ma kota",
+                        "kota oraz",
+                        "oraz malego",
+                        "malego zolwia",
+                        "zolwia ktory",
+                        "ktory jest",
+                        "jest zielony"
+                      ]
+                      ,
+                      "$firstMaxNgram.keyword"
+                    ]
+                  }
+                }
+                ,
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 1] },
+                  "then": {
+                    "$indexOfArray": [
+                      [
+                        "ma",
+                        "kota",
+                        "oraz",
+                        "malego",
+                        "zolwia",
+                        "ktory",
+                        "jest",
+                        "zielony"
+                      ]
+                      ,
+                      "$firstMaxNgram.keyword"
+                    ]
+                  }
+                }
+              ],
+              "default": null
+            }
+          }
+          ,
+          "dataOffset": {
+            "$switch": {
+              "branches": [
+                  {
+                    "case": {"$gt": ["$firstMaxNgram.level", 0]},
+                    "then": {
+                      "$indexOfArray": [
+                        "$keywords"
+                        ,
+                        "$firstMaxNgram.keyword"
+                      ]
+                    }
+                  }
+              ],
+              "default": null
+            }
+          }
 
-      //   }
-      // }
-      // ,
-      // { 
-      //   $project: {
-      //     _id: 0,
-      //     r_1: 1,
-      //     searchOffest: 1,
-      //     dataOffset: 1
-      //   }
-      // }
+        }
+      }
+      ,
+      { 
+        $project: {
+          _id: 0,
+          r_1: 1,
+          searchOffest: 1,
+          dataOffset: 1,
+          "firstMaxNgram.level": 1,
+          keywordCount: 1
+        }
+      }
     ]
     ,
-    expectedResults: [{r_1: "t11", searchOffest: 0, dataOffset: 1},
-    {r_1: "t12", searchOffest: 1, dataOffset: 2},
-    {r_1: "t13", searchOffest: 4, dataOffset: 0}
+    expectedResults: [{r_1: "t21", searchOffest: 0, dataOffset: 1, firstMaxNgram: {level: 4}, keywordCount: 4},
+    {r_1: "t22", searchOffest: 1, dataOffset: 2, firstMaxNgram: {level: 4}, keywordCount: 4},
+    {r_1: "t23", searchOffest: 4, dataOffset: 0, firstMaxNgram: {level: 4}, keywordCount: 4}
   ],
     testDescription: "pipeline that returns correct max ngram, keyword count and offset values"
   }
