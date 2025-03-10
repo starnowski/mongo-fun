@@ -189,6 +189,7 @@ const testData = [
           "firstMaxNgram": {
             "$first": {
               "$setIntersection": [ 
+                "$keywords",
                 [
                   "ma kota oraz malego",
                   "kota oraz malego zolwia",
@@ -220,49 +221,56 @@ const testData = [
                   "jest",
                   "zielony"
                 ]
-                , "$keywords"
               ]
             }
           }
         }
       }
       ,
-      //https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
       {
         "$set": {
-          "searchOffest": {
-            "$indexOfArray": [
-                [
-                  ["ma", "kota", "oraz", "malego"],
-                  ["kota", "oraz", "malego", "zolwia"],
-                  ["oraz", "malego", "zolwia", "ktory"],
-                  ["malego", "zolwia", "ktory", "jest"],
-                  ["zolwia", "ktory", "jest", "zielony"]
-                ]
-                ,
-                "$firstNgram"
-              ]
+          "maxNgram": {
+            "$size": { $regexFindAll: { input: "$property", regex: "\S+" } } 
           }
-          ,
-          "dataOffset": {
-            "$indexOfArray": [
-                "$keywords"
-                ,
-                "$firstNgram"
-              ]
-          }
+        }
+      }
+      // ,
+      //https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
+      // {
+      //   "$set": {
+      //     "searchOffest": {
+      //       "$indexOfArray": [
+      //           [
+      //             ["ma", "kota", "oraz", "malego"],
+      //             ["kota", "oraz", "malego", "zolwia"],
+      //             ["oraz", "malego", "zolwia", "ktory"],
+      //             ["malego", "zolwia", "ktory", "jest"],
+      //             ["zolwia", "ktory", "jest", "zielony"]
+      //           ]
+      //           ,
+      //           "$firstNgram"
+      //         ]
+      //     }
+      //     ,
+      //     "dataOffset": {
+      //       "$indexOfArray": [
+      //           "$keywords"
+      //           ,
+      //           "$firstNgram"
+      //         ]
+      //     }
 
-        }
-      }
-      ,
-      { 
-        $project: {
-          _id: 0,
-          r_1: 1,
-          searchOffest: 1,
-          dataOffset: 1
-        }
-      }
+      //   }
+      // }
+      // ,
+      // { 
+      //   $project: {
+      //     _id: 0,
+      //     r_1: 1,
+      //     searchOffest: 1,
+      //     dataOffset: 1
+      //   }
+      // }
     ]
     ,
     expectedResults: [{r_1: "t11", searchOffest: 0, dataOffset: 1},
