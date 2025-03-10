@@ -544,7 +544,8 @@ const testData = [
     ,
     expectedResults: [{r_1: "t21", searchOffest: 0, dataOffset: 1, firstMaxNgram: {level: 4}, keywordCount: 4},
     {r_1: "t22", searchOffest: 1, dataOffset: 2, firstMaxNgram: {level: 4}, keywordCount: 4},
-    {r_1: "t23", searchOffest: 4, dataOffset: 0, firstMaxNgram: {level: 4}, keywordCount: 4}
+    {r_1: "t23", searchOffest: 4, dataOffset: 0, firstMaxNgram: {level: 4}, keywordCount: 4},
+    {r_1: "t24", searchOffest: 5, dataOffset: 1, firstMaxNgram: {level: 3}, keywordCount: 3}
   ],
     testDescription: "pipeline that returns correct max ngram, keyword count and offset values"
   }
@@ -641,6 +642,20 @@ beforeAll( async () => {
                     "ktory jest",
                     "jest zielony",
                     "zolwia",
+                    "ktory",
+                    "jest",
+                    "zielony"
+                  ] 
+                },
+                { r_1: "t24", testCase: 3, 
+                  keywords: [
+                    "pajaka ktory jest zielony",
+                    "pajaka ktory jest",
+                    "ktory jest zielony",
+                    "pajaka ktory",
+                    "ktory jest",
+                    "jest zielony",
+                    "pajaka",
                     "ktory",
                     "jest",
                     "zielony"
