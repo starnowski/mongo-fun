@@ -159,17 +159,66 @@ const testData = [
         }
       }
       ,
+      // keywordCount
+      {
+        "$set": {
+          "keywordCount": {
+            "$size": {
+              "$setIntersection": [ 
+                [	
+                "ma",
+                "kota",
+                "oraz",
+                "malego",
+                "zolwia",
+                "ktory",
+                "jest",
+                "zielony"
+                ]
+                , "$keywords"
+              ]
+            }
+          }
+        }
+      }
+      ,
+      //firstMaxNgram
       // https://www.mongodb.com/docs/v5.0/reference/operator/aggregation/first-array-element/
       {
         "$set": {
-          "firstNgram": {
+          "firstMaxNgram": {
             "$first": {
-              "$setIntersection": [ [
-                  ["ma", "kota", "oraz", "malego"],
-                  ["kota", "oraz", "malego", "zolwia"],
-                  ["oraz", "malego", "zolwia", "ktory"],
-                  ["malego", "zolwia", "ktory", "jest"],
-                  ["zolwia", "ktory", "jest", "zielony"]
+              "$setIntersection": [ 
+                [
+                  "ma kota oraz malego",
+                  "kota oraz malego zolwia",
+                  "oraz malego zolwia ktory",
+                  "malego zolwia ktory jest",
+                  "zolwia ktory jest zielony",
+                
+                  "ma kota oraz",
+                  "kota oraz malego",
+                  "oraz malego zolwia",
+                  "malego zolwia ktory",
+                  "zolwia ktory jest",
+                  "ktory jest zielony",
+                
+                  "ma kota",
+                  "kota oraz",
+                  "oraz malego",
+                  "malego zolwia",
+                  "zolwia ktory",
+                  "ktory jest",
+                  "jest zielony",
+                
+                  "ma",
+                  "kota",
+                  "oraz",
+                  "malego",
+                  "zolwia",
+                  "ktory",
+                  "jest",
+                  "zielony"
                 ]
                 , "$keywords"
               ]
