@@ -371,7 +371,58 @@ const testData = [
       }
       ,
       {
-        
+        "$set": {
+          "keywords": {
+              "$switch": {
+              "branches": [
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 4] },
+                  "then": {
+                    "$filter": {
+                      "input": "$keywords",
+                      "as": "item",
+                      "cond": { $regexMatch: { input: "$$item", regex: "^(\\S+\\s){3}\\S+$" } }
+                    }
+                  }
+                }
+                ,
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 3] },
+                  "then": {
+                    "$filter": {
+                      "input": "$keywords",
+                      "as": "item",
+                      "cond": { $regexMatch: { input: "$$item", regex: "^(\\S+\\s){2}\\S+$" } }
+                    }
+                  }
+                }
+                ,
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 2] },
+                  "then": {
+                    "$filter": {
+                      "input": "$keywords",
+                      "as": "item",
+                      "cond": { $regexMatch: { input: "$$item", regex: "^(\\S+\\s){1}\\S+$" } }
+                    }
+                  }
+                }
+                ,
+                {
+                  "case": { "$eq": ["$firstMaxNgram.level", 1] },
+                  "then": {
+                    "$filter": {
+                      "input": "$keywords",
+                      "as": "item",
+                      "cond": { $regexMatch: { input: "$$item", regex: "^\\S+$" } }
+                    }
+                  }
+                }
+              ],
+              "default": null
+            }
+          }
+        }
       }
       // ,
       //https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
