@@ -289,9 +289,80 @@ const testData = [
                       }
                       ,
                       "level": 3
+                    }
+                  }
+                ,
+                // 2 - Ngram
+                { 
+                  "case": { 
+                    "$gt": [{ "$size": { "$setIntersection": ["$intersection", [
+                      "ma kota",
+                      "kota oraz",
+                      "oraz malego",
+                      "malego zolwia",
+                      "zolwia ktory",
+                      "ktory jest",
+                      "jest zielony"]] } }, 0]
+                  }
+                  , 
+                  "then": {
+                    "keyword": {
+                      "$first": {
+                              "$filter": {
+                                "input": [
+                                  "ma kota",
+                                  "kota oraz",
+                                  "oraz malego",
+                                  "malego zolwia",
+                                  "zolwia ktory",
+                                  "ktory jest",
+                                  "jest zielony"],
+                                "as": "item",
+                                "cond": { "$in": ["$$item", "$intersection"] }
+                              }
+                      }
+                    }
+                    ,
+                    "level": 2
                   }
                 }
-              
+                ,
+                // 1 - Ngram
+                { 
+                  "case": { 
+                    "$gt": [{ "$size": { "$setIntersection": ["$intersection", [
+                      "ma",
+                      "kota",
+                      "oraz",
+                      "malego",
+                      "zolwia",
+                      "ktory",
+                      "jest",
+                      "zielony"]] } }, 0]
+                  }
+                  , 
+                  "then": {
+                    "keyword": {
+                      "$first": {
+                              "$filter": {
+                                "input": [
+                                  "ma",
+                                  "kota",
+                                  "oraz",
+                                  "malego",
+                                  "zolwia",
+                                  "ktory",
+                                  "jest",
+                                  "zielony"],
+                                "as": "item",
+                                "cond": { "$in": ["$$item", "$intersection"] }
+                              }
+                      }
+                    }
+                    ,
+                    "level": 1
+                  }
+                }
               ],
               "default": {"level": 0, "keyword": null}
             }
@@ -300,11 +371,7 @@ const testData = [
       }
       ,
       {
-        "$set": {
-          "maxNgram": {
-            "$size": { $regexFindAll: { input: "$property", regex: "\S+" } } 
-          }
-        }
+        
       }
       // ,
       //https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/#mongodb-expression-exp.-indexOfArray
