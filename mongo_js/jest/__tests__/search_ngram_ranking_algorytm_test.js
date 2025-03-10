@@ -230,73 +230,68 @@ const testData = [
           "firstMaxNgram": {
             "$switch": {
               "branches": [
-                // 4 -  ngram
+                    // 4 -  ngram
+                    { 
+                      "case": { 
+                        "$gt": [{ "$size": { "$setIntersection": ["$intersection", [
+                          "ma kota oraz malego",
+                          "kota oraz malego zolwia",
+                          "oraz malego zolwia ktory",
+                          "malego zolwia ktory jest",
+                          "zolwia ktory jest zielony"]] } }, 0]
+                      }, 
+                      "then": {
+                        "keyword": {
+                          "$first": {
+                                  "$filter": {
+                                    "input": [
+                                      "ma kota oraz malego",
+                                      "kota oraz malego zolwia",
+                                      "oraz malego zolwia ktory",
+                                      "malego zolwia ktory jest",
+                                      "zolwia ktory jest zielony"],
+                                    "as": "item",
+                                    "cond": { "$in": ["$$item", "$intersection"] }
+                                  }
+                            }
+                        },
+                        "level": 4
+                      }
+                  }
+                  ,
+                  // 3 - Ngram
                   { 
                     "case": { 
-                      "$in": [
-                        "$intersection", [
-                        "ma kota oraz malego",
-                        "kota oraz malego zolwia",
-                        "oraz malego zolwia ktory",
-                        "malego zolwia ktory jest",
-                        "zolwia ktory jest zielony"
-                        ]
-                      ]
-                    }, 
+                      "$gt": [{ "$size": { "$setIntersection": ["$intersection", [
+                        "ma kota oraz",
+                        "kota oraz malego",
+                        "oraz malego zolwia",
+                        "malego zolwia ktory",
+                        "zolwia ktory jest",
+                        "ktory jest zielony"]] } }, 0]
+                    }
+                    , 
                     "then": {
                       "keyword": {
                         "$first": {
                                 "$filter": {
                                   "input": [
-                                    "ma kota oraz malego",
-                                    "kota oraz malego zolwia",
-                                    "oraz malego zolwia ktory",
-                                    "malego zolwia ktory jest",
-                                    "zolwia ktory jest zielony"],
+                                    "ma kota oraz",
+                                    "kota oraz malego",
+                                    "oraz malego zolwia",
+                                    "malego zolwia ktory",
+                                    "zolwia ktory jest",
+                                    "ktory jest zielony"],
                                   "as": "item",
                                   "cond": { "$in": ["$$item", "$intersection"] }
                                 }
-                          }
-                      },
-                      "level": 4
-                    }
-                }
-                ,
-                // 3 - Ngram
-                { 
-                  "case": { 
-                    "$in": [
-                      "$intersection", [
-                      "ma kota oraz",
-                      "kota oraz malego",
-                      "oraz malego zolwia",
-                      "malego zolwia ktory",
-                      "zolwia ktory jest",
-                      "ktory jest zielony"
-                      ]
-                    ]
-                  }
-                  , 
-                  "then": {
-                    "keyword": {
-                      "$first": {
-                              "$filter": {
-                                "input": [
-                                  "ma kota oraz",
-                                  "kota oraz malego",
-                                  "oraz malego zolwia",
-                                  "malego zolwia ktory",
-                                  "zolwia ktory jest",
-                                  "ktory jest zielony"],
-                                "as": "item",
-                                "cond": { "$in": ["$$item", "$intersection"] }
-                              }
+                        }
                       }
-                    }
-                    ,
-                    "level": 3
+                      ,
+                      "level": 3
+                  }
                 }
-              }
+              
               ],
               "default": {"level": 0, "keyword": null}
             }
