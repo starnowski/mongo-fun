@@ -145,7 +145,17 @@ const testData = [
     pipeline: [
       {
         "$match": {
-          "testCase": 3
+          "testCase": 3,
+          "keywords": {"$in": [	
+            "ma",
+            "kota",
+            "oraz",
+            "malego",
+            "zolwia",
+            "ktory",
+            "jest",
+            "zielony"]
+          }
         }
       }
       ,
