@@ -145,17 +145,19 @@ const testData = [
     pipeline: [
       {
         "$match": {
-          "testCase": 3,
-          "keywords": {"$in": [	
-            "ma",
-            "kota",
-            "oraz",
-            "malego",
-            "zolwia",
-            "ktory",
-            "jest",
-            "zielony"]
-          }
+          "testCase": 3
+          //TODO uncomment this fragment if you want to search documents based on below criteria
+          // ,
+          // "keywords": {"$in": [	
+          //   "ma",
+          //   "kota",
+          //   "oraz",
+          //   "malego",
+          //   "zolwia",
+          //   "ktory",
+          //   "jest",
+          //   "zielony"]
+          // }
         }
       }
       ,
@@ -545,7 +547,9 @@ const testData = [
     expectedResults: [{r_1: "t21", searchOffest: 0, dataOffset: 1, firstMaxNgram: {level: 4}, keywordCount: 4},
     {r_1: "t22", searchOffest: 1, dataOffset: 2, firstMaxNgram: {level: 4}, keywordCount: 4},
     {r_1: "t23", searchOffest: 4, dataOffset: 0, firstMaxNgram: {level: 4}, keywordCount: 4},
-    {r_1: "t24", searchOffest: 5, dataOffset: 1, firstMaxNgram: {level: 3}, keywordCount: 3}
+    {r_1: "t24", searchOffest: 5, dataOffset: 1, firstMaxNgram: {level: 3}, keywordCount: 3},
+    {r_1: "t25", searchOffest: 6, dataOffset: 2, firstMaxNgram: {level: 1}, keywordCount: 1},
+    {r_1: "t26", searchOffest: null, dataOffset: null, firstMaxNgram: {level: 0}, keywordCount: 0}
   ],
     testDescription: "pipeline that returns correct max ngram, keyword count and offset values"
   }
@@ -659,6 +663,34 @@ beforeAll( async () => {
                     "ktory",
                     "jest",
                     "zielony"
+                  ] 
+                },
+                { r_1: "t25", testCase: 3, 
+                  keywords: [
+                    "pajaka co jest zolty",
+                    "pajaka co jest",
+                    "co jest zolty",
+                    "pajaka co",
+                    "co jest",
+                    "jest zolty",
+                    "pajaka",
+                    "co",
+                    "jest",
+                    "zolty"
+                  ] 
+                },
+                { r_1: "t26", testCase: 3, 
+                  keywords: [
+                    "pajaka co byl zolty",
+                    "pajaka co byl",
+                    "co byl zolty",
+                    "pajaka co",
+                    "co byl",
+                    "byl zolty",
+                    "pajaka",
+                    "co",
+                    "byl",
+                    "zolty"
                   ] 
                 }
               ];
