@@ -99,6 +99,45 @@ const testData = [
         $project:
           {
             r_1: 1, 
+            _id: 0,
+            rank:
+              {
+                $add: [
+                  {
+                    $cond: { if: { "$eq" : [ "$prop1", "A"] }, then: 25, else: 0 }
+                  }
+                  ,
+                  {
+                    $cond: { if: { "$eq" : [ "$prop2", 443] }, then: 50, else: 0 }
+                  }
+                ]
+              }
+          }
+      }
+     ,
+      {
+          $project: { r_1: 1, rank: 1}
+      }
+    ]
+    ,
+    expectedResults: [{ r_1: "t1", rank: 25 }, { r_1: "t8", rank: 25 }, {r_1: "t11", rank: 75}],
+    testDescription: "pipeline that matches document based on two criteria with rank with one aggregation stage that calculates rank"
+  }
+  ,
+  {
+    pipeline: [{
+          $match: {
+            $or: [
+              { prop1 : { $eq: "A"} },
+              { prop2 : { $eq: 443} }
+            ]
+          }
+      }
+      ,
+      {
+        $project:
+          {
+            r_1: 1, 
             prop1: 1,
             prop2: 2,
             _id: 0,
