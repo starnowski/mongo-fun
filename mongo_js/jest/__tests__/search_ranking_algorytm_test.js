@@ -207,6 +207,83 @@ const testData = [
     pipeline: [{
           $match: {
             $or: [
+              { prop1 : { $eq: "A"} }
+            ]
+          }
+      }
+      ,
+      {
+        $project:
+          {
+            r_1: 1, 
+            prop1: 1,
+            prop2: 2,
+            _id: 0,
+            rank:
+              {
+                $cond: { if: { "$eq" : [ "$prop1", "A"] }, then: 25, else: 0 }
+              }
+            ,
+            optionalRank:
+            {
+              $cond: { if: { "$eq" : [ "$prop2", 443] }, then: 25, else: 0 }
+            }
+          }
+      }
+      ,
+      {
+          $project: { r_1: 1, rank: 1, optionalRank: 1}
+      }
+      ,
+      {
+        $facet: {
+          items: [
+            {
+              $sort: {
+                rank: -1,
+                optionalRank: -1
+              }
+            }
+            ,
+            { $limit : 1 }
+          ]
+          ,
+          maxRank: [
+            {
+              $group: {
+                _id: { 
+                  rank: "$rank", 
+                  optionalRank: "$optionalRank"
+                },
+                count: { $sum: 1 }
+             }
+            }
+            ,
+            {
+              $sort: {
+                "_id.rank": -1,
+                "_id.optionalRank": -1
+              }
+            }
+            ,
+            {
+              $project: { count: 1}
+            }
+            ,
+            { $limit : 1 }
+          ]
+        }
+      }
+    ]
+    ,
+    expectedResults: [{ items:[{r_1: "t11", rank: 25, optionalRank: 25}], maxRank: [{ _id: { rank: 25, optionalRank: 25}, count: 1}] }],
+    testDescription: "pipeline that matches document based on one criteria with rank and sort by optional criteria and returns document with highest rank"
+  }
+  ,
+  {
+    pipeline: [{
+          $match: {
+            $or: [
               { prop1 : { $eq: "A"} },
               { prop2 : { $eq: 443} }
             ]
