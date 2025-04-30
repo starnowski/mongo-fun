@@ -135,4 +135,61 @@ describe("Arrays mongo operations", () => {
        expect(result.every(elem => expectedTeams.includes(elem))).toBeTruthy();
        expect(result.length).toEqual(3);
      });
+
+     test("should update specific documents with field that has dot", async () => {
+      //GIVEN
+      // Add data
+      // this option prevents additional documents from being inserted if one fails
+      const options = { ordered: true };
+      const developersTeam = [
+               { t_id: "t1", top: { "nested.prop1": { "prop1": 1, prop2: 2 }, "prop_level2": { prop3: 13} } }
+             ];
+      await arraysCollection.insertMany(developersTeam, options);
+      const expectedRecords = [{ t_id: "t1", top: { "nested.prop1": { "prop1": 47, prop2: 2 }, "prop_level2": { prop3: 13} } }];
+ 
+       // WHEN
+       await arraysCollection.updateMany({}, 
+                                                      [{
+                                                         $set: {
+                                                             "tmpField": {
+                                                              $getField: {
+                                                                field: "nested.prop1",
+                                                                input: "$$CURRENT.top"
+                                                              }
+                                                             }
+                                                         }
+                                                      },
+                                                      {
+                                                        $set: {
+                                                            "tmpField.prop1": 47
+                                                            }
+                                                        }
+                                                        ,
+                                                        { $set : {
+                                                          "top": {
+                                                              $setField: {
+                                                                  field: "nested.prop1",
+                                                                  input: "$$CURRENT.top",
+                                                                  value: "$tmpField"
+                                                                  }
+                                                          }
+                                                        }
+                                                      },
+                                                        {
+                                                          $unset: "tmpField"
+                                                        }
+                                                       ]);
+ 
+       // THEN
+       var result = await arraysCollection.aggregate([
+          {
+              $project: { _id: 0}
+          }
+            ]).toArray();
+       console.log('result: ' + result);
+       console.log(JSON.stringify(result));
+      console.log('current documents: ' + JSON.stringify(result));
+      console.log('expected documents: ' + JSON.stringify(expectedRecords));
+      expect(expectedRecords).toEqual(result);
+     });
 });
