@@ -3,6 +3,7 @@ package com.github.starnowski.mongo.fun.mongodb.container.services;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.ExampleDao;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.bson.Document;
 
 import java.util.Map;
 
@@ -13,8 +14,7 @@ public class ExampleService {
     private ExampleDao exampleDao;
 
     public Map<String, Object> saveExample(Map<String, Object> payload) {
-        //TODO
-        return null;
+        return exampleDao.save(new Document(payload));
     }
 
 

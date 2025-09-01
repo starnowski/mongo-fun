@@ -1,9 +1,10 @@
 package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.bson.Document;
 
 @ApplicationScoped
-public class ExampleDao extends AbstractDao<Object> {
+public class ExampleDao extends AbstractDao<Document> {
 
     @Override
     protected String getCollectionName() {
@@ -11,7 +12,7 @@ public class ExampleDao extends AbstractDao<Object> {
     }
 
     @Override
-    protected Class<Object> getDocumentClass() {
-        return Object.class;
+    protected Class<Document> getDocumentClass() {
+        return Document.class;
     }
 }

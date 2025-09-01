@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
+import com.github.starnowski.mongo.fun.mongodb.container.filters.Secured;
 import com.github.starnowski.mongo.fun.mongodb.container.services.ExampleService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -18,6 +19,7 @@ public class ExampleController {
     @Inject
     private ExampleService exampleService;
 
+    @Secured
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
