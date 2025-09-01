@@ -1,6 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -30,7 +31,9 @@ class ExampleControllerTest {
     public void shouldSaveExampleDocument(String requestFile, String expectedResponse) throws IOException {
         given()
                 .body(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(requestFile).getFile()).getPath())))
-                .when().post("/examples/")
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples/")
                 .then()
                 .statusCode(200)
                 .body(is(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(expectedResponse).getFile()).getPath()))));
