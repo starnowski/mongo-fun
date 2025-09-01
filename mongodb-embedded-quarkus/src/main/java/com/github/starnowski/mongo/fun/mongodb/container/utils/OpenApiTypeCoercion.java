@@ -24,20 +24,20 @@ public class OpenApiTypeCoercion {
         MediaType mt = op.getRequestBody().getContentMediaType("application/json");
         if (mt == null || mt.getSchema() == null) return;
 
-        Schema<?> schema = mt.getSchema();
+        Schema schema = mt.getSchema();
         if ("object".equals(schema.getType())) {
             applyFormatConversions(body, schema);
         }
     }
 
-    private void applyFormatConversions(Map<String, Object> data, Schema<?> schema) {
+    private void applyFormatConversions(Map<String, Object> data, Schema schema) {
         if (data == null) return;
-        Map<String, Schema<?>> props = schema.getProperties();
+        Map<String, Schema> props = schema.getProperties();
         if (props == null) return;
 
-        for (Map.Entry<String, Schema<?>> entry : props.entrySet()) {
+        for (Map.Entry<String, Schema> entry : props.entrySet()) {
             String key = entry.getKey();
-            Schema<?> propSchema = entry.getValue();
+            Schema propSchema = entry.getValue();
             Object value = data.get(key);
 
             if (value == null) continue;
