@@ -30,7 +30,7 @@ class ExampleControllerTest {
     public void shouldSaveExampleDocument(String requestFile, String expectedResponse) throws IOException {
         given()
                 .body(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(requestFile).getFile()).getPath())))
-                .when().post("/example/")
+                .when().post("/examples/")
                 .then()
                 .statusCode(200)
                 .body(is(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(expectedResponse).getFile()).getPath()))));
