@@ -24,7 +24,8 @@ class ExampleControllerTest {
 
     public static Stream<Arguments> provideShouldSaveExampleDocument() {
         return Stream.of(
-                Arguments.of("examples/example1.json", "examples/example1.json")
+                Arguments.of("examples/example1.json", "examples/example1.json"),
+                Arguments.of("examples/example2.json", "examples/example2.json")
         );
     }
 

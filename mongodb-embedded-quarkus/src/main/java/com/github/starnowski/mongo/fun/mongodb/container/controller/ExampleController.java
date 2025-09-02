@@ -1,5 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.OpenApiJsonMapper;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.Secured;
 import com.github.starnowski.mongo.fun.mongodb.container.services.ExampleService;
@@ -23,6 +25,13 @@ public class ExampleController {
     @Inject
     private OpenApiJsonMapper openApiJsonMapper;
 
+    private final ObjectMapper mapper;
+
+    public ExampleController() {
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // handle java.time types
+    }
+
     @Secured
     @POST
     @Path("/")
@@ -30,6 +39,7 @@ public class ExampleController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveExample(Map<String, Object> body) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example_openapi.yaml", "Example");
-        return Response.ok(exampleService.saveExample(coercedMap)).build();
+        Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
+        return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 }
