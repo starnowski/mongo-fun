@@ -10,8 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @ApplicationScoped
 public class OpenApiJsonMapper {
@@ -53,37 +52,87 @@ public class OpenApiJsonMapper {
         // 2. Get schema by ref (e.g. "#/components/schemas/MyType")
         String schemaName = schemaRef.replace("#/components/schemas/", "");
         Schema<?> oasSchema = openAPI.getComponents().getSchemas().get(schemaName);
-        if (oasSchema == null) {
-            throw new IllegalArgumentException("Schema not found: " + schemaName);
-        }
+//        if (oasSchema == null) {
+//            throw new IllegalArgumentException("Schema not found: " + schemaName);
+//        }
 
 
         // 6. Convert to typed Map
         Map<String, Object> result = mapper.convertValue(node, Map.class);
 
         // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
-        result.replaceAll((k, v) -> coerceValue(v));
-
-        return result;
+        return (Map<String, Object>) coerceDeepWithSchema(result, oasSchema);
     }
 
-    private Object coerceValue(Object value) {
-        if (value instanceof String str) {
-            try {
-                return java.util.UUID.fromString(str);
-            } catch (IllegalArgumentException ignored) {
-            }
-
-            try {
-                return java.time.OffsetDateTime.parse(str);
-            } catch (Exception ignored) {
-            }
-
-            try {
-                return java.time.LocalDate.parse(str);
-            } catch (Exception ignored) {
-            }
+    @SuppressWarnings("unchecked")
+    private Object coerceDeepWithSchema(Object value, Schema<?> schema) {
+        if (value == null || schema == null) {
+            return value;
         }
-        return value;
+
+        String type = schema.getType();
+        String format = schema.getFormat();
+
+        if (value instanceof Map<?, ?> subMap && schema.getProperties() != null) {
+            Map<String, Object> newMap = new LinkedHashMap<>();
+            subMap.forEach((k, v) -> {
+                Schema<?> propSchema = (Schema<?>) schema.getProperties().get(k);
+                newMap.put(k.toString(), coerceDeepWithSchema(v, propSchema));
+            });
+            return newMap;
+        } else if (value instanceof List<?> list && schema.getItems() != null) {
+            List<Object> newList = new ArrayList<>();
+            for (Object item : list) {
+                newList.add(coerceDeepWithSchema(item, (Schema<?>) schema.getItems()));
+            }
+            return newList;
+        } else {
+            return coerceWithSchema(value, type, format);
+        }
+    }
+
+    private Object coerceWithSchema(Object value, String type, String format) {
+        if (value == null) return null;
+
+        try {
+            switch (type) {
+                case "string" -> {
+                    if ("uuid".equals(format)) {
+                        return UUID.fromString(value.toString());
+                    } else if ("date".equals(format)) {
+                        return java.time.LocalDate.parse(value.toString());
+                    } else if ("date-time".equals(format)) {
+                        return java.time.OffsetDateTime.parse(value.toString());
+                    } else if ("byte".equals(format)) {
+                        return Base64.getDecoder().decode(value.toString());
+                    } else {
+                        return value.toString();
+                    }
+                }
+                case "integer" -> {
+                    if ("int64".equals(format)) {
+                        return Long.valueOf(value.toString());
+                    } else {
+                        return Integer.valueOf(value.toString());
+                    }
+                }
+                case "number" -> {
+                    if ("float".equals(format)) {
+                        return Float.valueOf(value.toString());
+                    } else {
+                        return Double.valueOf(value.toString());
+                    }
+                }
+                case "boolean" -> {
+                    return Boolean.valueOf(value.toString());
+                }
+                default -> {
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            // If parsing fails, keep original value
+            return value;
+        }
     }
 }
