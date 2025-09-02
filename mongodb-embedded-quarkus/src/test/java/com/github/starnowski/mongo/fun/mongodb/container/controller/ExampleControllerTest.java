@@ -28,6 +28,12 @@ class ExampleControllerTest {
         );
     }
 
+    public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
+        return Stream.of(
+                Arguments.of("examples/invalid_request_example1.json")
+        );
+    }
+
     @ParameterizedTest
     @MethodSource({"provideShouldSaveExampleDocument"})
     public void shouldSaveExampleDocument(String requestFile, String expectedResponse) throws IOException, JSONException {
@@ -41,5 +47,17 @@ class ExampleControllerTest {
 
         String responsePayload = response.asString();
         JSONAssert.assertEquals(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(expectedResponse).getFile()).getPath())), responsePayload, false);
+    }
+
+    @ParameterizedTest
+    @MethodSource({"provideShouldReturnBadRequestForInvalidPayload"})
+    public void shouldReturnBadRequestForInvalidPayload(String requestFile) throws IOException, JSONException {
+        ExtractableResponse<Response> response = given()
+                .body(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(requestFile).getFile()).getPath())))
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples/")
+                .then()
+                .statusCode(400).extract();
     }
 }
