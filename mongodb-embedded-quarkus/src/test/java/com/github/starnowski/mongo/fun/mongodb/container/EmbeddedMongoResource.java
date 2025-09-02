@@ -24,7 +24,7 @@ public class EmbeddedMongoResource implements QuarkusTestResourceLifecycleManage
             MongodStarter starter = MongodStarter.getDefaultInstance();
             int port = 27018; // You can choose any available port
             MongodConfig mongodConfig = MongodConfig.builder()
-                    .version(Version.Main.PRODUCTION)
+                    .version(Version.Main.V6_0)
                     .net(new de.flapdoodle.embed.mongo.config.Net(port, Network.localhostIsIPv6()))
                     .replication(new Storage(null, null, 0)) // Enable journaling
                     .cmdOptions(MongoCmdOptions.builder().useNoJournal(true).build())
