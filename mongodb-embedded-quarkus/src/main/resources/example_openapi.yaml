@@ -24,3 +24,15 @@ components:
               type: string
             city:
               type: string
+        stayPeriod:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            date:
+              type: string
+              format: date
+            when:
+              type: string
+              format: date-time
