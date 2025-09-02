@@ -8,6 +8,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,9 +44,8 @@ public class OpenApiJsonMapper {
             String openApiSpec,
             String schemaRef
     ) throws Exception {
-
         // 1. Load OpenAPI spec
-        OpenAPI openAPI = new OpenAPIV3Parser().readContents(openApiSpec, null, null).getOpenAPI();
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(Files.readString(Path.of(openApiSpec)), null, null).getOpenAPI();
         if (openAPI == null) {
             throw new IllegalArgumentException("Invalid OpenAPI spec");
         }
