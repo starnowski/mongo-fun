@@ -1,3 +1,6 @@
 {
-  "name": "Adam"
+  "name": "Adam",
+  "address": {
+    "street": "Santa Clause"
+  }
 }
