@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
+import com.github.starnowski.mongo.fun.mongodb.container.filters.OpenApiJsonMapper;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.Secured;
 import com.github.starnowski.mongo.fun.mongodb.container.services.ExampleService;
 import jakarta.inject.Inject;
@@ -19,12 +20,16 @@ public class ExampleController {
     @Inject
     private ExampleService exampleService;
 
+    @Inject
+    private OpenApiJsonMapper openApiJsonMapper;
+
     @Secured
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveExample(Map<String, Object> body) throws IOException {
-        return Response.ok(exampleService.saveExample(body)).build();
+    public Response saveExample(Map<String, Object> body) throws Exception {
+        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example_openapi.yaml", "Example");
+        return Response.ok(exampleService.saveExample(coercedMap)).build();
     }
 }
