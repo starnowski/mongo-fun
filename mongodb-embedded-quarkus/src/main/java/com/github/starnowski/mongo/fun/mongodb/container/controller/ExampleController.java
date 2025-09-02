@@ -1,6 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.OpenApiJsonMapper;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.Secured;
@@ -30,6 +31,7 @@ public class ExampleController {
     public ExampleController() {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule()); // handle java.time types
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Secured

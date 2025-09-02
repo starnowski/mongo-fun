@@ -66,7 +66,33 @@ public class OpenApiJsonMapper {
 
     @SuppressWarnings("unchecked")
     private Object coerceDeepWithSchema(Object value, Schema<?> schema) {
-        if (value == null || schema == null) {
+        if (value == null || schema == null) return value;
+
+        // Handle polymorphic schemas
+        if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
+            Map<String, Object> merged = new LinkedHashMap<>();
+            for (Schema<?> subSchema : schema.getAllOf()) {
+                Object coerced = coerceDeepWithSchema(value, subSchema);
+                if (coerced instanceof Map<?, ?> m) {
+                    merged.putAll((Map<String, Object>) m);
+                }
+            }
+            return merged;
+        }
+
+        if ((schema.getOneOf() != null && !schema.getOneOf().isEmpty()) ||
+                (schema.getAnyOf() != null && !schema.getAnyOf().isEmpty())) {
+
+            List<Schema> options = schema.getOneOf() != null ? schema.getOneOf() : schema.getAnyOf();
+            for (Schema<?> option : options) {
+                try {
+                    Object coerced = coerceDeepWithSchema(value, option);
+                    return coerced;
+                } catch (Exception ignored) {
+                    // try next option
+                }
+            }
+            // fallback
             return value;
         }
 

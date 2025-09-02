@@ -5,6 +5,23 @@ info:
 paths: {}
 components:
   schemas:
+    BaseEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      ExtendedEntity:
+        allOf:
+          - $ref: '#/components/schemas/BaseEntity'
+          - type: object
+            properties:
+              name:
+                type: string
+      PolyEntity:
+        oneOf:
+          - $ref: '#/components/schemas/BaseEntity'
+          - $ref: '#/components/schemas/ExtendedEntity'
     Example:
       type: object
       required:
@@ -36,3 +53,6 @@ components:
             when:
               type: string
               format: date-time
+        complexProperty:
+          allOf:
+            - $ref: '#/components/schemas/PolyEntity'
