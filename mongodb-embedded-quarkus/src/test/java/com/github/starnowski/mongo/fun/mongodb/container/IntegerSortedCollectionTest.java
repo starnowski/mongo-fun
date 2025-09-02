@@ -26,7 +26,7 @@ import static java.util.Collections.singletonList;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+//@QuarkusTestResource(EmbeddedMongoResource.class)
 public class IntegerSortedCollectionTest {
     private static final String INTEGER_COLUMN = "integer_col";
 
