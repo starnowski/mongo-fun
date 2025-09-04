@@ -11,6 +11,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @ApplicationScoped
@@ -63,18 +67,71 @@ public class OpenApiJsonMapper {
         Map<String, Object> result = mapper.convertValue(node, Map.class);
 
         // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
-        return (Map<String, Object>) coerceDeepWithSchema(result, oasSchema);
+        return (Map<String, Object>) coerceDeepWithSchema(result, oasSchema, (value, type, format) -> coerceWithSchema(value, type, format) );
     }
 
+//    @SuppressWarnings("unchecked")
+//    private Object coerceDeepWithSchema(Object value, Schema<?> schema) {
+//        if (value == null || schema == null) return value;
+//
+//        // Handle polymorphic schemas
+//        if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
+//            Map<String, Object> merged = new LinkedHashMap<>();
+//            for (Schema<?> subSchema : schema.getAllOf()) {
+//                Object coerced = coerceDeepWithSchema(value, subSchema);
+//                if (coerced instanceof Map<?, ?> m) {
+//                    merged.putAll((Map<String, Object>) m);
+//                }
+//            }
+//            return merged;
+//        }
+//
+//        if ((schema.getOneOf() != null && !schema.getOneOf().isEmpty()) ||
+//                (schema.getAnyOf() != null && !schema.getAnyOf().isEmpty())) {
+//
+//            List<Schema> options = schema.getOneOf() != null ? schema.getOneOf() : schema.getAnyOf();
+//            for (Schema<?> option : options) {
+//                try {
+//                    Object coerced = coerceDeepWithSchema(value, option);
+//                    return coerced;
+//                } catch (Exception ignored) {
+//                    // try next option
+//                }
+//            }
+//            // fallback
+//            return value;
+//        }
+//
+//        String type = schema.getType();
+//        String format = schema.getFormat();
+//
+//        if (value instanceof Map<?, ?> subMap && schema.getProperties() != null) {
+//            Map<String, Object> newMap = new LinkedHashMap<>();
+//            subMap.forEach((k, v) -> {
+//                Schema<?> propSchema = (Schema<?>) schema.getProperties().get(k);
+//                newMap.put(k.toString(), coerceDeepWithSchema(v, propSchema));
+//            });
+//            return newMap;
+//        } else if (value instanceof List<?> list && schema.getItems() != null) {
+//            List<Object> newList = new ArrayList<>();
+//            for (Object item : list) {
+//                newList.add(coerceDeepWithSchema(item, (Schema<?>) schema.getItems()));
+//            }
+//            return newList;
+//        } else {
+//            return coerceWithSchema(value, type, format);
+//        }
+//    }
+
     @SuppressWarnings("unchecked")
-    private Object coerceDeepWithSchema(Object value, Schema<?> schema) {
+    private Object coerceDeepWithSchema(Object value, Schema<?> schema, CoerceValueWithSchema coerceValueWithSchema) {
         if (value == null || schema == null) return value;
 
         // Handle polymorphic schemas
         if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
             Map<String, Object> merged = new LinkedHashMap<>();
             for (Schema<?> subSchema : schema.getAllOf()) {
-                Object coerced = coerceDeepWithSchema(value, subSchema);
+                Object coerced = coerceDeepWithSchema(value, subSchema, coerceValueWithSchema);
                 if (coerced instanceof Map<?, ?> m) {
                     merged.putAll((Map<String, Object>) m);
                 }
@@ -88,7 +145,7 @@ public class OpenApiJsonMapper {
             List<Schema> options = schema.getOneOf() != null ? schema.getOneOf() : schema.getAnyOf();
             for (Schema<?> option : options) {
                 try {
-                    Object coerced = coerceDeepWithSchema(value, option);
+                    Object coerced = coerceDeepWithSchema(value, option, coerceValueWithSchema);
                     return coerced;
                 } catch (Exception ignored) {
                     // try next option
@@ -105,18 +162,23 @@ public class OpenApiJsonMapper {
             Map<String, Object> newMap = new LinkedHashMap<>();
             subMap.forEach((k, v) -> {
                 Schema<?> propSchema = (Schema<?>) schema.getProperties().get(k);
-                newMap.put(k.toString(), coerceDeepWithSchema(v, propSchema));
+                newMap.put(k.toString(), coerceDeepWithSchema(v, propSchema, coerceValueWithSchema));
             });
             return newMap;
         } else if (value instanceof List<?> list && schema.getItems() != null) {
             List<Object> newList = new ArrayList<>();
             for (Object item : list) {
-                newList.add(coerceDeepWithSchema(item, (Schema<?>) schema.getItems()));
+                newList.add(coerceDeepWithSchema(item, (Schema<?>) schema.getItems(), coerceValueWithSchema));
             }
             return newList;
         } else {
-            return coerceWithSchema(value, type, format);
+            return coerceValueWithSchema.coerce(value, type, format);
         }
+    }
+
+    interface CoerceValueWithSchema {
+
+        Object coerce(Object value, String type, String format);
     }
 
     private Object coerceWithSchema(Object value, String type, String format) {
@@ -162,5 +224,56 @@ public class OpenApiJsonMapper {
             // If parsing fails, keep original value
             return value;
         }
+    }
+
+    private Object coerceJavaTypeWithSchema(Object value, String type, String format) {
+        if (value == null) return null;
+
+        try {
+            switch (type) {
+                case "string" -> {
+                    if ("uuid".equals(format)) {
+                        return UUID.fromString(value.toString());
+                    } else if ("date".equals(format)) {
+                        return value instanceof Date ? dateToLocalDate((Date) value) : java.time.LocalDate.parse(value.toString());
+                    } else if ("date-time".equals(format)) {
+                        return java.time.OffsetDateTime.parse(value.toString());
+                    } else if ("byte".equals(format)) {
+                        return Base64.getDecoder().decode(value.toString());
+                    } else {
+                        return value.toString();
+                    }
+                }
+                case "integer" -> {
+                    if ("int64".equals(format)) {
+                        return Long.valueOf(value.toString());
+                    } else {
+                        return Integer.valueOf(value.toString());
+                    }
+                }
+                case "number" -> {
+                    if ("float".equals(format)) {
+                        return Float.valueOf(value.toString());
+                    } else {
+                        return Double.valueOf(value.toString());
+                    }
+                }
+                case "boolean" -> {
+                    return Boolean.valueOf(value.toString());
+                }
+                default -> {
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            // If parsing fails, keep original value
+            return value;
+        }
+    }
+
+    private LocalDate dateToLocalDate(Date date) {
+        Instant instant = date.toInstant();
+        ///TODO
+        return instant.atZone(ZoneId.of("UTC")).toLocalDate();
     }
 }
