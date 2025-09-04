@@ -53,7 +53,7 @@ public class ExampleController {
     public Response saveExample(Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example_openapi.yaml", "Example");
         Map<String, Object> savedModel = exampleService.saveAndUpdate(coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
-        savedModel = openApiJsonMapper.coerceMapToJson(savedModel, "src/main/resources/example_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceJavaTypes(savedModel, "src/main/resources/example_openapi.yaml", "Example");
 
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }

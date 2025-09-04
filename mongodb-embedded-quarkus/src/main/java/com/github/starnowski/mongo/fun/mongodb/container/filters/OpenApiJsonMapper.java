@@ -25,7 +25,7 @@ public class OpenApiJsonMapper {
     public OpenApiJsonMapper() {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule()); // handle java.time types
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+//        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     public Map<String, Object> coerceJsonString(
@@ -33,7 +33,7 @@ public class OpenApiJsonMapper {
             String openApiSpec,
             String schemaRef
     ) throws Exception {
-        return parse(mapper.readTree(json), openApiSpec, schemaRef);
+        return parse(mapper.readTree(json), openApiSpec, schemaRef, (value, type, format) -> coerceWithSchema(value, type, format));
     }
 
     public Map<String, Object> coerceMapToJson(
@@ -41,13 +41,22 @@ public class OpenApiJsonMapper {
             String openApiSpec,
             String schemaRef
     ) throws Exception {
-        return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef);
+        return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef, (value, type, format) -> coerceWithSchema(value, type, format));
+    }
+
+    public Map<String, Object> coerceJavaTypes(
+            Map<String, Object> jsonMap,
+            String openApiSpec,
+            String schemaRef
+    ) throws Exception {
+        return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef, (value, type, format) -> coerceJavaTypeWithSchema(value, type, format));
     }
 
     private Map<String, Object> parse(
             JsonNode node,
             String openApiSpec,
-            String schemaRef
+            String schemaRef,
+            CoerceValueWithSchema coerceValueWithSchema
     ) throws Exception {
         // 1. Load OpenAPI spec
         OpenAPI openAPI = new OpenAPIV3Parser().readContents(Files.readString(Path.of(openApiSpec)), null, null).getOpenAPI();
@@ -58,70 +67,16 @@ public class OpenApiJsonMapper {
         // 2. Get schema by ref (e.g. "#/components/schemas/MyType")
         String schemaName = schemaRef.replace("#/components/schemas/", "");
         Schema<?> oasSchema = openAPI.getComponents().getSchemas().get(schemaName);
-//        if (oasSchema == null) {
-//            throw new IllegalArgumentException("Schema not found: " + schemaName);
-//        }
 
 
         // 6. Convert to typed Map
         Map<String, Object> result = mapper.convertValue(node, Map.class);
 
         // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
-        return (Map<String, Object>) coerceDeepWithSchema(result, oasSchema, (value, type, format) -> coerceWithSchema(value, type, format) );
+        return (Map<String, Object>) coerceDeepWithSchema(result, oasSchema, coerceValueWithSchema );
     }
 
-//    @SuppressWarnings("unchecked")
-//    private Object coerceDeepWithSchema(Object value, Schema<?> schema) {
-//        if (value == null || schema == null) return value;
-//
-//        // Handle polymorphic schemas
-//        if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
-//            Map<String, Object> merged = new LinkedHashMap<>();
-//            for (Schema<?> subSchema : schema.getAllOf()) {
-//                Object coerced = coerceDeepWithSchema(value, subSchema);
-//                if (coerced instanceof Map<?, ?> m) {
-//                    merged.putAll((Map<String, Object>) m);
-//                }
-//            }
-//            return merged;
-//        }
-//
-//        if ((schema.getOneOf() != null && !schema.getOneOf().isEmpty()) ||
-//                (schema.getAnyOf() != null && !schema.getAnyOf().isEmpty())) {
-//
-//            List<Schema> options = schema.getOneOf() != null ? schema.getOneOf() : schema.getAnyOf();
-//            for (Schema<?> option : options) {
-//                try {
-//                    Object coerced = coerceDeepWithSchema(value, option);
-//                    return coerced;
-//                } catch (Exception ignored) {
-//                    // try next option
-//                }
-//            }
-//            // fallback
-//            return value;
-//        }
-//
-//        String type = schema.getType();
-//        String format = schema.getFormat();
-//
-//        if (value instanceof Map<?, ?> subMap && schema.getProperties() != null) {
-//            Map<String, Object> newMap = new LinkedHashMap<>();
-//            subMap.forEach((k, v) -> {
-//                Schema<?> propSchema = (Schema<?>) schema.getProperties().get(k);
-//                newMap.put(k.toString(), coerceDeepWithSchema(v, propSchema));
-//            });
-//            return newMap;
-//        } else if (value instanceof List<?> list && schema.getItems() != null) {
-//            List<Object> newList = new ArrayList<>();
-//            for (Object item : list) {
-//                newList.add(coerceDeepWithSchema(item, (Schema<?>) schema.getItems()));
-//            }
-//            return newList;
-//        } else {
-//            return coerceWithSchema(value, type, format);
-//        }
-//    }
+
 
     @SuppressWarnings("unchecked")
     private Object coerceDeepWithSchema(Object value, Schema<?> schema, CoerceValueWithSchema coerceValueWithSchema) {
@@ -235,9 +190,9 @@ public class OpenApiJsonMapper {
                     if ("uuid".equals(format)) {
                         return UUID.fromString(value.toString());
                     } else if ("date".equals(format)) {
-                        return value instanceof Date ? dateToLocalDate((Date) value) : java.time.LocalDate.parse(value.toString());
+                        return dateStringToLocalDate(value.toString());
                     } else if ("date-time".equals(format)) {
-                        return java.time.OffsetDateTime.parse(value.toString());
+                        return Instant.ofEpochMilli(Long.parseLong(value.toString())).atOffset(ZoneOffset.UTC);
                     } else if ("byte".equals(format)) {
                         return Base64.getDecoder().decode(value.toString());
                     } else {
@@ -272,6 +227,13 @@ public class OpenApiJsonMapper {
     }
 
     private LocalDate dateToLocalDate(Date date) {
+        Instant instant = date.toInstant();
+        ///TODO
+        return instant.atZone(ZoneId.of("UTC")).toLocalDate();
+    }
+
+    private LocalDate dateStringToLocalDate(String dateValue) {
+        Date date = Date.from(Instant.ofEpochMilli(Long.parseLong(dateValue)));
         Instant instant = date.toInstant();
         ///TODO
         return instant.atZone(ZoneId.of("UTC")).toLocalDate();
