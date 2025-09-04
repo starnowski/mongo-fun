@@ -17,5 +17,9 @@ public class ExampleService {
         return exampleDao.save(new Document(payload));
     }
 
+    public Map<String, Object> saveAndUpdate(Map<String, Object> payload, Map<String, Object> params) {
+        return exampleDao.saveAndUpdate(new Document(payload), params);
+    }
+
 
 }
