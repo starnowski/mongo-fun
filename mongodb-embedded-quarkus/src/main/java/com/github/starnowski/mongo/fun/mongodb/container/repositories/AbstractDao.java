@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
+import com.github.starnowski.mongo.fun.mongodb.container.codec.OffsetDateTimeCodec;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.ClientSession;
@@ -12,6 +13,7 @@ import com.mongodb.client.result.InsertOneResult;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
@@ -33,6 +35,7 @@ public abstract class AbstractDao<T> {
     public void init() {
         CodecRegistry pojoCodecRegistry =
                 fromRegistries(
+                        CodecRegistries.fromCodecs(new OffsetDateTimeCodec()),
                         MongoClientSettings.getDefaultCodecRegistry(),
                         fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         this.collection =
