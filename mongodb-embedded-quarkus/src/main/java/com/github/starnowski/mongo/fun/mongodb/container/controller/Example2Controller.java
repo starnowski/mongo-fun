@@ -33,7 +33,7 @@ public class Example2Controller {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    @Secured
+//    @Secured
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)

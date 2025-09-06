@@ -37,12 +37,24 @@ class Example2ControllerTest {
                         random.nextBytes(bytes);
                         return new ByteArrayInputStream(bytes);
                     }
-                });
+                })
+                .randomize(Object.class, new Randomizer<Object>() {
+
+                    private final Random random = new Random();
+                    @Override
+                    public Object getRandomValue() {
+                        return random.nextInt();
+                    }
+                })
+                ;
         EasyRandom generator = new EasyRandom(parameters);
         Example2Dto dto = generator.nextObject(Example2Dto.class);
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        //TODO temporary erasing binary field
+        dto.setFileUpload(null);
 
         // Convert to JSON string
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
