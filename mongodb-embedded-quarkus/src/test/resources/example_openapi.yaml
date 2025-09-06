@@ -5,7 +5,24 @@ info:
 paths: {}
 components:
   schemas:
-    Person:
+    BaseEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      ExtendedEntity:
+        allOf:
+          - $ref: '#/components/schemas/BaseEntity'
+          - type: object
+            properties:
+              name:
+                type: string
+      PolyEntity:
+        oneOf:
+          - $ref: '#/components/schemas/BaseEntity'
+          - $ref: '#/components/schemas/ExtendedEntity'
+    Example:
       type: object
       required:
         - name
@@ -24,3 +41,18 @@ components:
               type: string
             city:
               type: string
+        stayPeriod:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            date:
+              type: string
+              format: date
+            when:
+              type: string
+              format: date-time
+        complexProperty:
+          allOf:
+            - $ref: '#/components/schemas/PolyEntity'

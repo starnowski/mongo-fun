@@ -2,7 +2,6 @@ package com.github.starnowski.mongo.fun.mongodb.container.filters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -226,16 +225,9 @@ public class OpenApiJsonMapper {
         }
     }
 
-    private LocalDate dateToLocalDate(Date date) {
-        Instant instant = date.toInstant();
-        ///TODO
-        return instant.atZone(ZoneId.of("UTC")).toLocalDate();
-    }
-
     private LocalDate dateStringToLocalDate(String dateValue) {
         Date date = Date.from(Instant.ofEpochMilli(Long.parseLong(dateValue)));
         Instant instant = date.toInstant();
-        ///TODO
         return instant.atZone(ZoneId.of("UTC")).toLocalDate();
     }
 }
