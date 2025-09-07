@@ -58,6 +58,8 @@ class Example2ControllerTest {
 
         // Convert to JSON string
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+        System.out.println("Request payload:");
+        System.out.println(json);
 
         // WHEN
         ExtractableResponse<Response> response = given()
@@ -68,6 +70,8 @@ class Example2ControllerTest {
                 .then()
                 .statusCode(200).extract();
 
+        System.out.println("Response payload:");
+        System.out.println(response.asPrettyString());
         JSONAssert.assertEquals(json, response.asString(), true);
     }
 }
