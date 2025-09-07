@@ -1,13 +1,19 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.OffsetDateTimeSerializer;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import jakarta.annotation.PostConstruct;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
@@ -18,6 +24,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.UUID;
 
@@ -25,6 +35,27 @@ import static io.restassured.RestAssured.given;
 
 @QuarkusTest
 class Example2ControllerTest {
+
+    private JavaTimeModule javaTimeModule;
+
+    @PostConstruct
+    public void init() {
+        javaTimeModule = new JavaTimeModule();
+
+        // Custom serializer for OffsetDateTime
+        javaTimeModule.addSerializer(OffsetDateTime.class, new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
+            @Override
+            public void serialize(OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                // https://www.mongodb.com/docs/manual/reference/method/Date/
+                /*
+                 Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
+                 No microseconds or nanoseconds
+                 */
+                gen.writeString(value.truncatedTo(ChronoUnit.MILLIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+            }
+        });
+//        javaTimeModule.disable();
+    }
 
     @Test
     public void shouldSaveAndReturnTheSameGeneratedExample() throws IOException, JSONException {
@@ -52,7 +83,7 @@ class Example2ControllerTest {
         EasyRandom generator = new EasyRandom(parameters);
         Example2Dto dto = generator.nextObject(Example2Dto.class);
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(javaTimeModule);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         //TODO temporary erasing binary field
@@ -82,6 +113,7 @@ class Example2ControllerTest {
     public void shouldSaveAndReturnTheSameGeneratedExampleForGetByIdEndpoint() throws IOException, JSONException {
         // GIVEN
         UUID uuid = UUID.randomUUID();
+        // https://www.mongodb.com/docs/manual/reference/method/Date/
         EasyRandomParameters parameters = new EasyRandomParameters()
                 .randomize(InputStream.class, new Randomizer<InputStream>() {
                     private final Random random = new Random();
@@ -105,7 +137,7 @@ class Example2ControllerTest {
         EasyRandom generator = new EasyRandom(parameters);
         Example2Dto dto = generator.nextObject(Example2Dto.class);
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(javaTimeModule);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         //TODO temporary erasing binary field

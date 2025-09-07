@@ -37,7 +37,7 @@ public class Example2Controller {
     public Response getExample(@PathParam("id") UUID id) throws Exception {
        Map<String, Object> savedModel = exampleService.getById(id);
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMapToJson(savedModel, "src/main/resources/example2_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 
@@ -48,10 +48,10 @@ public class Example2Controller {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveExample(Map<String, Object> body) throws Exception {
-        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example");
+        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 
@@ -60,10 +60,10 @@ public class Example2Controller {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveExampleWithId(@PathParam("id") UUID id, Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
-        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example");
+        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = exampleService.saveAndUpdate(id, coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 }

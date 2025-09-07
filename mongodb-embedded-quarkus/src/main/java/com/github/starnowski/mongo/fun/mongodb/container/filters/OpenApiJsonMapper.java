@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -156,8 +157,10 @@ public class OpenApiJsonMapper {
                 case "integer" -> {
                     if ("int64".equals(format)) {
                         return Long.valueOf(value.toString());
-                    } else {
+                    } else if ("int32".equals(format)) {
                         return Integer.valueOf(value.toString());
+                    } else {
+                        return new BigInteger(value.toString());
                     }
                 }
                 case "number" -> {
@@ -201,8 +204,10 @@ public class OpenApiJsonMapper {
                 case "integer" -> {
                     if ("int64".equals(format)) {
                         return Long.valueOf(value.toString());
-                    } else {
+                    } else if ("int32".equals(format)) {
                         return Integer.valueOf(value.toString());
+                    } else {
+                        return new BigInteger(value.toString());
                     }
                 }
                 case "number" -> {
