@@ -42,6 +42,7 @@ public class Example2Controller {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
         savedModel.remove("_id");
+        savedModel = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 }
