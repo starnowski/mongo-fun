@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Example2Dto {
     private String plainString;
-    private String base64Data;
+    private byte[] base64Data;
     private InputStream fileUpload; // usually not serialized directly
     private LocalDate birthDate;
     private OffsetDateTime timestamp;
@@ -37,11 +37,11 @@ public class Example2Dto {
         this.plainString = plainString;
     }
 
-    public String getBase64Data() {
+    public byte[] getBase64Data() {
         return base64Data;
     }
 
-    public void setBase64Data(String base64Data) {
+    public void setBase64Data(byte[] base64Data) {
         this.base64Data = base64Data;
     }
 
