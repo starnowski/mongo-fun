@@ -42,15 +42,7 @@ public class OpenApiJsonMapper {
         mapper.registerModule(mongoDBModule);
     }
 
-    public Map<String, Object> coerceJsonString(
-            String json,
-            String openApiSpec,
-            String schemaRef
-    ) throws Exception {
-        return parse(mapper.readTree(json), openApiSpec, schemaRef, (value, type, format) -> coerceWithSchema(value, type, format));
-    }
-
-    public Map<String, Object> coerceMapToJson(
+    public Map<String, Object> coerceRawJsonTypesToOpenApiJavaTypes(
             Map<String, Object> jsonMap,
             String openApiSpec,
             String schemaRef
@@ -58,7 +50,7 @@ public class OpenApiJsonMapper {
         return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef, (value, type, format) -> coerceWithSchema(value, type, format));
     }
 
-    public Map<String, Object> coerceJavaTypes(
+    public Map<String, Object> coerceMongoDecodedTypesToOpenApiJavaTypes(
             Map<String, Object> jsonMap,
             String openApiSpec,
             String schemaRef

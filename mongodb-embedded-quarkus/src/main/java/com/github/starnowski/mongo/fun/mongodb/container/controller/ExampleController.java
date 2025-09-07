@@ -16,7 +16,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-import java.io.IOException;
 import java.util.Map;
 
 @Path("/examples")
@@ -40,7 +39,7 @@ public class ExampleController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveExample(Map<String, Object> body) throws Exception {
-        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example_openapi.yaml", "Example");
+        Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example_openapi.yaml", "Example");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
@@ -51,9 +50,9 @@ public class ExampleController {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveExample(Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
-        Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example_openapi.yaml", "Example");
+        Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example_openapi.yaml", "Example");
         Map<String, Object> savedModel = exampleService.saveAndUpdate(coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
-        savedModel = openApiJsonMapper.coerceJavaTypes(savedModel, "src/main/resources/example_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example_openapi.yaml", "Example");
 
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
