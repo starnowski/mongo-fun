@@ -1,13 +1,19 @@
 package com.github.starnowski.mongo.fun.mongodb.container.filters;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.bson.types.Binary;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +31,15 @@ public class OpenApiJsonMapper {
     public OpenApiJsonMapper() {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule()); // handle java.time types
-//        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        SimpleModule mongoDBModule = new SimpleModule();
+        mongoDBModule.addSerializer(Binary.class, new JsonSerializer<Binary>() {
+            @Override
+            public void serialize(Binary value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                gen.writeString(Base64.getEncoder().encodeToString(value.getData()));
+            }
+        });
+
+        mapper.registerModule(mongoDBModule);
     }
 
     public Map<String, Object> coerceJsonString(

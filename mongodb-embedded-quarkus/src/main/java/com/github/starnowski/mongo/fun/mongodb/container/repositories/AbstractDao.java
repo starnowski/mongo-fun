@@ -46,8 +46,8 @@ public abstract class AbstractDao<T> {
     }
 
     public T save(T document) {
-        collection.insertOne(document);
-        return document;
+        InsertOneResult insertedDocument = collection.insertOne(document);
+        return collection.find(new Document(getIdPropertyName(), insertedDocument.getInsertedId())).first();
     }
 
     public T find(String id) {

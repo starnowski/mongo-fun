@@ -51,7 +51,7 @@ public class Example2Controller {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMapToJson(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
+        savedModel = openApiJsonMapper.coerceJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 
@@ -63,7 +63,7 @@ public class Example2Controller {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceMapToJson(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = exampleService.saveAndUpdate(id, coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMapToJson(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
+        savedModel = openApiJsonMapper.coerceJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(savedModel)).build();
     }
 }
