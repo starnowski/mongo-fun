@@ -17,8 +17,10 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,6 +55,11 @@ public abstract class AbstractDao<T> {
         return collection.find(new Document(getIdPropertyName(), new ObjectId(id))).first();
     }
 
+    public T findByUIID(UUID id) {
+
+        return collection.find(new Document(getIdPropertyName(), id)).first();
+    }
+
     public T find(ObjectId oid) {
 
         return collection.find(new Document(getIdPropertyName(), oid)).first();
@@ -75,7 +82,7 @@ public abstract class AbstractDao<T> {
         return result.getDeletedCount() > 0;
     }
 
-    public T saveAndUpdate(T document, Map<String, Object> params) {
+    public T saveAndUpdate(UUID id, T document, Map<String, Object> params) {
 //        try (ClientSession session = mongoClient.startSession()) {
 //            session.startTransaction();
 //
@@ -102,13 +109,17 @@ public abstract class AbstractDao<T> {
 //                throw new RuntimeException(e);
 //            }
 //        }
-        UUID id = UUID.randomUUID();
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
+        ArrayList<Bson> aggregationPipeline = new ArrayList<>();
+        aggregationPipeline.add(new Document("$set", document));
+        if (params != null && !params.isEmpty()) {
+            aggregationPipeline.add(new Document("$set", new Document("queryParams", params)));
+        }
         collection.updateMany(
                 Filters.eq("_id", id),
-                List.of(
-                        new Document("$set", document),
-                        new Document("$set", new Document("queryParams", params))
-                ),
+                aggregationPipeline,
                 new UpdateOptions().upsert(true)
         );
         return collection.find(Filters.eq("_id", id)).first();

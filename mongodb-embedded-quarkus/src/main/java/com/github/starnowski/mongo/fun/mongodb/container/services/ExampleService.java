@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import org.bson.Document;
 
 import java.util.Map;
+import java.util.UUID;
 
 @ApplicationScoped
 public class ExampleService {
@@ -13,12 +14,20 @@ public class ExampleService {
     @Inject
     private ExampleDao exampleDao;
 
+    public Map<String, Object> getById(UUID id) {
+        return exampleDao.findByUIID(id);
+    }
+
     public Map<String, Object> saveExample(Map<String, Object> payload) {
         return exampleDao.save(new Document(payload));
     }
 
     public Map<String, Object> saveAndUpdate(Map<String, Object> payload, Map<String, Object> params) {
-        return exampleDao.saveAndUpdate(new Document(payload), params);
+        return exampleDao.saveAndUpdate(null, new Document(payload), params);
+    }
+
+    public Map<String, Object> saveAndUpdate(UUID id, Map<String, Object> payload, Map<String, Object> params) {
+        return exampleDao.saveAndUpdate(id, new Document(payload), params);
     }
 
 
