@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Example2Dto {
     private String plainString;
@@ -15,19 +16,24 @@ public class Example2Dto {
     private LocalDate birthDate;
     private OffsetDateTime timestamp;
     private String password;
-
+    private UUID uuidProp;
     private BigDecimal genericNumber;
     private Float floatValue;
     private Double doubleValue;
-
     private BigInteger genericInteger;
     private Integer smallInteger;
     private Long bigInteger;
-
     private Boolean isActive;
-
     private List<String> tags;
     private Map<String, Object> metadata;
+
+    public UUID getUuidProp() {
+        return uuidProp;
+    }
+
+    public void setUuidProp(UUID uuidProp) {
+        this.uuidProp = uuidProp;
+    }
 
     public String getPlainString() {
         return plainString;

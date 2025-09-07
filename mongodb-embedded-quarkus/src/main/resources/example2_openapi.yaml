@@ -26,6 +26,9 @@ components:
         password:
           type: string
           format: password      # -> java.lang.String
+        uuidProp:
+          type: string
+          format: uuid      # -> java.util.UUID
 
         # ---- number ----
         genericNumber:
