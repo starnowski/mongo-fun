@@ -37,6 +37,8 @@ import static io.restassured.RestAssured.given;
 class Example2ControllerTest {
 
     private JavaTimeModule javaTimeModule;
+    private EasyRandom generator;
+    private ObjectMapper mapper;
 
     @PostConstruct
     public void init() {
@@ -55,11 +57,7 @@ class Example2ControllerTest {
             }
         });
 //        javaTimeModule.disable();
-    }
-
-    @Test
-    public void shouldSaveAndReturnTheSameGeneratedExample() throws IOException, JSONException {
-        // GIVEN
+        // https://www.mongodb.com/docs/manual/reference/method/Date/
         EasyRandomParameters parameters = new EasyRandomParameters()
                 .randomize(InputStream.class, new Randomizer<InputStream>() {
                     private final Random random = new Random();
@@ -80,11 +78,16 @@ class Example2ControllerTest {
                     }
                 })
                 ;
-        EasyRandom generator = new EasyRandom(parameters);
-        Example2Dto dto = generator.nextObject(Example2Dto.class);
-        ObjectMapper mapper = new ObjectMapper();
+        generator = new EasyRandom(parameters);
+        mapper = new ObjectMapper();
         mapper.registerModule(javaTimeModule);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
+    @Test
+    public void shouldSaveAndReturnTheSameGeneratedExample() throws IOException, JSONException {
+        // GIVEN
+        Example2Dto dto = generator.nextObject(Example2Dto.class);
 
         //TODO temporary erasing binary field
         dto.setFileUpload(null);
@@ -113,32 +116,43 @@ class Example2ControllerTest {
     public void shouldSaveAndReturnTheSameGeneratedExampleForGetByIdEndpoint() throws IOException, JSONException {
         // GIVEN
         UUID uuid = UUID.randomUUID();
-        // https://www.mongodb.com/docs/manual/reference/method/Date/
-        EasyRandomParameters parameters = new EasyRandomParameters()
-                .randomize(InputStream.class, new Randomizer<InputStream>() {
-                    private final Random random = new Random();
-
-                    @Override
-                    public InputStream getRandomValue() {
-                        byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
-                        random.nextBytes(bytes);
-                        return new ByteArrayInputStream(bytes);
-                    }
-                })
-                .randomize(Object.class, new Randomizer<Object>() {
-
-                    private final Random random = new Random();
-                    @Override
-                    public Object getRandomValue() {
-                        return random.nextInt();
-                    }
-                })
-                ;
-        EasyRandom generator = new EasyRandom(parameters);
         Example2Dto dto = generator.nextObject(Example2Dto.class);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(javaTimeModule);
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        //TODO temporary erasing binary field
+        dto.setFileUpload(null);
+
+        // Convert to JSON string
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+        System.out.println("Request payload:");
+        System.out.println(json);
+
+        // WHEN
+        ExtractableResponse<Response> response = given()
+                .body(json)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        response = given()
+                .when()
+                .get("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+        System.out.println("Response payload:");
+        System.out.println(response.asPrettyString());
+        JSONAssert.assertEquals(json, response.asString(), true);
+    }
+
+    //shouldSaveAndReturnBadRequestWhenTryingToInsertDocumentWithSameId
+
+    @Test
+    public void shouldSaveAndReturnBadRequestWhenTryingToInsertDocumentWithSameId() throws IOException, JSONException {
+        // GIVEN
+        UUID uuid = UUID.randomUUID();
+        Example2Dto dto = generator.nextObject(Example2Dto.class);
 
         //TODO temporary erasing binary field
         dto.setFileUpload(null);
