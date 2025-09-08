@@ -161,6 +161,13 @@ class Example2ControllerTest {
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
         System.out.println("Request payload:");
         System.out.println(json);
+        given()
+                .body(json)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
 
         // WHEN
         ExtractableResponse<Response> response = given()
@@ -169,16 +176,7 @@ class Example2ControllerTest {
                 .when()
                 .post("/examples2/{id}", uuid)
                 .then()
-                .statusCode(200).extract();
+                .statusCode(400).extract();
 
-        // THEN
-        response = given()
-                .when()
-                .get("/examples2/{id}", uuid)
-                .then()
-                .statusCode(200).extract();
-        System.out.println("Response payload:");
-        System.out.println(response.asPrettyString());
-        JSONAssert.assertEquals(json, response.asString(), true);
     }
 }
