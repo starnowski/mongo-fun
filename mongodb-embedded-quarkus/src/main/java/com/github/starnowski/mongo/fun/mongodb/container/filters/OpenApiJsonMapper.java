@@ -1,10 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.filters;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -17,6 +14,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -32,6 +30,7 @@ public class OpenApiJsonMapper {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule()); // handle java.time types
         SimpleModule mongoDBModule = new SimpleModule();
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mongoDBModule.addSerializer(Binary.class, new JsonSerializer<Binary>() {
             @Override
             public void serialize(Binary value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -198,9 +197,10 @@ public class OpenApiJsonMapper {
                     if ("uuid".equals(format)) {
                         return UUID.fromString(value.toString());
                     } else if ("date".equals(format)) {
-                        return dateStringToLocalDate(value.toString());
+//                        return dateStringToLocalDate(value.toString());
+                        return dateToInstant(value.toString()).atZone(ZoneId.of("UTC")).toLocalDate();
                     } else if ("date-time".equals(format)) {
-                        return Instant.ofEpochMilli(Long.parseLong(value.toString())).atOffset(ZoneOffset.UTC);
+                        return dateToInstant(value.toString()).atOffset(ZoneOffset.UTC);
                     } else if ("byte".equals(format)) {
                         return Base64.getDecoder().decode(value.toString());
                     } else {
@@ -234,6 +234,10 @@ public class OpenApiJsonMapper {
             // If parsing fails, keep original value
             return value;
         }
+    }
+
+    private Instant dateToInstant(String dateValue) throws ParseException {
+        return mapper.getDateFormat().parse(dateValue).toInstant();
     }
 
     private LocalDate dateStringToLocalDate(String dateValue) {
