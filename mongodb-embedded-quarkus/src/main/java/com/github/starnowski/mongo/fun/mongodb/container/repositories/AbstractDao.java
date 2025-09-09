@@ -2,7 +2,9 @@ package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import com.github.starnowski.mongo.fun.mongodb.container.codec.BigIntegerCodec;
 import com.github.starnowski.mongo.fun.mongodb.container.codec.OffsetDateTimeCodec;
+import com.github.starnowski.mongo.fun.mongodb.container.exceptions.DuplicatedKeyException;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoWriteException;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
@@ -20,11 +22,9 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import static com.mongodb.ErrorCategory.DUPLICATE_KEY;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -117,11 +117,19 @@ public abstract class AbstractDao<T> {
         if (params != null && !params.isEmpty()) {
             aggregationPipeline.add(new Document("$set", new Document("queryParams", params)));
         }
-        collection.updateMany(
-                Filters.eq("_id", id),
-                aggregationPipeline,
-                new UpdateOptions().upsert(true)
-        );
+        try {
+            collection.updateMany(
+                    Filters.and(Filters.eq("_id", id), Filters.not(Filters.exists("_id"))),
+                    aggregationPipeline,
+                    new UpdateOptions().upsert(true)
+            );
+        } catch (MongoWriteException e) {
+            if (e.getError().getCategory() == DUPLICATE_KEY) {
+                throw new DuplicatedKeyException(e.getMessage(), e);
+            } else {
+                throw e; // rethrow other write errors
+            }
+        }
         return collection.find(Filters.eq("_id", id)).first();
     }
 }

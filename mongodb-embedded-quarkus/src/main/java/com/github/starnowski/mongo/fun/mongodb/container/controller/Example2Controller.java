@@ -3,6 +3,7 @@ package com.github.starnowski.mongo.fun.mongodb.container.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.starnowski.mongo.fun.mongodb.container.exceptions.DuplicatedKeyException;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.OpenApiJsonMapper;
 import com.github.starnowski.mongo.fun.mongodb.container.services.ExampleService;
 import jakarta.inject.Inject;
@@ -60,7 +61,12 @@ public class Example2Controller {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveExampleWithId(@PathParam("id") UUID id, Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example2_openapi.yaml", "Example2");
-        Map<String, Object> savedModel = exampleService.saveAndUpdate(id, coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
+        Map<String, Object> savedModel = null;
+        try {
+            savedModel = exampleService.saveAndUpdate(id, coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
+        } catch (DuplicatedKeyException duplicatedKeyException) {
+            return Response.status(400).build();
+        }
         savedModel.remove("_id");
         savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(savedModel)).build();
