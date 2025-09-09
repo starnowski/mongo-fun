@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class OpenApiJsonMapperTest {
 
     @Test
@@ -23,11 +21,11 @@ class OpenApiJsonMapperTest {
         OpenApiJsonMapper tested = new OpenApiJsonMapper();
 
         // WHEN
-        Map<String, Object> result = tested.coerceMongoDecodedTypesToOpenApiJavaTypes(mongoDocument, "src/main/resources/example2_openapi.yaml", "Example2");
+        Map<String, Object> result = tested.coerceMongoDecodedTypesToOpenApiJavaTypesV2(mongoDocument, "src/main/resources/example2_openapi.yaml", "Example2");
 
         // THEN
         Assertions.assertEquals(LocalDate.class,  result.get("birthDate").getClass());
         Assertions.assertEquals(OffsetDateTime.class,  result.get("timestamp").getClass());
-//        Assertions.assertEquals(Date.class,  result.get("nonSpecifiedDateProperty").getClass());
+        Assertions.assertEquals(Date.class,  result.get("nonSpecifiedDateProperty").getClass());
     }
 }

@@ -37,7 +37,7 @@ public class Example2Controller {
     public Response getExample(@PathParam("id") UUID id) throws Exception {
        Map<String, Object> savedModel = exampleService.getById(id);
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(savedModel)).build();
     }
 
@@ -51,7 +51,7 @@ public class Example2Controller {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 
@@ -68,7 +68,7 @@ public class Example2Controller {
             return Response.status(400).build();
         }
         savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(savedModel)).build();
     }
 }

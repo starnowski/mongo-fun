@@ -41,7 +41,7 @@ public class ExampleController {
     public Response saveExample(Map<String, Object> body) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example_openapi.yaml", "Example");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example_openapi.yaml", "Example");
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }
 
@@ -53,7 +53,7 @@ public class ExampleController {
     public Response saveExample(Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example_openapi.yaml", "Example");
         Map<String, Object> savedModel = exampleService.saveAndUpdate(coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypes(savedModel, "src/main/resources/example_openapi.yaml", "Example");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example_openapi.yaml", "Example");
 
         return Response.ok(mapper.writeValueAsString(savedModel)).build();
     }

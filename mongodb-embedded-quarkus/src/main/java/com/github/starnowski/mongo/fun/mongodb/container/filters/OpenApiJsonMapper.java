@@ -49,13 +49,13 @@ public class OpenApiJsonMapper {
         return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef, (value, type, format) -> coerceWithSchema(value, type, format));
     }
 
-    public Map<String, Object> coerceMongoDecodedTypesToOpenApiJavaTypes(
-            Map<String, Object> jsonMap,
-            String openApiSpec,
-            String schemaRef
-    ) throws Exception {
-        return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef, (value, type, format) -> coerceJavaTypeWithSchema(value, type, format));
-    }
+//    public Map<String, Object> coerceMongoDecodedTypesToOpenApiJavaTypes(
+//            Map<String, Object> jsonMap,
+//            String openApiSpec,
+//            String schemaRef
+//    ) throws Exception {
+//        return parse(mapper.valueToTree(jsonMap), openApiSpec, schemaRef, (value, type, format) -> coerceJavaTypeWithSchema(value, type, format));
+//    }
 
     private Map<String, Object> parse(
             JsonNode node,
@@ -79,6 +79,26 @@ public class OpenApiJsonMapper {
 
         // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
         return (Map<String, Object>) coerceDeepWithSchema(result, oasSchema, coerceValueWithSchema );
+    }
+
+    public Map<String, Object> coerceMongoDecodedTypesToOpenApiJavaTypesV2(
+            Map<String, Object> jsonMap,
+            String openApiSpec,
+            String schemaRef
+    ) throws Exception {
+        // 1. Load OpenAPI spec
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(Files.readString(Path.of(openApiSpec)), null, null).getOpenAPI();
+        if (openAPI == null) {
+            throw new IllegalArgumentException("Invalid OpenAPI spec");
+        }
+
+        // 2. Get schema by ref (e.g. "#/components/schemas/MyType")
+        String schemaName = schemaRef.replace("#/components/schemas/", "");
+        Schema<?> oasSchema = openAPI.getComponents().getSchemas().get(schemaName);
+
+
+        // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
+        return (Map<String, Object>) coerceDeepWithSchema(jsonMap, oasSchema, ((value, type, format) -> coerceJavaTypeWithSchemaAndMappedByMapper(value, type, format)) );
     }
 
 
@@ -190,6 +210,55 @@ public class OpenApiJsonMapper {
 
     private Object coerceJavaTypeWithSchema(Object value, String type, String format) {
         if (value == null) return null;
+
+        try {
+            switch (type) {
+                case "string" -> {
+                    if ("uuid".equals(format)) {
+                        return UUID.fromString(value.toString());
+                    } else if ("date".equals(format)) {
+//                        return dateStringToLocalDate(value.toString());
+                        return dateToInstant(value.toString()).atZone(ZoneId.of("UTC")).toLocalDate();
+                    } else if ("date-time".equals(format)) {
+                        return dateToInstant(value.toString()).atOffset(ZoneOffset.UTC);
+                    } else if ("byte".equals(format)) {
+                        return Base64.getDecoder().decode(value.toString());
+                    } else {
+                        return value.toString();
+                    }
+                }
+                case "integer" -> {
+                    if ("int64".equals(format)) {
+                        return Long.valueOf(value.toString());
+                    } else if ("int32".equals(format)) {
+                        return Integer.valueOf(value.toString());
+                    } else {
+                        return new BigInteger(value.toString());
+                    }
+                }
+                case "number" -> {
+                    if ("float".equals(format)) {
+                        return Float.valueOf(value.toString());
+                    } else {
+                        return Double.valueOf(value.toString());
+                    }
+                }
+                case "boolean" -> {
+                    return Boolean.valueOf(value.toString());
+                }
+                default -> {
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            // If parsing fails, keep original value
+            return value;
+        }
+    }
+
+    private Object coerceJavaTypeWithSchemaAndMappedByMapper(Object value, String type, String format) {
+        if (value == null) return null;
+        value = mapper.convertValue(value, Object.class);
 
         try {
             switch (type) {
