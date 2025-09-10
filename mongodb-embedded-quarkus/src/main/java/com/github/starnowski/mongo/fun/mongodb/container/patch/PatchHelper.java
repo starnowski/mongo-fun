@@ -27,8 +27,13 @@ public class PatchHelper {
 
     // JSON Merge Patch (RFC 7396)
     public <T> T applyMergePatch(JsonMergePatch mergePatch, T target, Class<T> type) throws IOException, IOException {
-        JsonStructure targetJson = mapper.readValue(mapper.writeValueAsBytes(target), JsonStructure.class);
-        JsonValue patchedJson = mergePatch.apply(targetJson);
+        // Convert POJO -> JSON string
+        String targetJson = mapper.writeValueAsString(target);
+
+        // Parse string into JSON-P structure
+        JsonReader reader = Json.createReader(new StringReader(targetJson));
+        JsonStructure targetStructure = reader.read();
+        JsonValue patchedJson = mergePatch.apply(targetStructure);
         return mapper.readValue(patchedJson.toString(), type);
     }
 }

@@ -29,6 +29,8 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -182,7 +184,7 @@ class Example2ControllerTest {
     }
 
     @Test
-    public void shouldSaveAndPatchModel() throws IOException, JSONException {
+    public void shouldSaveAndPatchModelWithJsonPatchSpecification() throws IOException, JSONException {
         // GIVEN
         UUID uuid = UUID.randomUUID();
         Example2Dto dto = generator.nextObject(Example2Dto.class);
@@ -207,13 +209,69 @@ class Example2ControllerTest {
         String expectedJsonAfterPath = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
 
         // WHEN
-        ExtractableResponse<Response> patchResponse = given()
+        given()
                 .body("""
                         [
                           { "op": "replace", "path": "/birthDate", "value": "1973-07-03" }
                         ]
                         """)
                 .contentType("application/json-patch+json")
+                .when()
+                .patch("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .get("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+        System.out.println("Response payload:");
+        System.out.println(getResponse.asPrettyString());
+        JSONAssert.assertEquals(expectedJsonAfterPath, getResponse.asString(), true);
+    }
+
+    @Test
+    public void shouldSaveAndPatchModelWithMergePatchSpecification() throws IOException, JSONException {
+        // GIVEN
+        UUID uuid = UUID.randomUUID();
+        Example2Dto dto = generator.nextObject(Example2Dto.class);
+
+        //TODO temporary erasing binary field
+        dto.setFileUpload(null);
+        Map<String, Object> innerObject = new HashMap<>();
+        innerObject.put("prop1", "val3");
+        innerObject.put("prop2", "val19");
+        dto.getMetadata().put("innerObject", innerObject);
+
+        // Convert to JSON string
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+        System.out.println("Request payload:");
+        System.out.println(json);
+        given()
+                .body(json)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+
+        innerObject.put("prop2", 1987);
+        String expectedJsonAfterPath = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+
+        // WHEN
+        given()
+                .body("""
+                        {
+                            "metadata": {
+                                "innerObject": {
+                                    "prop2": 1987
+                                }
+                            }
+                        }
+                        """)
+                .contentType("application/merge-patch+json")
                 .when()
                 .patch("/examples2/{id}", uuid)
                 .then()
