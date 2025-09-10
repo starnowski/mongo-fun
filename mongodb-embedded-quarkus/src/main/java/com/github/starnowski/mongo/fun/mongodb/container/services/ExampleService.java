@@ -30,5 +30,9 @@ public class ExampleService {
         return exampleDao.saveAndUpdate(id, new Document(payload), params);
     }
 
+    public Map<String, Object> update(UUID id, Map<String, Object> payload, Map<String, Object> params) {
+        return exampleDao.update(id, new Document(payload), params);
+    }
+
 
 }

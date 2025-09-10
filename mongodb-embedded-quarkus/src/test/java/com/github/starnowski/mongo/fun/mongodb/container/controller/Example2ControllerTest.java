@@ -24,6 +24,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -178,5 +179,54 @@ class Example2ControllerTest {
                 .then()
                 .statusCode(400).extract();
 
+    }
+
+    @Test
+    public void shouldSaveAndPatchModel() throws IOException, JSONException {
+        // GIVEN
+        UUID uuid = UUID.randomUUID();
+        Example2Dto dto = generator.nextObject(Example2Dto.class);
+
+        //TODO temporary erasing binary field
+        dto.setFileUpload(null);
+
+        // Convert to JSON string
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+        System.out.println("Request payload:");
+        System.out.println(json);
+
+        ExtractableResponse<Response> postResponse = given()
+                .body(json)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+
+        dto.setBirthDate(LocalDate.of(1973, 7, 3));
+        String expectedJsonAfterPath = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+
+        // WHEN
+        ExtractableResponse<Response> patchResponse = given()
+                .body("""
+                        [
+                          { "op": "replace", "path": "/birthDate", "value": "1973-07-03" }
+                        ]
+                        """)
+                .contentType("application/json-patch+json")
+                .when()
+                .patch("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .get("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+        System.out.println("Response payload:");
+        System.out.println(getResponse.asPrettyString());
+        JSONAssert.assertEquals(expectedJsonAfterPath, getResponse.asString(), true);
     }
 }

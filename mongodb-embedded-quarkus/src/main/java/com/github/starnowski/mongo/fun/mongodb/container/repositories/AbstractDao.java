@@ -13,6 +13,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import org.bson.Document;
@@ -118,11 +119,12 @@ public abstract class AbstractDao<T> {
             aggregationPipeline.add(new Document("$set", new Document("queryParams", params)));
         }
         try {
-            collection.updateMany(
+            UpdateResult updateResult = collection.updateMany(
                     Filters.and(Filters.eq("_id", id), Filters.not(Filters.exists("_id"))),
                     aggregationPipeline,
                     new UpdateOptions().upsert(true)
             );
+            return collection.find(Filters.eq("_id", updateResult.getUpsertedId())).first();
         } catch (MongoWriteException e) {
             if (e.getError().getCategory() == DUPLICATE_KEY) {
                 throw new DuplicatedKeyException(e.getMessage(), e);
@@ -130,6 +132,27 @@ public abstract class AbstractDao<T> {
                 throw e; // rethrow other write errors
             }
         }
-        return collection.find(Filters.eq("_id", id)).first();
+    }
+
+    public T update(UUID id, T document, Map<String, Object> params) {
+        ArrayList<Bson> aggregationPipeline = new ArrayList<>();
+        aggregationPipeline.add(new Document("$set", document));
+        if (params != null && !params.isEmpty()) {
+            aggregationPipeline.add(new Document("$set", new Document("queryParams", params)));
+        }
+        try {
+            collection.updateMany(
+                    Filters.eq("_id", id),
+                    aggregationPipeline,
+                    new UpdateOptions().upsert(false)
+            );
+            return collection.find(Filters.eq("_id", id)).first();
+        } catch (MongoWriteException e) {
+            if (e.getError().getCategory() == DUPLICATE_KEY) {
+                throw new DuplicatedKeyException(e.getMessage(), e);
+            } else {
+                throw e; // rethrow other write errors
+            }
+        }
     }
 }
