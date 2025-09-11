@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.starnowski.mongo.fun.mongodb.container.exceptions.DuplicatedKeyException;
 import com.github.starnowski.mongo.fun.mongodb.container.filters.OpenApiJsonMapper;
+import com.github.starnowski.mongo.fun.mongodb.container.filters.SecuredExample2;
 import com.github.starnowski.mongo.fun.mongodb.container.patch.PatchHelper;
 import com.github.starnowski.mongo.fun.mongodb.container.services.ExampleService;
 import jakarta.inject.Inject;
@@ -56,6 +57,7 @@ public class Example2Controller {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @SecuredExample2
     public Response saveExample(Map<String, Object> body) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
@@ -68,6 +70,7 @@ public class Example2Controller {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @SecuredExample2
     public Response saveExampleWithId(@PathParam("id") UUID id, Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
         Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example2_openapi.yaml", "Example2");
         Map<String, Object> savedModel = null;
@@ -85,6 +88,7 @@ public class Example2Controller {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @SecuredExample2
     public Response updateExampleWithId(@PathParam("id") UUID id, Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
         return updateExample(id, body, Map.copyOf(uriInfo.getQueryParameters()));
     }
@@ -101,6 +105,7 @@ public class Example2Controller {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @Path("/{id}")//consumes = "application/json-patch+json")
     @PATCH
+    @SecuredExample2
     public Response patchUser(@PathParam("id") UUID id, String patchJson) throws Exception {
         Response getResponse = getExample(id);
         Map<String, Object> savedModel = mapper.readValue((String)getResponse.getEntity(), Map.class);
@@ -115,6 +120,7 @@ public class Example2Controller {
     @Consumes("application/merge-patch+json")
     @Path("/{id}")
     @PATCH
+    @SecuredExample2
     public Response mergePatchUser(@PathParam("id") UUID id, String mergePatchJson) throws Exception {
         Response getResponse = getExample(id);
         Map<String, Object> savedModel = mapper.readValue((String)getResponse.getEntity(), Map.class);

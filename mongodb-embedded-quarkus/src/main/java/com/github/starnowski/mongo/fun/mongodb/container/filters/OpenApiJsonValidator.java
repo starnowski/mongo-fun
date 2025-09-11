@@ -19,16 +19,32 @@ import java.util.Set;
 public class OpenApiJsonValidator {
     private final ObjectMapper mapper;
     private final OpenAPI openAPI;
+    private final OpenAPI openAPI2;
 
     public OpenApiJsonValidator() {
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         openAPI = new OpenAPIV3Parser().read("src/main/resources/example_openapi.yaml");// Exclude all null fields globally
+        openAPI2 = new OpenAPIV3Parser().read("src/main/resources/example2_openapi.yaml");// Exclude all null fields globally
     }
 
     public Set<ValidationMessage> validateObject(String model, String json) throws JsonProcessingException {
         String schemaString = mapper.writeValueAsString(
                 openAPI.getComponents().getSchemas().get(model)
+        );
+
+        // 3. Build schema validator
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
+        JsonSchema schema = factory.getSchema(schemaString);
+
+        // 4. Parse and validate input JSON
+        JsonNode jsonNode = mapper.readTree(json);
+        return schema.validate(jsonNode);
+    }
+
+    public Set<ValidationMessage> validateObjectSpec2(String model, String json) throws JsonProcessingException {
+        String schemaString = mapper.writeValueAsString(
+                openAPI2.getComponents().getSchemas().get(model)
         );
 
         // 3. Build schema validator
