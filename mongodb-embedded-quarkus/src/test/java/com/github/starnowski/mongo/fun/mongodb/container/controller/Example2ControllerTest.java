@@ -47,7 +47,7 @@ class Example2ControllerTest {
 
     public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
         return Stream.of(
-                Arguments.of("examples/invalid_request_example1.json")
+                Arguments.of("examples/invalid_request_example2.json")
         );
     }
 
