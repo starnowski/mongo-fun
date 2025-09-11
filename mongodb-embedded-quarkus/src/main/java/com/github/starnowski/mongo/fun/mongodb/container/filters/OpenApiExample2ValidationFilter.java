@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-@Secured
+@SecuredExample2
 @Provider
 public class OpenApiExample2ValidationFilter implements ContainerRequestFilter {
 

@@ -1,14 +1,10 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.OffsetDateTimeSerializer;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
@@ -19,13 +15,18 @@ import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 
@@ -42,6 +44,12 @@ class Example2ControllerTest {
     private JavaTimeModule javaTimeModule;
     private EasyRandom generator;
     private ObjectMapper mapper;
+
+    public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
+        return Stream.of(
+                Arguments.of("examples/invalid_request_example1.json")
+        );
+    }
 
     @PostConstruct
     public void init() {
@@ -75,12 +83,12 @@ class Example2ControllerTest {
                 .randomize(Object.class, new Randomizer<Object>() {
 
                     private final Random random = new Random();
+
                     @Override
                     public Object getRandomValue() {
                         return random.nextInt();
                     }
-                })
-                ;
+                });
         generator = new EasyRandom(parameters);
         mapper = new ObjectMapper();
         mapper.registerModule(javaTimeModule);
@@ -286,5 +294,17 @@ class Example2ControllerTest {
         System.out.println("Response payload:");
         System.out.println(getResponse.asPrettyString());
         JSONAssert.assertEquals(expectedJsonAfterPath, getResponse.asString(), true);
+    }
+
+    @ParameterizedTest
+    @MethodSource({"provideShouldReturnBadRequestForInvalidPayload"})
+    public void shouldReturnBadRequestForInvalidPayload(String requestFile) throws IOException, JSONException {
+        ExtractableResponse<Response> response = given()
+                .body(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(requestFile).getFile()).getPath())))
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples2/")
+                .then()
+                .statusCode(400).extract();
     }
 }
