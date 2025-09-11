@@ -29,7 +29,7 @@ public class OpenApiExample2ValidationFilter implements ContainerRequestFilter {
                 requestContext.getMethod(),
                 requestContext.getUriInfo().getRequestUri());
 
-        Set<ValidationMessage> errors = this.openApiJsonValidator.validateObject("Example", getRequestBody(requestContext));
+        Set<ValidationMessage> errors = this.openApiJsonValidator.validateObjectSpec2("Example2", getRequestBody(requestContext));
         if (errors.isEmpty()) {
             System.out.println("Valid JSON ✅");
         } else {

@@ -105,7 +105,6 @@ public class Example2Controller {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @Path("/{id}")//consumes = "application/json-patch+json")
     @PATCH
-    @SecuredExample2
     public Response patchUser(@PathParam("id") UUID id, String patchJson) throws Exception {
         Response getResponse = getExample(id);
         Map<String, Object> savedModel = mapper.readValue((String)getResponse.getEntity(), Map.class);
@@ -120,7 +119,6 @@ public class Example2Controller {
     @Consumes("application/merge-patch+json")
     @Path("/{id}")
     @PATCH
-    @SecuredExample2
     public Response mergePatchUser(@PathParam("id") UUID id, String mergePatchJson) throws Exception {
         Response getResponse = getExample(id);
         Map<String, Object> savedModel = mapper.readValue((String)getResponse.getEntity(), Map.class);

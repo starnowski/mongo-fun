@@ -14,9 +14,9 @@ components:
         base64Data:
           type: string
           format: byte          # -> java.lang.String (Base64 encoded)
-        fileUpload:
-          type: string
-          format: binary        # -> java.io.InputStream / org.springframework.web.multipart.MultipartFile
+#        fileUpload:
+#          type: string
+#          format: binary        # -> java.io.InputStream / org.springframework.web.multipart.MultipartFile
         birthDate:
           type: string
           format: date          # -> java.time.LocalDate
