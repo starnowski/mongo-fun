@@ -3,7 +3,7 @@
     {
       "code": "oas.validation",
       "reason": "validation_failed",
-      "message": "integer found, string expected",
+      "message": "$.plainString: integer found, string expected",
       "location": "request.plainString"
     }
   ]
