@@ -47,7 +47,7 @@ class Example2ControllerTest {
 
     public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
         return Stream.of(
-                Arguments.of("examples/invalid_request_example2.json")
+                Arguments.of("examples/invalid_request_example2.json", "examples/oas_response_example2.json")
         );
     }
 
@@ -298,7 +298,11 @@ class Example2ControllerTest {
 
     @ParameterizedTest
     @MethodSource({"provideShouldReturnBadRequestForInvalidPayload"})
-    public void shouldReturnBadRequestForInvalidPayload(String requestFile) throws IOException, JSONException {
+    public void shouldReturnBadRequestForInvalidPayload(String requestFile, String expectedResponseFilePath) throws IOException, JSONException {
+        // GIVEN
+        String expectedResponse = Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(expectedResponseFilePath).getFile()).getPath()));
+
+        // WHEN
         ExtractableResponse<Response> response = given()
                 .body(Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(requestFile).getFile()).getPath())))
                 .contentType(ContentType.JSON)
@@ -306,5 +310,8 @@ class Example2ControllerTest {
                 .post("/examples2/")
                 .then()
                 .statusCode(400).extract();
+
+        // THEN
+        JSONAssert.assertEquals(expectedResponse, response.asString(), false);
     }
 }

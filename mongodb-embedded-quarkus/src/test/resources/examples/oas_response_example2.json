@@ -3,14 +3,8 @@
     {
       "code": "oas.validation",
       "reason": "validation_failed",
-      "message": "Invalid type. Expected integer but got string.",
-      "location": "request.body.age"
-    },
-    {
-      "code": "oas.validation",
-      "reason": "validation_failed",
-      "message": "String does not match format: email.",
-      "location": "request.body.email"
+      "message": "integer found, string expected",
+      "location": "request.plainString"
     }
   ]
 }

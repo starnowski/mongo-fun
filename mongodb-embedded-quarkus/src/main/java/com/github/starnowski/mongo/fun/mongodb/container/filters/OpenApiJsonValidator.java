@@ -12,6 +12,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.oas.models.OpenAPI;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,6 +21,10 @@ public class OpenApiJsonValidator {
     private final ObjectMapper mapper;
     private final OpenAPI openAPI;
     private final OpenAPI openAPI2;
+
+    static {
+        Locale.setDefault(Locale.ENGLISH);  // 👈 must be set before validator loads ResourceBundle
+    }
 
     public OpenApiJsonValidator() {
         mapper = new ObjectMapper();
