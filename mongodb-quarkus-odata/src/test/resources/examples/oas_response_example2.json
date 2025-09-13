@@ -1,0 +1,10 @@
+{
+  "errors": [
+    {
+      "code": "oas.validation",
+      "reason": "validation_failed",
+      "message": "$.plainString: integer found, string expected",
+      "location": "request.plainString"
+    }
+  ]
+}

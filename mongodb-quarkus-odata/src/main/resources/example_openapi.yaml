@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Example API
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    BaseEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      ExtendedEntity:
+        allOf:
+          - $ref: '#/components/schemas/BaseEntity'
+          - type: object
+            properties:
+              name:
+                type: string
+      PolyEntity:
+        oneOf:
+          - $ref: '#/components/schemas/BaseEntity'
+          - $ref: '#/components/schemas/ExtendedEntity'
+    Example:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+        address:
+          type: object
+          required:
+            - street
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+        stayPeriod:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            date:
+              type: string
+              format: date
+            when:
+              type: string
+              format: date-time
+        complexProperty:
+          allOf:
+            - $ref: '#/components/schemas/PolyEntity'

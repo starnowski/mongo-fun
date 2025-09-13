@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Example API
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Example2:
+      type: object
+      properties:
+        # ---- string ----
+        plainString:
+          type: string          # -> java.lang.String
+        base64Data:
+          type: string
+          format: byte          # -> java.lang.String (Base64 encoded)
+#        fileUpload:
+#          type: string
+#          format: binary        # -> java.io.InputStream / org.springframework.web.multipart.MultipartFile
+        birthDate:
+          type: string
+          format: date          # -> java.time.LocalDate
+        timestamp:
+          type: string
+          format: date-time     # -> java.time.OffsetDateTime (or java.util.Date, java.time.Instant)
+        password:
+          type: string
+          format: password      # -> java.lang.String
+        uuidProp:
+          type: string
+          format: uuid      # -> java.util.UUID
+
+        # ---- number ----
+        genericNumber:
+          type: number          # -> java.math.BigDecimal
+        floatValue:
+          type: number
+          format: float         # -> java.lang.Float
+        doubleValue:
+          type: number
+          format: double        # -> java.lang.Double
+
+        # ---- integer ----
+        genericInteger:
+          type: integer         # -> java.math.BigInteger
+        smallInteger:
+          type: integer
+          format: int32         # -> java.lang.Integer
+        bigInteger:
+          type: integer
+          format: int64         # -> java.lang.Long
+
+        # ---- boolean ----
+        isActive:
+          type: boolean         # -> java.lang.Boolean
+
+        # ---- array ----
+        tags:
+          type: array
+          items:
+            type: string        # -> java.util.List<String>
+
+        # ---- object ----
+        metadata:
+          type: object          # -> java.util.Map<String, Object>
