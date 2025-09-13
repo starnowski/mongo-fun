@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDocument;
+import com.github.starnowski.mongo.fun.mongodb.container.test.MongoSetup;
+import com.mongodb.client.MongoClient;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
@@ -30,10 +34,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
@@ -44,10 +45,18 @@ class Example2ControllerTest {
     private JavaTimeModule javaTimeModule;
     private EasyRandom generator;
     private ObjectMapper mapper;
+    @Inject
+    private MongoClient mongoClient;
 
     public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
         return Stream.of(
                 Arguments.of("examples/invalid_request_example2.json", "examples/oas_response_example2.json")
+        );
+    }
+
+    public static Stream<Arguments> provideShouldReturnResponseBasedOnFilters() {
+        return Stream.of(
+                Arguments.of("contains(123,123)", "examples/oas_response_example2.json")
         );
     }
 
@@ -314,4 +323,24 @@ class Example2ControllerTest {
         // THEN
         JSONAssert.assertEquals(expectedResponse, response.asString(), false);
     }
+
+    @ParameterizedTest
+    @MethodSource({"provideShouldReturnResponseBasedOnFilters"})
+    @MongoSetup(mongoDocuments = {@MongoDocument(bsonFilePath = "", collection = "examples2")})
+    public void shouldReturnResponseBasedOnFilters(List<String> filters, String expectedResponseFilePath) throws IOException, JSONException {
+        // GIVEN
+        String expectedResponse = Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(expectedResponseFilePath).getFile()).getPath()));
+
+        // WHEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .queryParams(Map.of("$filter", filters))
+                .get("/examples2/simple-query")
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+    }
+    //MongoSetup
 }

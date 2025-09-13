@@ -129,4 +129,14 @@ public class Example2Controller {
         Map patched = patchHelper.applyMergePatch(mergePatch, savedModel, Map.class);
         return updateExample(id, patched, null);
     }
+
+    @GET
+    @Path("/simple-query")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response simpleFilterQuery(@PathParam("id") UUID id) throws Exception {
+        Map<String, Object> savedModel = exampleService.getById(id);
+        savedModel.remove("_id");
+        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
+        return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(savedModel)).build();
+    }
 }

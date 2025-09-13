@@ -13,6 +13,9 @@ import org.junit.jupiter.api.AfterEach;
 @QuarkusTestResource(EmbeddedMongoResource.class)
 public class AbstractITTest {
 
+
+    public static final String TEST_DATABASE = "test";
+
     @Inject
     protected PostDao postDao;
 
