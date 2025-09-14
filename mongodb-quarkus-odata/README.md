@@ -22,3 +22,7 @@ https://cloud.google.com/apigee/docs/api-platform/reference/policies/oas-validat
 ### ODate
 https://olingo.apache.org/doc/odata4/tutorials/sqo_f/tutorial_sqo_f.html
 
+
+TODO
+Try to execute explain (but without query execution), analyze based on the explain response if query planner is going to use indexes
+

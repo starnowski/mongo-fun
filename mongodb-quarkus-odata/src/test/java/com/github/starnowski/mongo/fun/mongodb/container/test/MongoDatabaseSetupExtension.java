@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.test;
 
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -20,6 +21,7 @@ public class MongoDatabaseSetupExtension implements BeforeEachCallback {
         MongoSetup annotation = context.getTestMethod()
                 .stream()
                 .map(t -> t.getAnnotation(MongoSetup.class))
+                .filter(Objects::nonNull)
                 .findFirst().orElse(null);
         if (annotation != null) {
             // Get test instance (the test class object)
@@ -49,7 +51,7 @@ public class MongoDatabaseSetupExtension implements BeforeEachCallback {
             MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE); // change if needed
             collectionNames.forEach(collectionName -> {
                 MongoCollection<Document> collection = database.getCollection(collectionName);
-
+                collection.withWriteConcern(WriteConcern.W1); // no .withJournal(true)
                 collection.deleteMany(new Document()); // clears collection
             });
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDatabaseSetupExtension;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDocument;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoSetup;
 import com.mongodb.client.MongoClient;
@@ -19,6 +20,7 @@ import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,6 +42,7 @@ import java.util.stream.Stream;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
+@ExtendWith(MongoDatabaseSetupExtension.class)
 class Example2ControllerTest {
 
     private JavaTimeModule javaTimeModule;
@@ -56,7 +59,7 @@ class Example2ControllerTest {
 
     public static Stream<Arguments> provideShouldReturnResponseBasedOnFilters() {
         return Stream.of(
-                Arguments.of("contains(123,123)", "examples/oas_response_example2.json")
+                Arguments.of(Arrays.asList("contains(123,123)"), "examples/oas_response_example2.json")
         );
     }
 
