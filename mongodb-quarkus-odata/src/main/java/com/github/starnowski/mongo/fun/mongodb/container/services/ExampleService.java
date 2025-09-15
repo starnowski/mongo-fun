@@ -1,10 +1,25 @@
 package com.github.starnowski.mongo.fun.mongodb.container.services;
 
+import com.github.starnowski.mongo.fun.mongodb.container.odata.MongoFilterVisitor;
+import com.github.starnowski.mongo.fun.mongodb.container.odata.ODataToMongoParser;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.ExampleDao;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.model.Aggregates;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.core.uri.parser.Parser;
+import org.apache.olingo.server.core.uri.parser.UriParserException;
+import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,7 +51,31 @@ public class ExampleService {
     }
 
 
-    public List<Map<String, Object>> query(String filter) {
+    public List<Map<String, Object>> query(String filter) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+
+        List<Bson> pipeline = new ArrayList<>();
+
+        if (filter != null && !filter.isEmpty()) {
+            UriInfo uriInfo;
+            if (filter != null) {
+                // Parse OData $filter into UriInfo (simplified)
+                uriInfo = new Parser((Edm) null, null).parseUri(null, "$filter=" + filter, null, null);
+                Bson mongoFilter = ODataToMongoParser.parseFilter(uriInfo);
+
+            FilterOption filterOption = uriInfo.getFilterOption();
+            if (filterOption != null) {
+                Expression expr = filterOption.getExpression();
+                Bson bsonFilter = expr.accept(new MongoFilterVisitor());
+                pipeline.add(Aggregates.match(bsonFilter));
+            }
+            }
+
+        }
+
+        AggregateIterable<Document> results = getCollection().aggregate(pipeline);
+        List<Document> docs = new ArrayList<>();
+        results.into(docs);
+
         return null;
     }
 }
