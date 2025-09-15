@@ -19,10 +19,7 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 public class ExampleService {
@@ -52,30 +49,6 @@ public class ExampleService {
 
 
     public List<Map<String, Object>> query(String filter) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
-
-        List<Bson> pipeline = new ArrayList<>();
-
-        if (filter != null && !filter.isEmpty()) {
-            UriInfo uriInfo;
-            if (filter != null) {
-                // Parse OData $filter into UriInfo (simplified)
-                uriInfo = new Parser((Edm) null, null).parseUri(null, "$filter=" + filter, null, null);
-                Bson mongoFilter = ODataToMongoParser.parseFilter(uriInfo);
-
-            FilterOption filterOption = uriInfo.getFilterOption();
-            if (filterOption != null) {
-                Expression expr = filterOption.getExpression();
-                Bson bsonFilter = expr.accept(new MongoFilterVisitor());
-                pipeline.add(Aggregates.match(bsonFilter));
-            }
-            }
-
-        }
-
-        AggregateIterable<Document> results = getCollection().aggregate(pipeline);
-        List<Document> docs = new ArrayList<>();
-        results.into(docs);
-
-        return null;
+        return exampleDao.query(filter).stream().map(doc -> (Map<String, Object>) new HashMap(doc)).toList();
     }
 }
