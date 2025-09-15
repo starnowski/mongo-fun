@@ -21,8 +21,10 @@ import jakarta.ws.rs.core.UriInfo;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("/examples2")
 public class Example2Controller {
@@ -133,10 +135,20 @@ public class Example2Controller {
     @GET
     @Path("/simple-query")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response simpleFilterQuery(@PathParam("id") UUID id) throws Exception {
-        Map<String, Object> savedModel = exampleService.getById(id);
-        savedModel.remove("_id");
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example2_openapi.yaml", "Example2");
-        return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(savedModel)).build();
+    public Response simpleFilterQuery(@QueryParam("$filter") String filter) throws Exception {
+        List<Map<String, Object>> results = exampleService.query(filter);
+        QueryResponse queryResponse = new QueryResponse(results.stream()
+                .map(rec -> {
+                    try {
+                        return openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(rec, "src/main/resources/example2_openapi.yaml", "Example2");
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList());
+        return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
+    }
+
+    public record QueryResponse(List<Map<String, Object>> results) {
+
     }
 }

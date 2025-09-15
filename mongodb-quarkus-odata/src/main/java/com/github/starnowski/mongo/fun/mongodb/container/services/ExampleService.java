@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.Document;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,4 +36,7 @@ public class ExampleService {
     }
 
 
+    public List<Map<String, Object>> query(String filter) {
+        return null;
+    }
 }
