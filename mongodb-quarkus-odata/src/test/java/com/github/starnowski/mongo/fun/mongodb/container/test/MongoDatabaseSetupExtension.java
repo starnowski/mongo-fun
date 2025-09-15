@@ -9,7 +9,11 @@ import org.bson.Document;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest.TEST_DATABASE;
@@ -55,6 +59,15 @@ public class MongoDatabaseSetupExtension implements BeforeEachCallback {
                 collection.deleteMany(new Document()); // clears collection
             });
 
+            Arrays.stream(annotation.mongoDocuments()).forEach(an -> {
+                MongoCollection<Document> collection = database.getCollection(an.collection());
+                try {
+                    String bson = Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(an.bsonFilePath()).getFile()).getPath()));
+                    collection.insertOne(Document.parse(bson));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 }

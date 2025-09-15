@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDatabaseSetupExtension;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDocument;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoSetup;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -15,6 +16,7 @@ import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import org.bson.Document;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
@@ -39,6 +41,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest.TEST_DATABASE;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
@@ -150,7 +153,7 @@ class Example2ControllerTest {
         System.out.println(json);
 
         // WHEN
-        ExtractableResponse<Response> response = given()
+        given()
                 .body(json)
                 .contentType(ContentType.JSON)
                 .when()
@@ -159,7 +162,7 @@ class Example2ControllerTest {
                 .statusCode(200).extract();
 
         // THEN
-        response = given()
+        ExtractableResponse<Response> response = given()
                 .when()
                 .get("/examples2/{id}", uuid)
                 .then()
@@ -167,6 +170,10 @@ class Example2ControllerTest {
         System.out.println("Response payload:");
         System.out.println(response.asPrettyString());
         JSONAssert.assertEquals(json, response.asString(), true);
+
+        // Print MongoDB document in BSON format
+        Document document = mongoClient.getDatabase(TEST_DATABASE).getCollection("examples").find(new Document("_id", uuid)).first();
+        System.out.println("BSON Document : " + document.toJson());
     }
 
     //shouldSaveAndReturnBadRequestWhenTryingToInsertDocumentWithSameId
@@ -329,7 +336,11 @@ class Example2ControllerTest {
 
     @ParameterizedTest
     @MethodSource({"provideShouldReturnResponseBasedOnFilters"})
-    @MongoSetup(mongoDocuments = {@MongoDocument(bsonFilePath = "", collection = "examples2")})
+    @MongoSetup(mongoDocuments = {
+            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples2"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples2"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples2")
+    })
     public void shouldReturnResponseBasedOnFilters(List<String> filters, String expectedResponseFilePath) throws IOException, JSONException {
         // GIVEN
         String expectedResponse = Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(expectedResponseFilePath).getFile()).getPath()));
