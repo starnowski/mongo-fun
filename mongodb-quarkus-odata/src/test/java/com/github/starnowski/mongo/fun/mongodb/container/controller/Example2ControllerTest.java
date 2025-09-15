@@ -62,7 +62,7 @@ class Example2ControllerTest {
 
     public static Stream<Arguments> provideShouldReturnResponseBasedOnFilters() {
         return Stream.of(
-                Arguments.of(Arrays.asList("contains(123,123)"), "examples/oas_response_example2.json")
+                Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'"), "examples/query/responses/example2_1.json")
         );
     }
 
