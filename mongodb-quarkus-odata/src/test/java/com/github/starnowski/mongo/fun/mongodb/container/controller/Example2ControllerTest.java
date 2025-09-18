@@ -337,9 +337,9 @@ class Example2ControllerTest {
     @ParameterizedTest
     @MethodSource({"provideShouldReturnResponseBasedOnFilters"})
     @MongoSetup(mongoDocuments = {
-            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples2"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples2"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples2")
+            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples")
     })
     public void shouldReturnResponseBasedOnFilters(List<String> filters, String expectedResponseFilePath) throws IOException, JSONException {
         // GIVEN

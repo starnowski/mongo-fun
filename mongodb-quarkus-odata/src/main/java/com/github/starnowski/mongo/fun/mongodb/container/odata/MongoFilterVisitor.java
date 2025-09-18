@@ -119,19 +119,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private Object extractValueObj(Bson bson) {
-        String json = bson.toBsonDocument().toJson();
-        if (json.startsWith("\"") && json.endsWith("\"")) {
-            return json.substring(1, json.length() - 1);
-        }
-        try {
-            return Integer.parseInt(json);
-        } catch (NumberFormatException e) {
-            try {
-                return Double.parseDouble(json);
-            } catch (NumberFormatException ex) {
-                return json;
-            }
-        }
+        //$literal
+        return bson.toBsonDocument().get("$literal");
     }
 
     // --- Not used in this example ---
