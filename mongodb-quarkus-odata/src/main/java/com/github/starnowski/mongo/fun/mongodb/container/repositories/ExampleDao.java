@@ -48,12 +48,12 @@ public class ExampleDao extends AbstractDao<Document> {
                 // Parse OData $filter into UriInfo (simplified)
                 UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                         .parseUri("examples2", "$filter=" + filter, null, null);
-                Bson mongoFilter = ODataToMongoParser.parseFilter(uriInfo);
+//                Bson mongoFilter = ODataToMongoParser.parseFilter(uriInfo);
 
                 FilterOption filterOption = uriInfo.getFilterOption();
                 if (filterOption != null) {
                     Expression expr = filterOption.getExpression();
-                    Bson bsonFilter = expr.accept(new MongoFilterVisitor());
+                    Bson bsonFilter = ODataToMongoParser.parseFilter(uriInfo);
                     pipeline.add(Aggregates.match(bsonFilter));
                 }
 

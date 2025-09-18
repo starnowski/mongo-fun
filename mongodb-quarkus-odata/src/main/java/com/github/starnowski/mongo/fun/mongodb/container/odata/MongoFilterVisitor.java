@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
+    public static final String CUSTOM_LITERAL_VALUE_PROPERTY = "$odata.literal";
+
     // --- Literals ---
     @Override
     public Bson visitLiteral(Literal literal) {
@@ -38,7 +40,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     public static Document literal(Object value) {
-        return new Document("$literal", value);
+        return new Document(CUSTOM_LITERAL_VALUE_PROPERTY, value);
     }
 
     // --- Members (fields) ---
@@ -115,12 +117,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private String extractValue(Bson bson) {
-        return bson.toBsonDocument().toJson();
+        return bson.toBsonDocument().get(CUSTOM_LITERAL_VALUE_PROPERTY).asString().getValue();
     }
 
     private Object extractValueObj(Bson bson) {
-        //$literal
-        return bson.toBsonDocument().get("$literal");
+        return bson.toBsonDocument().get(CUSTOM_LITERAL_VALUE_PROPERTY);
     }
 
     // --- Not used in this example ---
