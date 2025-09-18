@@ -4,6 +4,7 @@ import com.github.starnowski.mongo.fun.mongodb.container.odata.Example2StaticEdm
 import com.github.starnowski.mongo.fun.mongodb.container.odata.MongoFilterVisitor;
 import com.github.starnowski.mongo.fun.mongodb.container.odata.ODataToMongoParser;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -48,13 +49,11 @@ public class ExampleDao extends AbstractDao<Document> {
                 // Parse OData $filter into UriInfo (simplified)
                 UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                         .parseUri("examples2", "$filter=" + filter, null, null);
-//                Bson mongoFilter = ODataToMongoParser.parseFilter(uriInfo);
 
                 FilterOption filterOption = uriInfo.getFilterOption();
                 if (filterOption != null) {
-                    Expression expr = filterOption.getExpression();
                     Bson bsonFilter = ODataToMongoParser.parseFilter(uriInfo);
-                    pipeline.add(Aggregates.match(bsonFilter));
+                    pipeline.add(Aggregates.match(Filters.and(bsonFilter)));
                 }
 
         }

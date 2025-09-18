@@ -5,6 +5,7 @@ import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import com.mongodb.client.model.Filters;
@@ -47,8 +48,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     @Override
     public Bson visitMember(Member member) {
         String field = member.getResourcePath().getUriResourceParts().get(0).toString();
-        return Filters.exists(field); // placeholder, combined later
+//        return Filters.exists(field); // placeholder, combined later
+        return prepareMemberDocument(field);
     }
+
+    private Document prepareMemberDocument(String field) {
+        return new Document(ODATA_MEMBER_PROPERTY, field);
+    }
+
+    public static final String ODATA_MEMBER_PROPERTY = "$odata.member";
 
     // --- Binary operators ---
     @Override
@@ -80,9 +88,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     // --- Methods (functions) ---
     @Override
     public Bson visitMethodCall(MethodKind methodCall, List<Bson> parameters) {
-        if (parameters.size() != 2) {
-            throw new UnsupportedOperationException("Expected field and value for: " + methodCall);
+        switch (parameters.size()) {
+            case 1:
+                return visitMethodWithOneParameter(methodCall, parameters);
+            case 2:
+                return visitMethodWithTwoParameters(methodCall, parameters);
+            default:
+                throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
+    }
+
+    private Bson visitMethodWithTwoParameters(MethodKind methodCall, List<Bson> parameters){
         String field = extractField(parameters.get(0));
         String value = extractValue(parameters.get(1));
 
@@ -98,11 +114,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
     }
 
+    private Bson visitMethodWithOneParameter(MethodKind methodCall, List<Bson> parameters){
+        String field = extractField(parameters.get(0));
+
+        switch (methodCall) {
+            case TOLOWER:
+                return new Document("$toLower", "$" + field);
+            default:
+                throw new UnsupportedOperationException("Method not supported: " + methodCall);
+        }
+    }
+
     // --- Helpers ---
     private Bson combineEq(Bson left, Bson right) {
         String field = extractField(left);
         Object value = extractValueObj(right);
-        return Filters.eq(field, value);
+        return field == null ? new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value))) : Filters.eq(field, value);
     }
 
     private Bson combineFieldOp(Bson left, Bson right,
@@ -113,7 +140,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private String extractField(Bson bson) {
-        return bson.toBsonDocument().keySet().iterator().next();
+        BsonDocument document = bson.toBsonDocument();
+        return document.containsKey(ODATA_MEMBER_PROPERTY) ? document.get(ODATA_MEMBER_PROPERTY).asString().getValue() : null;
     }
 
     private String extractValue(Bson bson) {
