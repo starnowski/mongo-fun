@@ -41,4 +41,8 @@ public class ExampleService {
     public List<Map<String, Object>> query(String filter) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
         return exampleDao.query(filter).stream().map(doc -> (Map<String, Object>) new HashMap(doc)).toList();
     }
+
+    public String explain(String filter) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+        return exampleDao.explain(filter);
+    }
 }

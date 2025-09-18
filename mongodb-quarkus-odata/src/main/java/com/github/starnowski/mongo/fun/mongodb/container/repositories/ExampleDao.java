@@ -46,6 +46,51 @@ public class ExampleDao extends AbstractDao<Document> {
         return pipeline.isEmpty() ? new ArrayList<>() : getCollection().aggregate(pipeline).into(new ArrayList<>());
     }
 
+    public String explain(String filter) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(Collections.singletonList(filter));
+
+        // Run explain on the aggregation
+        Document explain = getCollection().aggregate(pipeline).explain();
+
+        // Navigate to winning plan
+        Document queryPlanner = (Document) explain.get("stages", List.of())
+                .stream()
+                .filter(o -> ((Document) o).containsKey("$cursor"))
+                .map(o -> (Document) o)
+                .findFirst()
+                .map(o -> (Document) ((Document) o.get("$cursor")).get("queryPlanner"))
+                .orElse(null);
+
+        if (queryPlanner == null) {
+            System.out.println("No query planner info found in explain output.");
+            return null;
+        }
+
+        Document winningPlan = (Document) queryPlanner.get("winningPlan");
+        String stage = winningPlan.getString("stage");
+
+        System.out.println("Winning plan stage: " + stage);
+
+        // Check index usage
+        if ("IXSCAN".equals(stage)) {
+            System.out.println("✅ Pure index scan (covered aggregation).");
+          return "IXSCAN";
+        } else if ("FETCH".equals(stage)) {
+            Document inputStage = (Document) winningPlan.get("inputStage");
+            if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
+                System.out.println("✅ Index scan with fetch (aggregation not covered, but index is used).");
+                return "FETCH + IXSCAN";
+            }
+            return "FETCH";
+        } else if ("COLLSCAN".equals(stage)) {
+            System.out.println("❌ Collection scan (no index used in aggregation).");
+            return "COLLSCAN";
+        } else {
+            System.out.println("ℹ️ Other plan stage: " + stage);
+        }
+        return stage;
+    }
+
     private List<Bson> preparePipelineBasedOnFilter(List<String> filters) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
         List<Bson> pipeline = new ArrayList<>();
 

@@ -144,11 +144,11 @@ public class Example2Controller {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }).toList());
+                }).toList(), exampleService.explain(filter));
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
     }
 
-    public record QueryResponse(List<Map<String, Object>> results) {
+    public record QueryResponse(List<Map<String, Object>> results, String winningPlan) {
 
     }
 }
