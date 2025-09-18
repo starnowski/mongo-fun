@@ -13,38 +13,50 @@ import java.util.List;
 public class Example2StaticEdmProvider extends CsdlAbstractEdmProvider {
 
     public static final String NAMESPACE = "MyService";
-    public static final String ENTITY_TYPE_NAME = "Example2";   // entity type
-    public static final String ENTITY_SET_NAME = "examples2";
+
+    // --- Entity Type & Entity Set names ---
+    public static final String ENTITY_TYPE_NAME = "Example2";    // PascalCase for type
+    public static final String ENTITY_SET_NAME = "examples2";    // plural, matches URL segment
     public static final FullQualifiedName FQN_EXAMPLE2 = new FullQualifiedName(NAMESPACE, ENTITY_TYPE_NAME);
+
+    // --- Container ---
     public static final String CONTAINER_NAME = "Container";
     public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE, CONTAINER_NAME);
 
+    private final List<CsdlSchema> schemas;
+
+    public Example2StaticEdmProvider() {
+        this.schemas = prepareSchemas();
+    }
+
     @Override
-    public List<CsdlSchema> getSchemas() throws ODataException {
+    public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) throws ODataException {
+        return getSchemas().get(0).getEntityType(entityTypeName.getName());
+    }
+
+    private List<CsdlSchema> prepareSchemas() {
         List<CsdlSchema> schemas = new ArrayList<>();
 
-        // Define Example2 entity
+        // --- Define Example2 entity type ---
         CsdlEntityType example2Type = new CsdlEntityType()
                 .setName(ENTITY_TYPE_NAME)
                 .setProperties(Arrays.asList(
-                        new CsdlProperty().setName("plainString").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-//                        ,
-//                        new CsdlProperty().setName("age").setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName())
-//                        ,
-//                        new CsdlProperty().setName("city").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                        new CsdlProperty().setName("plainString")
+                                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 ))
-                .setKey(Collections.singletonList(new CsdlPropertyRef().setName("plainString"))); // key on "name"
+                .setKey(Collections.singletonList(new CsdlPropertyRef().setName("plainString")));
 
-        // Define entity set
+        // --- Define entity set ---
         CsdlEntitySet entitySet = new CsdlEntitySet()
-                .setName(ENTITY_SET_NAME)
+                .setName(ENTITY_SET_NAME)      // 👈 matches URL /examples2
                 .setType(FQN_EXAMPLE2);
 
-        // Define entity container
+        // --- Define entity container ---
         CsdlEntityContainer container = new CsdlEntityContainer()
                 .setName(CONTAINER_NAME)
                 .setEntitySets(Collections.singletonList(entitySet));
 
+        // --- Define schema ---
         CsdlSchema schema = new CsdlSchema()
                 .setNamespace(NAMESPACE)
                 .setEntityTypes(Collections.singletonList(example2Type))
@@ -52,6 +64,16 @@ public class Example2StaticEdmProvider extends CsdlAbstractEdmProvider {
 
         schemas.add(schema);
         return schemas;
+    }
+
+    @Override
+    public List<CsdlSchema> getSchemas() throws ODataException {
+        return schemas;
+    }
+
+    @Override
+    public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) throws ODataException {
+        return getSchemas().get(0).getEntityContainer().getEntitySet(entitySetName);
     }
 
     @Override

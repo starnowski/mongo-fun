@@ -1,9 +1,11 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
+import com.mongodb.client.model.Aggregates;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 import com.mongodb.client.model.Filters;
 
@@ -17,12 +19,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public Bson visitLiteral(Literal literal) {
         String text = literal.getText();
         if ("null".equals(text)) {
+            //TODO do not support
             return Filters.eq(null, null);
         }
         if (text.startsWith("'") && text.endsWith("'")) {
-            return Filters.eq(text.substring(1, text.length() - 1), null); // placeholder, field comes later
+            return literal(text.substring(1, text.length() - 1)); // placeholder, field comes later
         }
-        return Filters.eq(text, null);
+        return literal(text);
 //        try {
 //            return Filters.eq(Integer.parseInt(text), null);
 //        } catch (NumberFormatException e) {
@@ -32,6 +35,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 //                return Filters.eq(text, null);
 //            }
 //        }
+    }
+
+    public static Document literal(Object value) {
+        return new Document("$literal", value);
     }
 
     // --- Members (fields) ---
