@@ -40,14 +40,14 @@ public class ExampleDao extends AbstractDao<Document> {
         return Document.class;
     }
 
-    public List<Document> query(String filter) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
-        List<Bson> pipeline = preparePipelineBasedOnFilter(Collections.singletonList(filter));
+    public List<Document> query(List<String> filters) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(filters);
 
         return pipeline.isEmpty() ? new ArrayList<>() : getCollection().aggregate(pipeline).into(new ArrayList<>());
     }
 
-    public String explain(String filter) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
-        List<Bson> pipeline = preparePipelineBasedOnFilter(Collections.singletonList(filter));
+    public String explain(List<String> filters) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(filters);
 
         // Run explain on the aggregation
         Document explain = getCollection().aggregate(pipeline).explain();
@@ -99,11 +99,14 @@ public class ExampleDao extends AbstractDao<Document> {
             // Parse OData $filter into UriInfo (simplified)
             UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                     .parseUri("examples2",
-//                            "$filter=" + filter
+                            // https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html?utm_source=chatgpt.com
+                            /**
+                             * "The same system query option MUST NOT be specified more than once for any resource."
+                             */
+                            "$filter=" +
                             filters.stream().filter(Objects::nonNull)
                                     .filter(filter -> !filter.trim().isEmpty())
-                                    .map(filter -> "$filter=" + filter)
-                                    .collect(Collectors.joining("&"))
+                                    .collect(Collectors.joining(" and "))
                             , null, null);
 
             FilterOption filterOption = uriInfo.getFilterOption();

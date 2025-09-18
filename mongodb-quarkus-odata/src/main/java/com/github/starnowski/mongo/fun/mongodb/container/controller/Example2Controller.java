@@ -135,8 +135,8 @@ public class Example2Controller {
     @GET
     @Path("/simple-query")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response simpleFilterQuery(@QueryParam("$filter") String filter) throws Exception {
-        List<Map<String, Object>> results = exampleService.query(filter);
+    public Response simpleFilterQuery(@QueryParam("$filter") List<String> filters) throws Exception {
+        List<Map<String, Object>> results = exampleService.query(filters);
         QueryResponse queryResponse = new QueryResponse(results.stream()
                 .map(rec -> {
                     try {
@@ -144,7 +144,7 @@ public class Example2Controller {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }).toList(), exampleService.explain(filter));
+                }).toList(), exampleService.explain(filters));
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
     }
 
