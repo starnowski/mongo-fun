@@ -42,9 +42,13 @@ public class Example2StaticEdmProvider extends CsdlAbstractEdmProvider {
                 .setName(ENTITY_TYPE_NAME)
                 .setProperties(Arrays.asList(
                         new CsdlProperty().setName("plainString")
-                                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()),
+                        new CsdlProperty().setName("smallInteger")
+                                .setType(EdmPrimitiveTypeKind.Single.getFullQualifiedName())
                 ))
-                .setKey(Collections.singletonList(new CsdlPropertyRef().setName("plainString")));
+                //TODO set _id guid
+//                .setKey(Collections.singletonList(new CsdlPropertyRef().setName("plainString")))
+                ;
 
         // --- Define entity set ---
         CsdlEntitySet entitySet = new CsdlEntitySet()

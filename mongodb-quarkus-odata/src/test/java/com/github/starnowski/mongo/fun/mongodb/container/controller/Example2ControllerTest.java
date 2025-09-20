@@ -66,7 +66,8 @@ class Example2ControllerTest {
                 Arguments.of(List.of("tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'"), "examples/query/responses/example2_1.json"),
                 Arguments.of(List.of("plainString eq 'Some text'"), "examples/query/responses/example2_2.json"),
                 Arguments.of(List.of("startswith(plainString,'So')"), "examples/query/responses/example2_2.json"),
-                Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json")
+                Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json"),
+                Arguments.of(Arrays.asList("startswith(plainString,'Some t')", "smallInteger eq -1188957731"), "examples/query/responses/example2_2.json")
         );
     }
 
