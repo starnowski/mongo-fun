@@ -8,6 +8,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OpenApiToODataMapper {
 
@@ -29,12 +30,16 @@ public class OpenApiToODataMapper {
         Map<String, String> mainEntityProperties = new HashMap<>();
         enrichWithTypeDefinitions(oasSchema, mainEntityProperties);
 
-        return new OpenApiToODataMapperResult(Map.copyOf(mainEntityProperties));
+        return new OpenApiToODataMapperResult(
+                mainEntityProperties
+                .entrySet().stream().filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                );
     }
 
-    private void enrichWithTypeDefinitions(Schema<?> schema, Map<String, String> mainEntityProperties) {
+    private String enrichWithTypeDefinitions(Schema<?> schema, Map<String, String> mainEntityProperties) {
         if (schema == null)
-            return;
+            return null;
 
         // Handle polymorphic schemas
         if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
@@ -44,6 +49,7 @@ public class OpenApiToODataMapper {
                 //TODO
             }
             //TODO
+            return null;
         }
 
         if ((schema.getOneOf() != null && !schema.getOneOf().isEmpty()) ||
@@ -60,6 +66,7 @@ public class OpenApiToODataMapper {
             }
             // fallback
             //TODO
+            return null;
         }
 
         String type = schema.getType();
@@ -68,16 +75,16 @@ public class OpenApiToODataMapper {
         if (schema.getProperties() != null) {
             Map<String, Object> newMap = new LinkedHashMap<>();
             schema.getProperties() .forEach((k, v) -> {
-                //TODO
-                enrichWithTypeDefinitions(v, mainEntityProperties);
+                mainEntityProperties.put(k, enrichWithTypeDefinitions(v, mainEntityProperties));
             });
             //TODO
         } else if (schema.getItems() != null) {
             enrichWithTypeDefinitions(schema.getItems(), mainEntityProperties);
             //TODO
         } else {
-            mainEntityProperties.put(schema.getName(), mapToODataType(type, format));
+            return mapToODataType(type, format);
         }
+        return null;
     }
 
     /**

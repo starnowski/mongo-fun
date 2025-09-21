@@ -26,11 +26,10 @@ public class Example2StaticEdmSupplier {
     private final Edm EDM;
 
 
-    public Example2StaticEdmSupplier() {
-
-
-
-        this.EDM = new EdmProviderImpl(new Example2StaticEdmProvider());
+    public Example2StaticEdmSupplier() throws Exception {
+        OpenApiToODataMapper openApiToODataMapper = new OpenApiToODataMapper();
+        OpenApiToODataMapper.OpenApiToODataMapperResult odataConfig = openApiToODataMapper.returnOpenApiToODataConfiguration("src/main/resources/example2_openapi.yaml", "Example2");
+        this.EDM = new EdmProviderImpl(new GenericEdmProvider(new GenericEdmProvider.GenericEdmProviderProperties("Example2", "examples2"), odataConfig));
     }
 
     public Edm get() {
