@@ -1,22 +1,31 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
 import com.mongodb.client.model.Filters;
-import org.apache.olingo.commons.api.edm.EdmEnumType;
-import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.bson.BsonDocument;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     public static final String CUSTOM_LITERAL_VALUE_PROPERTY = "$odata.literal";
     public static final String ODATA_MEMBER_PROPERTY = "$odata.member";
+    public static final String ODATA_MEMBER_TYPE_PROPERTY = "$odata.member.type";
+    private final Edm edm;
+
+    public MongoFilterVisitor(Edm edm) {
+        this.edm = edm;
+    }
 
     public static Document literal(Object value) {
         return new Document(CUSTOM_LITERAL_VALUE_PROPERTY, value);
@@ -51,7 +60,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private Document prepareMemberDocument(String field) {
-        return new Document(ODATA_MEMBER_PROPERTY, field);
+        Optional<EdmEntityType> entityType = edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
+        Document result = new Document(ODATA_MEMBER_PROPERTY, field);
+        if (entityType.isPresent()) {
+            EdmElement property = entityType.get().getProperty(field);
+            if (property != null) {
+                result.append(ODATA_MEMBER_TYPE_PROPERTY, property.getType().getFullQualifiedName().toString());
+            }
+        }
+        return result;
     }
 
     // --- Binary operators ---
@@ -133,6 +150,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     private Bson combineEq(Bson left, Bson right) {
         String field = extractField(left);
         Object value = extractValueObj(right);
+        String type = extractFieldType(left);
+        value = tryConvertValueByEdmType(value, type);
         return field == null ? new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value))) : Filters.eq(field, value);
     }
 
@@ -140,6 +159,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                 java.util.function.BiFunction<String, Object, Bson> fn) {
         String field = extractField(left);
         Object value = extractValueObj(right);
+        String type = extractFieldType(left);
+        value = tryConvertValueByEdmType(value, type);
         return fn.apply(field, value);
     }
 
@@ -154,6 +175,20 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     private Object extractValueObj(Bson bson) {
         return bson.toBsonDocument().get(CUSTOM_LITERAL_VALUE_PROPERTY);
+    }
+
+    private String extractFieldType(Bson field) {
+        BsonDocument document = field.toBsonDocument();
+        return document.containsKey(ODATA_MEMBER_TYPE_PROPERTY) ? document.get(ODATA_MEMBER_TYPE_PROPERTY).asString().getValue() : null;
+    }
+
+    private Object tryConvertValueByEdmType(Object value, String type) {
+        if (value instanceof String && type != null) {
+            return ODataToBsonConverter.toBsonValue((String) value, type);
+        } else if (value instanceof BsonString && type != null) {
+            return ODataToBsonConverter.toBsonValue(((BsonString) value).asString().getValue(), type);
+        }
+        return value;
     }
 
     // --- Not used in this example ---

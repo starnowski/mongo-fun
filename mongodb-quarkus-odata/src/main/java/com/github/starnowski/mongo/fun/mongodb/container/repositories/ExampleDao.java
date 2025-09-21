@@ -111,7 +111,7 @@ public class ExampleDao extends AbstractDao<Document> {
 
             FilterOption filterOption = uriInfo.getFilterOption();
             if (filterOption != null) {
-                Bson bsonFilter = ODataToMongoParser.parseFilter(uriInfo);
+                Bson bsonFilter = ODataToMongoParser.parseFilter(uriInfo, example2StaticEdmSupplier.get());
                 pipeline.add(Aggregates.match(Filters.and(bsonFilter)));
             }
 
