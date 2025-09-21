@@ -137,10 +137,18 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     private Bson visitMethodWithOneParameter(MethodKind methodCall, List<Bson> parameters) {
         String field = extractField(parameters.get(0));
-
+        Object value = extractValueObj(parameters.get(0));
+        String type = extractFieldType(parameters.get(0));
+        value = tryConvertValueByEdmType(value, type);
+        Object passedValue = null;
+        if (field != null) {
+            passedValue = "$" + field;
+        } else if (value != null){
+            passedValue = value;
+        }
         switch (methodCall) {
             case TOLOWER:
-                return new Document("$toLower", "$" + field);
+                return new Document("$toLower", passedValue);
             default:
                 throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
