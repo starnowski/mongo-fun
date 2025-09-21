@@ -1,16 +1,37 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
 import com.github.starnowski.mongo.fun.mongodb.container.filters.OpenApiJsonMapper;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class OpenApiToODataMapper {
 
     public record OpenApiToODataMapperResult(Map<String, String> mainEntityProperties) {}
+
+    public OpenApiToODataMapperResult returnOpenApiToODataConfiguration(
+            String openApiSpec,
+            String schemaRef
+    ) throws Exception {
+        // 1. Load OpenAPI spec
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(Files.readString(Path.of(openApiSpec)), null, null).getOpenAPI();
+        if (openAPI == null) {
+            throw new IllegalArgumentException("Invalid OpenAPI spec");
+        }
+
+        // 2. Get schema by ref (e.g. "#/components/schemas/MyType")
+        String schemaName = schemaRef.replace("#/components/schemas/", "");
+        Schema<?> oasSchema = openAPI.getComponents().getSchemas().get(schemaName);
+        Map<String, String> mainEntityProperties = new HashMap<>();
+        enrichWithTypeDefinitions(oasSchema, mainEntityProperties);
+
+        // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
+        return new OpenApiToODataMapperResult(Map.copyOf(mainEntityProperties));
+    }
 
     private void enrichWithTypeDefinitions(Schema<?> schema, Map<String, String> mainEntityProperties) {
         if (schema == null)
