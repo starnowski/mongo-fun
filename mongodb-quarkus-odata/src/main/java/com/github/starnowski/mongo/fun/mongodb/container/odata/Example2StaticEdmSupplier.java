@@ -27,6 +27,9 @@ public class Example2StaticEdmSupplier {
 
 
     public Example2StaticEdmSupplier() {
+
+
+
         this.EDM = new EdmProviderImpl(new Example2StaticEdmProvider());
     }
 

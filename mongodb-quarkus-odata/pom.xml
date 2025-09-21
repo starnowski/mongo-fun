@@ -174,6 +174,24 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.43.0</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal> <!-- Check if code meets formatting -->
+                                <goal>apply</goal> <!-- Apply formatting -->
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <java>
+                            <googleJavaFormat/>
+                        </java>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.1.2</version> <!-- or latest 3.x -->

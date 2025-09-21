@@ -29,7 +29,6 @@ public class OpenApiToODataMapper {
         Map<String, String> mainEntityProperties = new HashMap<>();
         enrichWithTypeDefinitions(oasSchema, mainEntityProperties);
 
-        // 7. Post-process for UUIDs, Dates (Jackson modules handle java.time)
         return new OpenApiToODataMapperResult(Map.copyOf(mainEntityProperties));
     }
 
