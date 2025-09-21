@@ -39,6 +39,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest.TEST_DATABASE;
@@ -60,6 +61,28 @@ class Example2ControllerTest {
         );
     }
 
+    private static String prepareResponseForQueryWithPlainStringProperties(String... properties){
+        return """
+                {
+                  "results": [
+                    %s
+                  ]
+                }
+                """
+                .formatted(Stream.of(properties)
+                        .map("""
+                                                {
+                                                      "plainString": "%s"
+                                                }
+                                        """::formatted
+                                ).collect(Collectors.joining("\n,"))
+                );
+
+//        {
+//            "plainString": "eOMtThyhVNLWUZNRcBaQKxI"
+//        }
+    }
+
     public static Stream<Arguments> provideShouldReturnResponseBasedOnFilters() {
         return Stream.of(
                 Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'"), "examples/query/responses/example2_1.json"),
@@ -70,6 +93,14 @@ class Example2ControllerTest {
                 Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json"),
                 Arguments.of(Arrays.asList("startswith(plainString,'Some t')", "smallInteger eq -1188957731"), "examples/query/responses/example2_2.json"),
                 Arguments.of(Arrays.asList("timestamp ge 2024-07-20T10:00:00.00Z", "timestamp le 2024-07-20T20:00:00.00Z"), "examples/query/responses/example2_1.json")
+        );
+    }
+
+    public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFilters() {
+        return Stream.of(
+                Arguments.of(Arrays.asList("uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
+                        "Some text",
+                        "Poem"))
         );
     }
 
@@ -363,5 +394,25 @@ class Example2ControllerTest {
         // THEN
         JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
     }
-    //MongoSetup
+
+    @ParameterizedTest
+    @MethodSource({"provideShouldReturnResponseStringBasedOnFilters"})
+    @MongoSetup(mongoDocuments = {
+            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples")
+    })
+    public void provideShouldReturnResponseStringBasedOnFilters(List<String> filters, String expectedResponse) throws IOException, JSONException {
+        // WHEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .queryParams(Map.of("$filter", filters))
+                .get("/examples2/simple-query")
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+    }
+
 }
