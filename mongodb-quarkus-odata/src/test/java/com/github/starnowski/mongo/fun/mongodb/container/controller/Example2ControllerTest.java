@@ -85,17 +85,18 @@ class Example2ControllerTest {
 
     public static Stream<Arguments> provideShouldReturnResponseBasedOnFilters() {
         return Stream.of(
-                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'"), "examples/query/responses/example2_1.json"),
-                Arguments.of(List.of("tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'"), "examples/query/responses/example2_1.json"),
-                Arguments.of(List.of("tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')"), "examples/query/responses/example2_1.json"),
-                Arguments.of(List.of("plainString eq 'Some text'"), "examples/query/responses/example2_2.json"),
-                Arguments.of(List.of("startswith(plainString,'So')"), "examples/query/responses/example2_2.json"),
-                Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json"),
-                Arguments.of(Arrays.asList("startswith(plainString,'Some t')", "smallInteger eq -1188957731"), "examples/query/responses/example2_2.json"),
-                Arguments.of(List.of("startswith(plainString,'Po') or smallInteger eq -113"), "examples/query/responses/example2_3.json"),
-                Arguments.of(Arrays.asList("timestamp ge 2024-07-20T10:00:00.00Z", "timestamp le 2024-07-20T20:00:00.00Z"), "examples/query/responses/example2_1.json"),
-                Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), "examples/query/responses/example2_1.json"),
-                Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "password eq 'password1'"), "examples/query/responses/example2_1.json")
+                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(List.of("tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(List.of("tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(List.of("plainString eq 'Some text'"), "examples/query/responses/example2_2.json", "COLLSCAN"),
+                Arguments.of(List.of("startswith(plainString,'So')"), "examples/query/responses/example2_2.json", "COLLSCAN"),
+                Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json", "COLLSCAN"),
+                Arguments.of(Arrays.asList("startswith(plainString,'Some t')", "smallInteger eq -1188957731"), "examples/query/responses/example2_2.json", "COLLSCAN"),
+                Arguments.of(List.of("startswith(plainString,'Po') or smallInteger eq -113"), "examples/query/responses/example2_3.json", "SUBPLAN"),
+                Arguments.of(Arrays.asList("timestamp ge 2024-07-20T10:00:00.00Z", "timestamp le 2024-07-20T20:00:00.00Z"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "SUBPLAN")
         );
     }
 
@@ -416,6 +417,32 @@ class Example2ControllerTest {
 
         // THEN
         JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+    }
+
+    @ParameterizedTest
+    @MethodSource({"provideShouldReturnResponseBasedOnFilters"})
+    @MongoSetup(mongoDocuments = {
+            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples")
+    })
+    public void shouldReturnResponseWithFirstStageQueryPlannerWinningPlanBasedOnFilters(List<String> filters, String expectedResponseFilePath, String firstStageWinningPlan) throws IOException, JSONException {
+        // GIVEN
+        String jsonWithWinningPlanProperty = """
+                {
+                    "winningPlan": "%s"
+                }
+                """.formatted(firstStageWinningPlan);
+        // WHEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .queryParams(Map.of("$filter", filters))
+                .get("/examples2/simple-query")
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        JSONAssert.assertEquals(jsonWithWinningPlanProperty, getResponse.asString(), false);
     }
 
 }
