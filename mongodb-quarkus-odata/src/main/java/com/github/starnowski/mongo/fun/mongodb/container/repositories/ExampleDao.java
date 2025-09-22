@@ -53,13 +53,14 @@ public class ExampleDao extends AbstractDao<Document> {
         Document explain = getCollection().aggregate(pipeline).explain();
 
         // Navigate to winning plan
-        Document queryPlanner = (Document) explain.get("stages", List.of())
-                .stream()
-                .filter(o -> ((Document) o).containsKey("$cursor"))
-                .map(o -> (Document) o)
-                .findFirst()
-                .map(o -> (Document) ((Document) o.get("$cursor")).get("queryPlanner"))
-                .orElse(null);
+        Document queryPlanner = (Document) explain.get("queryPlanner");
+//                (Document) explain.get("stages", List.of())
+//                .stream()
+//                .filter(o -> ((Document) o).containsKey("$cursor"))
+//                .map(o -> (Document) o)
+//                .findFirst()
+//                .map(o -> (Document) ((Document) o.get("$cursor")).get("queryPlanner"))
+//                .orElse(null);
 
         if (queryPlanner == null) {
             System.out.println("No query planner info found in explain output.");
