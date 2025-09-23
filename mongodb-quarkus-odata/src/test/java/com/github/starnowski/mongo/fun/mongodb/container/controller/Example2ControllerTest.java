@@ -96,7 +96,31 @@ class Example2ControllerTest {
                 Arguments.of(Arrays.asList("timestamp ge 2024-07-20T10:00:00.00Z", "timestamp le 2024-07-20T20:00:00.00Z"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
-                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN")
+                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+
+                // String functions
+                Arguments.of(List.of("tolower(plainString) eq 'poem'"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("toupper(plainString) eq 'POEM'"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("length(plainString) eq 4"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("trim(concat('  ', plainString, '  ')) eq 'Poem'"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+// Date functions
+                Arguments.of(List.of("year(birthDate) eq 2024"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("month(birthDate) eq 6"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("day(birthDate) eq 18"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("hour(timestamp) eq 10"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("minute(timestamp) eq 15"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("second(timestamp) eq 26"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+
+// Numeric functions
+                Arguments.of(List.of("ceiling(floatValue) eq 1"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("floor(floatValue) eq 0"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("round(floatValue) eq 1"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+// Boolean
+                Arguments.of(List.of("not(active) eq false"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+
+// Binary & UUID
+                Arguments.of(List.of("length(base64Data) eq 4"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("length(uuidProp) eq 16"), "examples/query/responses/example2_3.json", "COLLSCAN")
         );
     }
 
