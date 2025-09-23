@@ -22,21 +22,18 @@ public class ODataMongoFunctionMapper {
         ONE_ARGUMENT_FUNCTION_MAP.put("hour", "$hour");
         ONE_ARGUMENT_FUNCTION_MAP.put("minute", "$minute");
         ONE_ARGUMENT_FUNCTION_MAP.put("second", "$second");
-//        ONE_ARGUMENT_FUNCTION_MAP.put("date", "$dateTrunc (unit: day)");
         ONE_ARGUMENT_FUNCTION_MAP.put("time", "<custom: {hour, minute, second}>");
 
-        // Date constants
-        ZERO_ARGUMENT_FUNCTION_MAP.put("mindatetime", "ISODate(\"0001-01-01T00:00:00Z\")");
-        ZERO_ARGUMENT_FUNCTION_MAP.put("maxdatetime", "ISODate(\"9999-12-31T23:59:59.999Z\")");
-        ZERO_ARGUMENT_FUNCTION_MAP.put("now", "$$NOW");
 
         // Math
         ONE_ARGUMENT_FUNCTION_MAP.put("round", "$round");
         ONE_ARGUMENT_FUNCTION_MAP.put("floor", "$floor");
         ONE_ARGUMENT_FUNCTION_MAP.put("ceiling", "$ceil");
 
-        // Geo
-//        ONE_ARGUMENT_FUNCTION_MAP.put("geo.length", "<custom: geo length>");
+        // Date constants
+        ZERO_ARGUMENT_FUNCTION_MAP.put("mindatetime", "ISODate(\"0001-01-01T00:00:00Z\")");
+        ZERO_ARGUMENT_FUNCTION_MAP.put("maxdatetime", "ISODate(\"9999-12-31T23:59:59.999Z\")");
+        ZERO_ARGUMENT_FUNCTION_MAP.put("now", "$$NOW");
     }
 
     public static String toOneArgumentMongoOperator(String odataFunction) {
