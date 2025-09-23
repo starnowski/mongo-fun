@@ -6,13 +6,11 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -143,15 +141,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         Object passedValue = null;
         if (field != null) {
             passedValue = "$" + field;
-        } else if (value != null){
+        } else if (value != null) {
             passedValue = value;
         }
-        switch (methodCall) {
-            case TOLOWER:
-                return new Document("$toLower", passedValue);
-            default:
-                throw new UnsupportedOperationException("Method not supported: " + methodCall);
+        String mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperator(methodCall.toString());
+        if (mongoOperator == null) {
+            throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
+        return new Document(mongoOperator, passedValue);
     }
 
     // --- Helpers ---
