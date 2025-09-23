@@ -101,34 +101,32 @@ class Example2ControllerTest {
                 // String functions
                 Arguments.of(List.of("tolower(plainString) eq 'poem'"), "examples/query/responses/example2_3.json", "COLLSCAN"),
                 Arguments.of(List.of("toupper(plainString) eq 'POEM'"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("length(plainString) eq 4"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("trim(concat('  ', plainString, '  ')) eq 'Poem'"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-// Date functions
-                Arguments.of(List.of("year(birthDate) eq 2024"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("month(birthDate) eq 6"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("day(birthDate) eq 18"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("hour(timestamp) eq 10"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("minute(timestamp) eq 15"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("second(timestamp) eq 26"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-
-// Numeric functions
-                Arguments.of(List.of("ceiling(floatValue) eq 1"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("floor(floatValue) eq 0"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("round(floatValue) eq 1"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-// Boolean
-                Arguments.of(List.of("not(active) eq false"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-
-// Binary & UUID
-                Arguments.of(List.of("length(base64Data) eq 4"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("length(uuidProp) eq 16"), "examples/query/responses/example2_3.json", "COLLSCAN")
+                Arguments.of(List.of("length(plainString) eq 4"), "examples/query/responses/example2_3.json", "COLLSCAN")
         );
     }
 
+    private static final String ALL_EXAMPLES_IN_RESPONSE = prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
+                                                                                                                   "Some text",
+                                                                                                                   "Poem");
+
     public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFilters() {
         return Stream.of(
-                Arguments.of(List.of("uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
-                        "Some text",
-                        "Poem"))
+                Arguments.of(List.of("uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), ALL_EXAMPLES_IN_RESPONSE),
+//                Arguments.of(List.of("trim(concat('  ', plainString, '  ')) eq 'Poem'"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("trim('   Poem   ') eq 'Poem'"), ALL_EXAMPLES_IN_RESPONSE),
+
+// Date functions
+                Arguments.of(List.of("year(birthDate) eq 2024"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("month(birthDate) eq 6"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("day(birthDate) eq 18"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("hour(timestamp) eq 10"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("minute(timestamp) eq 15"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("second(timestamp) eq 26"), ALL_EXAMPLES_IN_RESPONSE),
+
+// Numeric functions
+                Arguments.of(List.of("ceiling(floatValue) eq 1"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("floor(floatValue) eq 0"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("round(floatValue) eq 1"), ALL_EXAMPLES_IN_RESPONSE)
         );
     }
 

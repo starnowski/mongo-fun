@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -146,6 +147,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
         String mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperator(methodCall.toString());
         if (mongoOperator == null) {
+            switch (methodCall) {
+                case TRIM:
+                    return new Document("$trim", new Document("input", value));
+            }
             throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
         return new Document(mongoOperator, passedValue);

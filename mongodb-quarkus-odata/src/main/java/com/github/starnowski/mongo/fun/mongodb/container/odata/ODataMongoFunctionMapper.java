@@ -13,7 +13,7 @@ public class ODataMongoFunctionMapper {
         ONE_ARGUMENT_FUNCTION_MAP.put("length", "$strLenCP");
         ONE_ARGUMENT_FUNCTION_MAP.put("tolower", "$toLower");
         ONE_ARGUMENT_FUNCTION_MAP.put("toupper", "$toUpper");
-        ONE_ARGUMENT_FUNCTION_MAP.put("trim", "$trim");
+//        ONE_ARGUMENT_FUNCTION_MAP.put("trim", "$trim");
 
         // Date/Time functions
         ONE_ARGUMENT_FUNCTION_MAP.put("year", "$year");
