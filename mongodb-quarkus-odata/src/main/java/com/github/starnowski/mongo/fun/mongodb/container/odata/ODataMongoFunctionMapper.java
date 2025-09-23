@@ -22,7 +22,6 @@ public class ODataMongoFunctionMapper {
         ONE_ARGUMENT_FUNCTION_MAP.put("hour", "$hour");
         ONE_ARGUMENT_FUNCTION_MAP.put("minute", "$minute");
         ONE_ARGUMENT_FUNCTION_MAP.put("second", "$second");
-        ONE_ARGUMENT_FUNCTION_MAP.put("time", "<custom: {hour, minute, second}>");
 
 
         // Math
