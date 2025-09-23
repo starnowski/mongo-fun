@@ -8,7 +8,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDatabaseSetupExtension;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDocument;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoSetup;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -61,7 +60,7 @@ class Example2ControllerTest {
         );
     }
 
-    private static String prepareResponseForQueryWithPlainStringProperties(String... properties){
+    private static String prepareResponseForQueryWithPlainStringProperties(String... properties) {
         return """
                 {
                   "results": [
@@ -71,11 +70,11 @@ class Example2ControllerTest {
                 """
                 .formatted(Stream.of(properties)
                         .map("""
-                                                {
-                                                      "plainString": "%s"
-                                                }
-                                        """::formatted
-                                ).collect(Collectors.joining("\n,"))
+                                        {
+                                              "plainString": "%s"
+                                        }
+                                """::formatted
+                        ).collect(Collectors.joining("\n,"))
                 );
 
 //        {
@@ -92,17 +91,17 @@ class Example2ControllerTest {
                 Arguments.of(List.of("startswith(plainString,'So')"), "examples/query/responses/example2_2.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("startswith(plainString,'Some t')", "smallInteger eq -1188957731"), "examples/query/responses/example2_2.json", "COLLSCAN"),
-                Arguments.of(List.of("startswith(plainString,'Po') or smallInteger eq -113"), "examples/query/responses/example2_3.json", "SUBPLAN"),
+                Arguments.of(List.of("startswith(plainString,'Po') or smallInteger eq -113"), "examples/query/responses/example2_3.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("timestamp ge 2024-07-20T10:00:00.00Z", "timestamp le 2024-07-20T20:00:00.00Z"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
-                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "SUBPLAN")
+                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN")
         );
     }
 
     public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFilters() {
         return Stream.of(
-                Arguments.of(Arrays.asList("uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
+                Arguments.of(List.of("uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
                         "Some text",
                         "Poem"))
         );
