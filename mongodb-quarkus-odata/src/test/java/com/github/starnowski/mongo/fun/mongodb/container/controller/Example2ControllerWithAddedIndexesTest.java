@@ -63,11 +63,11 @@ class Example2ControllerWithAddedIndexesTest {
                 Arguments.of(List.of("startswith(plainString,'So')"), "examples/query/responses/example2_2.json", "FETCH + IXSCAN"),
                 Arguments.of(Arrays.asList("startswith(plainString,'So')", "plainString eq 'Some text'"), "examples/query/responses/example2_2.json", "FETCH + IXSCAN"),
                 Arguments.of(Arrays.asList("startswith(plainString,'Some t')", "smallInteger eq -1188957731"), "examples/query/responses/example2_2.json", "FETCH + IXSCAN"),
-                Arguments.of(List.of("startswith(plainString,'Po') or smallInteger eq -113"), "examples/query/responses/example2_3.json", "SUBPLAN"),
+                Arguments.of(List.of("startswith(plainString,'Po') or smallInteger eq -113"), "examples/query/responses/example2_3.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("timestamp ge 2024-07-20T10:00:00.00Z", "timestamp le 2024-07-20T20:00:00.00Z"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), "examples/query/responses/example2_1.json", "FETCH + IXSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "password eq 'password1'"), "examples/query/responses/example2_1.json", "FETCH + IXSCAN"),
-                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "SUBPLAN")
+                Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "FETCH + IXSCAN")
         );
     }
 

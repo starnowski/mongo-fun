@@ -17,10 +17,7 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -89,7 +86,38 @@ public class ExampleDao extends AbstractDao<Document> {
         } else {
             System.out.println("ℹ️ Other plan stage: " + stage);
         }
-        return stage;
+        return tryToResolveKnowStage(winningPlan);
+    }
+
+    private String tryToResolveKnowStage(Document winningPlan) {
+        String stage = winningPlan.getString("stage");
+        if ("IXSCAN".equals(stage) || "COLLSCAN".equals(stage)) {
+            return stage;
+        }
+        boolean fetchExists = "FETCH".equals(stage);
+        if (winningPlan.containsKey("inputStage")) {
+            String innerStage = tryToResolveKnowStage((Document) winningPlan.get("inputStage"));
+//            if ("COLLSCAN".equals(innerStage)) {
+//                return innerStage;
+//            }
+            if ("IXSCAN".equals(innerStage)) {
+                return fetchExists ? "FETCH + IXSCAN" : innerStage;
+            }
+            return innerStage;
+        } else if (winningPlan.containsKey("inputStages")) {
+            List<Document> inputStages = winningPlan.getList("inputStages", Document.class);
+            Set<String> stages = inputStages.stream().map(
+                    this::tryToResolveKnowStage).filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
+            if (stages.contains("COLLSCAN")) {
+                return "COLLSCAN";
+            }
+            if (stages.equals(Set.of("IXSCAN"))) {
+                return fetchExists ? "FETCH + IXSCAN" : "IXSCAN";
+            }
+            System.out.println("Resolved stages are: " + stages);
+            return stages.stream().findFirst().orElse(null);
+        }
+        return null;
     }
 
     private List<Bson> preparePipelineBasedOnFilter(List<String> filters) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
@@ -101,7 +129,7 @@ public class ExampleDao extends AbstractDao<Document> {
             UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                     .parseUri("examples2",
                             // https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html?utm_source=chatgpt.com
-                            /**
+                            /*
                              * "The same system query option MUST NOT be specified more than once for any resource."
                              */
                             "$filter=" +
