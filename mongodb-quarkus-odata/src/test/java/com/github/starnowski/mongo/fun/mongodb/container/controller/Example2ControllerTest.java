@@ -105,6 +105,14 @@ class Example2ControllerTest {
         );
     }
 
+    public static Stream<Arguments> provideShouldReturnResponseBasedOnFiltersArrayTypes() {
+        return Stream.of(
+                // Array with primitives
+                // tags (String)
+                Arguments.of(List.of("tags/any(t:t eq 'developer') or tags/any(t:t eq 'LLM')"), "examples/query/responses/example2_3.json", "COLLSCAN")
+        );
+    }
+
     private static final String ALL_EXAMPLES_IN_RESPONSE = prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
                                                                                                                    "Some text",
                                                                                                                    "Poem");
@@ -422,7 +430,10 @@ class Example2ControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideShouldReturnResponseStringBasedOnFilters"})
+    @MethodSource({
+            "provideShouldReturnResponseStringBasedOnFilters",
+            "provideShouldReturnResponseBasedOnFiltersArrayTypes"
+    })
     @MongoSetup(mongoDocuments = {
             @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
             @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
@@ -442,7 +453,7 @@ class Example2ControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideShouldReturnResponseBasedOnFilters"})
+    @MethodSource({"provideShouldReturnResponseBasedOnFilters", "provideShouldReturnResponseBasedOnFiltersArrayTypes"})
     @MongoSetup(mongoDocuments = {
             @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
             @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
