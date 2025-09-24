@@ -12,7 +12,11 @@ import java.util.stream.Collectors;
 
 public class OpenApiToODataMapper {
 
-    public record OpenApiToODataMapperResult(Map<String, String> mainEntityProperties) {}
+    public record ODataProperty(String name, String reference, String type, boolean isCollection) {}
+
+    public record ODataType(Map<String, ODataProperty> properties){}
+
+    public record OpenApiToODataMapperResult(Map<String, String> mainEntityProperties, ODataType mainEntity) {}
 
     public OpenApiToODataMapperResult returnOpenApiToODataConfiguration(
             String openApiSpec,
@@ -33,7 +37,8 @@ public class OpenApiToODataMapper {
         return new OpenApiToODataMapperResult(
                 mainEntityProperties
                 .entrySet().stream().filter(entry -> entry.getKey() != null && entry.getValue() != null)
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+                new ODataType(null)
                 );
     }
 
