@@ -33,13 +33,68 @@ public class OpenApiToODataMapper {
         Schema<?> oasSchema = openAPI.getComponents().getSchemas().get(schemaName);
         Map<String, String> mainEntityProperties = new HashMap<>();
         enrichWithTypeDefinitions(oasSchema, mainEntityProperties);
+        ODataType odataType = new ODataType(new HashMap<>());
+        enrichWithTypeDefinitions(oasSchema, odataType);
 
         return new OpenApiToODataMapperResult(
                 mainEntityProperties
                 .entrySet().stream().filter(entry -> entry.getKey() != null && entry.getValue() != null)
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-                new ODataType(null)
+                odataType
                 );
+    }
+
+    private ODataProperty enrichWithTypeDefinitions(Schema<?> schema, ODataType oDataType) {
+        if (schema == null)
+            return null;
+
+        // Handle polymorphic schemas
+        if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
+            Map<String, Object> merged = new LinkedHashMap<>();
+            for (Schema<?> subSchema : schema.getAllOf()) {
+                enrichWithTypeDefinitions(subSchema, oDataType);
+                //TODO
+            }
+            //TODO
+            return null;
+        }
+
+        if ((schema.getOneOf() != null && !schema.getOneOf().isEmpty()) ||
+                (schema.getAnyOf() != null && !schema.getAnyOf().isEmpty())) {
+
+            List<Schema> options = schema.getOneOf() != null ? schema.getOneOf() : schema.getAnyOf();
+            for (Schema<?> option : options) {
+                try {
+                    enrichWithTypeDefinitions(option, oDataType);
+                    //TODO
+                } catch (Exception ignored) {
+                    // try next option
+                }
+            }
+            // fallback
+            //TODO
+            return null;
+        }
+
+        String type = schema.getType();
+        String format = schema.getFormat();
+
+        if (schema.getProperties() != null) {
+            Map<String, Object> newMap = new LinkedHashMap<>();
+            schema.getProperties() .forEach((k, v) -> {
+                ODataProperty odata = enrichWithTypeDefinitions(v, oDataType);
+                oDataType.properties.put(k, new ODataProperty(k, k, odata.type, odata.isCollection));
+            });
+        } else if (schema.getItems() != null) {
+            if ("array".equals(schema.getType())) {
+                ODataProperty odata = enrichWithTypeDefinitions(schema.getItems(), oDataType);
+                return new ODataProperty(null, null, "Collection(%s)".formatted(odata.type), true);
+            }
+        } else {
+            String mappedType = mapToODataType(type, format);
+            return new ODataProperty(null, null, mappedType, false);
+        }
+        return null;
     }
 
     private String enrichWithTypeDefinitions(Schema<?> schema, Map<String, String> mainEntityProperties) {
