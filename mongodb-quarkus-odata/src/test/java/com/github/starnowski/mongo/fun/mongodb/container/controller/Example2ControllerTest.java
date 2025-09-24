@@ -96,7 +96,7 @@ class Example2ControllerTest {
 
                 // Array with primitives
                 // tags (String)
-                Arguments.of(List.of("tags/any(t: t eq 'developer') or tags/any(t: t eq 'LLM')"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("tags/any(t:t eq 'developer') or tags/any(t:t eq 'LLM')"), "examples/query/responses/example2_3.json", "COLLSCAN"),
 
                 // String functions
                 Arguments.of(List.of("tolower(plainString) eq 'poem'"), "examples/query/responses/example2_3.json", "COLLSCAN"),

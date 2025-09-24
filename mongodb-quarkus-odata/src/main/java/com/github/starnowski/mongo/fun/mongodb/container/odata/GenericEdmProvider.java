@@ -38,10 +38,12 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
         CsdlEntityType example2Type = new CsdlEntityType()
                 .setName(genericEdmProviderProperties.entityTypeName())
                 .setProperties(
-                        odataConfig.mainEntityProperties().entrySet().stream().map(
-                                entry -> new CsdlProperty().setName(entry.getKey())
-                                        .setType(entry.getValue())
-                        ).toList()
+//                        odataConfig.mainEntityProperties().entrySet().stream().map(
+//                                entry -> new CsdlProperty().setName(entry.getKey())
+//                                        .setType(entry.getValue())
+//                        ).toList()
+                        odataConfig.mainEntity().properties().entrySet().stream().map(entry -> new CsdlProperty().setName(entry.getKey()).setType(entry.getValue().type()).setCollection(entry.getValue().isCollection())).toList()
+
                 )
                 //TODO set _id guid
 //                .setKey(Collections.singletonList(new CsdlPropertyRef().setName("plainString")))
