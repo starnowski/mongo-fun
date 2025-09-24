@@ -76,10 +76,6 @@ class Example2ControllerTest {
                                 """::formatted
                         ).collect(Collectors.joining("\n,"))
                 );
-
-//        {
-//            "plainString": "eOMtThyhVNLWUZNRcBaQKxI"
-//        }
     }
 
     public static Stream<Arguments> provideShouldReturnResponseBasedOnFilters() {
@@ -97,6 +93,10 @@ class Example2ControllerTest {
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(Arrays.asList("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", "password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(List.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' or password eq 'password1'"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+
+                // Array with primitives
+                // tags (String)
+                Arguments.of(List.of("tags/any(t: t eq 'developer') or tags/any(t: t eq 'LLM')"), "examples/query/responses/example2_3.json", "COLLSCAN"),
 
                 // String functions
                 Arguments.of(List.of("tolower(plainString) eq 'poem'"), "examples/query/responses/example2_3.json", "COLLSCAN"),

@@ -79,8 +79,9 @@ public class OpenApiToODataMapper {
             });
             //TODO
         } else if (schema.getItems() != null) {
-            enrichWithTypeDefinitions(schema.getItems(), mainEntityProperties);
-            //TODO
+            if ("array".equals(schema.getType())) {
+                return "Collection(%s)".formatted(enrichWithTypeDefinitions(schema.getItems(), mainEntityProperties));
+            }
         } else {
             return mapToODataType(type, format);
         }
