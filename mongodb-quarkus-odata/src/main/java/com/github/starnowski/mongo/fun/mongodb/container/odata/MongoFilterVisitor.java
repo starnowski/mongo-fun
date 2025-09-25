@@ -4,6 +4,7 @@ import com.mongodb.client.model.Filters;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
 import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
 import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
@@ -249,31 +250,32 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         try {
             // Visit the inner expression
             Bson inner = expression.accept(this);
+            return inner;
 
-            if ("any".equalsIgnoreCase(lambdaFunction)) {
-                // Extract the array field from inner expression
-                String field = extractField(inner);
-                Object value = extractValueObj(inner);
-
-                // If the inner expression is just `t eq 'literal'`
-                if (field != null && value != null) {
-                    return Filters.eq(field, value);
-                }
-                //TODO
-                return inner;
-
-                // Generic fallback: use $elemMatch with the inner filter
+//            if ("any".equalsIgnoreCase(lambdaFunction)) {
+//                // Extract the array field from inner expression
+//                String field = extractField(inner);
+//                Object value = extractValueObj(inner);
+//
+//                // If the inner expression is just `t eq 'literal'`
+//                if (field != null && value != null) {
+//                    return Filters.eq(field, value);
+//                }
+//                //TODO
+////                return inner;
+//
+//                // Generic fallback: use $elemMatch with the inner filter
 //                return Filters.elemMatch(field, inner);
-            } else if ("all".equalsIgnoreCase(lambdaFunction)) {
-                String field = extractField(inner);
-                Object value = extractValueObj(inner);
-                if (field != null && value != null) {
-                    return Filters.all(field, value);
-                }
-                return Filters.all(field, inner);
-            }
-
-            throw new UnsupportedOperationException("Lambda function not supported: " + lambdaFunction);
+//            } else if ("all".equalsIgnoreCase(lambdaFunction)) {
+//                String field = extractField(inner);
+//                Object value = extractValueObj(inner);
+//                if (field != null && value != null) {
+//                    return Filters.all(field, value);
+//                }
+//                return Filters.all(field, inner);
+//            }
+//
+//            throw new UnsupportedOperationException("Lambda function not supported: " + lambdaFunction);
 
         } catch (ExpressionVisitException | ODataApplicationException e) {
             throw new RuntimeException(e);
