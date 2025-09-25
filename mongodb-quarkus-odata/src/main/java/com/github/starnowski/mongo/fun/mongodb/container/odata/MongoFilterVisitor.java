@@ -1,19 +1,20 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
-import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
+import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
@@ -21,9 +22,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public static final String ODATA_MEMBER_PROPERTY = "$odata.member";
     public static final String ODATA_MEMBER_TYPE_PROPERTY = "$odata.member.type";
     private final Edm edm;
+    private final Map<String, Bson> lambdaVariableAliases;
 
     public MongoFilterVisitor(Edm edm) {
+        this(edm, Map.of());
+    }
+
+    public MongoFilterVisitor(Edm edm, Map<String, Bson> lambdaVariableAliases) {
         this.edm = edm;
+        this.lambdaVariableAliases = lambdaVariableAliases;
     }
 
     public static Document literal(Object value) {
@@ -54,6 +61,21 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     // --- Members (fields) ---
     @Override
     public Bson visitMember(Member member) {
+        if (member.getResourcePath().getUriResourceParts().size() == 1) {
+            String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+            if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
+                return prepareMemberDocument(field, variable.getType());
+            } else {
+                return prepareMemberDocument(field);
+            }
+        } else {
+            String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+            UriResource last = member.getResourcePath().getUriResourceParts().get(member.getResourcePath().getUriResourceParts().size() - 1);
+            if (last instanceof UriResourceLambdaAny any) {
+                return visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+            }
+
+        }
         String field = member.getResourcePath().getUriResourceParts().get(0).toString();
         return prepareMemberDocument(field);
     }
@@ -67,6 +89,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 result.append(ODATA_MEMBER_TYPE_PROPERTY, property.getType().getFullQualifiedName().toString());
             }
         }
+        return result;
+    }
+
+    private Document prepareMemberDocument(String field, EdmType edmType) {
+        Document result = new Document(ODATA_MEMBER_PROPERTY, field);
+        result.append(ODATA_MEMBER_TYPE_PROPERTY, edmType.getFullQualifiedName().toString());
         return result;
     }
 
@@ -213,8 +241,39 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
-    public Bson visitLambdaExpression(String s, String s1, Expression expression) {
-        throw new UnsupportedOperationException();
+    public Bson visitLambdaExpression(String lambdaFunction, String lambdaVariable, Expression expression) {
+        try {
+            // Visit the inner expression
+            Bson inner = expression.accept(this);
+
+            if ("any".equalsIgnoreCase(lambdaFunction)) {
+                // Extract the array field from inner expression
+                String field = extractField(inner);
+                Object value = extractValueObj(inner);
+
+                // If the inner expression is just `t eq 'literal'`
+                if (field != null && value != null) {
+                    return Filters.eq(field, value);
+                }
+                //TODO
+                return inner;
+
+                // Generic fallback: use $elemMatch with the inner filter
+//                return Filters.elemMatch(field, inner);
+            } else if ("all".equalsIgnoreCase(lambdaFunction)) {
+                String field = extractField(inner);
+                Object value = extractValueObj(inner);
+                if (field != null && value != null) {
+                    return Filters.all(field, value);
+                }
+                return Filters.all(field, inner);
+            }
+
+            throw new UnsupportedOperationException("Lambda function not supported: " + lambdaFunction);
+
+        } catch (ExpressionVisitException | ODataApplicationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
