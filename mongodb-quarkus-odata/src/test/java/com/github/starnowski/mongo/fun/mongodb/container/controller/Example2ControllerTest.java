@@ -48,6 +48,9 @@ import static io.restassured.RestAssured.given;
 @ExtendWith(MongoDatabaseSetupExtension.class)
 class Example2ControllerTest {
 
+    private static final String ALL_EXAMPLES_IN_RESPONSE = prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
+            "Some text",
+            "Poem");
     private JavaTimeModule javaTimeModule;
     private EasyRandom generator;
     private ObjectMapper mapper;
@@ -112,10 +115,6 @@ class Example2ControllerTest {
                 Arguments.of(List.of("tags/any(t:t eq 'developer') or tags/any(t:t eq 'LLM')"), "examples/query/responses/example2_3.json", "COLLSCAN")
         );
     }
-
-    private static final String ALL_EXAMPLES_IN_RESPONSE = prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
-                                                                                                                   "Some text",
-                                                                                                                   "Poem");
 
     public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFilters() {
         return Stream.of(
@@ -407,7 +406,11 @@ class Example2ControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource({"provideShouldReturnResponseBasedOnFilters"})
+    @MethodSource({
+            "provideShouldReturnResponseBasedOnFilters",
+            "provideShouldReturnResponseBasedOnFiltersArrayTypes"
+
+    })
     @MongoSetup(mongoDocuments = {
             @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
             @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
@@ -431,8 +434,7 @@ class Example2ControllerTest {
 
     @ParameterizedTest
     @MethodSource({
-            "provideShouldReturnResponseStringBasedOnFilters",
-            "provideShouldReturnResponseBasedOnFiltersArrayTypes"
+            "provideShouldReturnResponseStringBasedOnFilters"
     })
     @MongoSetup(mongoDocuments = {
             @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),

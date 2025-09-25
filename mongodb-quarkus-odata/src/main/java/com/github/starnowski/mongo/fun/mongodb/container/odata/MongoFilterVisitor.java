@@ -64,15 +64,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (member.getResourcePath().getUriResourceParts().size() == 1) {
             String field = member.getResourcePath().getUriResourceParts().get(0).toString();
             if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
+                if (this.lambdaVariableAliases.containsKey(variable.getVariableName())) {
+                    return lambdaVariableAliases.get(variable.getVariableName());
+                }
                 return prepareMemberDocument(field, variable.getType());
             } else {
                 return prepareMemberDocument(field);
             }
         } else {
-            String field = member.getResourcePath().getUriResourceParts().get(0).toString();
             UriResource last = member.getResourcePath().getUriResourceParts().get(member.getResourcePath().getUriResourceParts().size() - 1);
             if (last instanceof UriResourceLambdaAny any) {
-                return visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+                MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm, Map.of(any.getLambdaVariable(), prepareMemberDocument(field)));
+                return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
             }
 
         }
