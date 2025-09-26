@@ -211,14 +211,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
         switch (methodCall) {
             case STARTSWITH:
-                return Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
             case ENDSWITH:
-                return Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
             case CONTAINS:
-                return Filters.regex(field, Pattern.compile(Pattern.quote(value)));
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
             default:
                 throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
+    }
+
+    private Bson prepareRegexMatchExpr(String field, String regex) {
+        return new Document("$regexMatch",
+                new Document("input", field)
+                        .append("regex", regex)
+                        .append("options", "i")
+        );
     }
 
     private Bson visitMethodWithOneParameter(MethodKind methodCall, List<Bson> parameters) {
@@ -256,7 +264,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         Object value = extractValueObj(right);
         String type = extractFieldType(left);
         value = tryConvertValueByEdmType(value, type);
-        if (field == null){
+        if (field == null) {
             return this.context.isExprMode() ? new Document("$eq", Arrays.asList(left, value == null ? right : value)) : new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value)));
         }
         return Filters.eq(field, value);
