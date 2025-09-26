@@ -69,6 +69,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             String field = member.getResourcePath().getUriResourceParts().get(0).toString();
             if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
                 if (this.context.isLambdaContext() && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
+                    if (this.context.isExprMode()) {
+                        return prepareMemberDocument("$$" + variable.getVariableName(), variable.getType());
+                    }
                     return this.context.lambdaVariableAliases().get(variable.getVariableName());
                 }
                 return prepareMemberDocument(field, variable.getType());
@@ -225,7 +228,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         value = tryConvertValueByEdmType(value, type);
         Object passedValue = null;
         if (field != null) {
-            passedValue = "$" + field;
+            passedValue = this.context.isExprMode() ? field : "$" + field;
         } else if (value != null) {
             passedValue = value;
         }
