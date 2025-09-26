@@ -114,7 +114,9 @@ class Example2ControllerTest {
                 // tags (String)
                 Arguments.of(List.of("tags/any(t:t eq 'developer') or tags/any(t:t eq 'LLM')"), "examples/query/responses/example2_3.json", "COLLSCAN"),
                 Arguments.of(List.of("tags/any(t:startswith(t,'dev'))"), "examples/query/responses/example2_3.json", "COLLSCAN"),
-                Arguments.of(List.of("tags/any(t:startswith(t,'dev') and length(t) eq 9)"), "examples/query/responses/example2_3.json", "COLLSCAN")
+                Arguments.of(List.of("tags/any(t:startswith(t,'dev') and length(t) eq 9)"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("tags/any(t:length(t) eq 9)"), "examples/query/responses/example2_3.json", "COLLSCAN"),
+                Arguments.of(List.of("tags/any(t:tolower(t) eq 'developer')"), "examples/query/responses/example2_3.json", "COLLSCAN")
         );
     }
 

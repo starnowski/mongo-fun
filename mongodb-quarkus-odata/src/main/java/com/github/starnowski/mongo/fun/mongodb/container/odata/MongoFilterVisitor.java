@@ -84,7 +84,26 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                 .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
                                 .isLambdaContext(true)
                                 .build());
-                return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                try {
+                    return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                } catch (ExpressionOperantRequiredException ex) {
+//                    $expr: {
+//                        $eq: [
+//                        { $size: "$tags" },
+//                        {
+//                            $size: {
+//                                $filter: {
+//                                    input: "$tags",
+//                                            as: "t",
+//                                            cond: { $gt: [ { $strLenCP: "$$t" }, 3 ] }
+//                                }
+//                            }
+//                        }
+//        ]
+//                    }
+
+                }
+
             }
 
         }
@@ -185,15 +204,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         } else if (value != null) {
             passedValue = value;
         }
-        String mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperator(methodCall.toString());
+        ODataMongoFunctionMapper.MappedFunction mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperator(methodCall.toString());
         if (mongoOperator != null) {
-            return new Document(mongoOperator, passedValue);
-        }
-        mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperatorExprRequired(methodCall.toString());
-        if (mongoOperator != null) {
-            //TODO
-        }
-        if (mongoOperator == null) {
+            if (this.context.isLambdaContext() && !mongoOperator.isResultBoolean()) {
+                if (!this.context.isExprMode()) {
+                    throw new ExpressionOperantRequiredException("Operant [%s] mapped from [%s] requires expr".formatted(mongoOperator.mappedFunction(), methodCall.toString()));
+                }
+            }
+            return new Document(mongoOperator.mappedFunction(), passedValue);
+        } else {
 
             switch (methodCall) {
                 case TRIM:
@@ -201,7 +220,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             }
             throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
-        return new Document(mongoOperator, passedValue);
     }
 
     // --- Helpers ---
