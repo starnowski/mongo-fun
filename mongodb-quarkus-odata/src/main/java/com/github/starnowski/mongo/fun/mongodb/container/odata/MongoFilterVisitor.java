@@ -1,10 +1,10 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
 import com.mongodb.client.model.Filters;
+import lombok.Builder;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
 import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
 import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
@@ -13,9 +13,11 @@ import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
@@ -23,15 +25,16 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public static final String ODATA_MEMBER_PROPERTY = "$odata.member";
     public static final String ODATA_MEMBER_TYPE_PROPERTY = "$odata.member.type";
     private final Edm edm;
-    private final Map<String, Bson> lambdaVariableAliases;
+    private final MongoFilterVisitorContext context;
+
 
     public MongoFilterVisitor(Edm edm) {
-        this(edm, Map.of());
+        this(edm, MongoFilterVisitorContext.builder().build());
     }
 
-    public MongoFilterVisitor(Edm edm, Map<String, Bson> lambdaVariableAliases) {
+    public MongoFilterVisitor(Edm edm, MongoFilterVisitorContext context) {
         this.edm = edm;
-        this.lambdaVariableAliases = lambdaVariableAliases;
+        this.context = context;
     }
 
     public static Document literal(Object value) {
@@ -65,8 +68,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (member.getResourcePath().getUriResourceParts().size() == 1) {
             String field = member.getResourcePath().getUriResourceParts().get(0).toString();
             if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
-                if (this.lambdaVariableAliases.containsKey(variable.getVariableName())) {
-                    return lambdaVariableAliases.get(variable.getVariableName());
+                if (this.context.isLambdaContext() && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
+                    return this.context.lambdaVariableAliases().get(variable.getVariableName());
                 }
                 return prepareMemberDocument(field, variable.getType());
             } else {
@@ -76,7 +79,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             UriResource last = member.getResourcePath().getUriResourceParts().get(member.getResourcePath().getUriResourceParts().size() - 1);
             if (last instanceof UriResourceLambdaAny any) {
                 String field = member.getResourcePath().getUriResourceParts().get(0).toString();
-                MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm, Map.of(any.getLambdaVariable(), prepareMemberDocument(field)));
+                MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                        MongoFilterVisitorContext.builder()
+                                .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                .isLambdaContext(true)
+                                .build());
                 return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
             }
 
@@ -179,7 +186,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             passedValue = value;
         }
         String mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperator(methodCall.toString());
+        if (mongoOperator != null) {
+            return new Document(mongoOperator, passedValue);
+        }
+        mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperatorExprRequired(methodCall.toString());
+        if (mongoOperator != null) {
+            //TODO
+        }
         if (mongoOperator == null) {
+
             switch (methodCall) {
                 case TRIM:
                     return new Document("$trim", new Document("input", value));
@@ -295,5 +310,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     @Override
     public Bson visitBinaryOperator(BinaryOperatorKind binaryOperatorKind, Bson bson, List<Bson> list) throws ExpressionVisitException, ODataApplicationException {
         return null;
+    }
+
+    @Builder
+    public record MongoFilterVisitorContext(boolean isLambdaContext, Map<String, Bson> lambdaVariableAliases,
+                                            boolean isExprMode) {
+    }
+
+    private static class ExpressionOperantRequiredException extends RuntimeException {
+
+        public ExpressionOperantRequiredException(String message) {
+            super(message);
+        }
     }
 }

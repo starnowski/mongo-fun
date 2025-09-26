@@ -7,10 +7,11 @@ public class ODataMongoFunctionMapper {
 
     private static final Map<String, String> ZERO_ARGUMENT_FUNCTION_MAP = new HashMap<>();
     private static final Map<String, String> ONE_ARGUMENT_FUNCTION_MAP = new HashMap<>();
+    private static final Map<String, String> ONE_ARGUMENT_FUNCTION_MAP_EXPR_REQUIRED = new HashMap<>();
 
     static {
         // String functions
-        ONE_ARGUMENT_FUNCTION_MAP.put("length", "$strLenCP");
+        ONE_ARGUMENT_FUNCTION_MAP_EXPR_REQUIRED.put("length", "$strLenCP");
         ONE_ARGUMENT_FUNCTION_MAP.put("tolower", "$toLower");
         ONE_ARGUMENT_FUNCTION_MAP.put("toupper", "$toUpper");
 //        ONE_ARGUMENT_FUNCTION_MAP.put("trim", "$trim");
@@ -37,6 +38,10 @@ public class ODataMongoFunctionMapper {
 
     public static String toOneArgumentMongoOperator(String odataFunction) {
         return ONE_ARGUMENT_FUNCTION_MAP.getOrDefault(odataFunction.toLowerCase(), null);
+    }
+
+    public static String toOneArgumentMongoOperatorExprRequired(String odataFunction) {
+        return ONE_ARGUMENT_FUNCTION_MAP_EXPR_REQUIRED.getOrDefault(odataFunction.toLowerCase(), null);
     }
 
     // Example usage
