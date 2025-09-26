@@ -79,14 +79,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             UriResource last = member.getResourcePath().getUriResourceParts().get(member.getResourcePath().getUriResourceParts().size() - 1);
             if (last instanceof UriResourceLambdaAny any) {
                 String field = member.getResourcePath().getUriResourceParts().get(0).toString();
-                MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
-                        MongoFilterVisitorContext.builder()
-                                .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-                                .isLambdaContext(true)
-                                .build());
                 try {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaContext(true)
+                                    .build());
                     return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                 } catch (ExpressionOperantRequiredException ex) {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaContext(true)
+                                    .isExprMode(true)
+                                    .build());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                    return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
 //                    $expr: {
 //                        $eq: [
 //                        { $size: "$tags" },
@@ -109,6 +117,23 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
         String field = member.getResourcePath().getUriResourceParts().get(0).toString();
         return prepareMemberDocument(field);
+    }
+
+    private Bson prepareExprDocumentForAnyLambdaWithExpr(Bson innerPart, String field, String lambdaVariable) {
+        return new Document("$expr",
+                new Document("$gt", Arrays.asList(
+                        new Document("$size",
+                                new Document("$filter",
+                                        new Document("input", "$" + field)
+                                                .append("as", lambdaVariable)
+                                                .append("cond",
+                                                        innerPart
+                                                )
+                                )
+                        ),
+                        0
+                ))
+        );
     }
 
     private Document prepareMemberDocument(String field) {
@@ -228,7 +253,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         Object value = extractValueObj(right);
         String type = extractFieldType(left);
         value = tryConvertValueByEdmType(value, type);
-        return field == null ? new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value))) : Filters.eq(field, value);
+        if (field == null){
+            return this.context.isExprMode() ? new Document("$eq", Arrays.asList(left, value == null ? right : value)) : new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value)));
+        }
+        return Filters.eq(field, value);
     }
 
     private Bson combineFieldOp(Bson left, Bson right,
