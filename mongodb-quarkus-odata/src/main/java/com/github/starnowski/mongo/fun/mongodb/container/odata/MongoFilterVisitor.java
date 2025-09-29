@@ -88,6 +88,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                     .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
                                     .isLambdaAnyContext(true)
                                     .build());
+                    // TODO add similar method as prepareExprDocumentForAnyLambdaWithExpr but for elementMatch
                     return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                 } catch (ExpressionOperantRequiredException ex) {
                     MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
