@@ -68,7 +68,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (member.getResourcePath().getUriResourceParts().size() == 1) {
             String field = member.getResourcePath().getUriResourceParts().get(0).toString();
             if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
-                if (this.context.isLambdaContext() && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
+                if (this.context.isLambdaAnyContext() && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
                     if (this.context.isExprMode()) {
                         return prepareMemberDocument("$$" + variable.getVariableName(), variable.getType());
                     }
@@ -86,14 +86,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
                             MongoFilterVisitorContext.builder()
                                     .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-                                    .isLambdaContext(true)
+                                    .isLambdaAnyContext(true)
                                     .build());
                     return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                 } catch (ExpressionOperantRequiredException ex) {
                     MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
                             MongoFilterVisitorContext.builder()
                                     .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-                                    .isLambdaContext(true)
+                                    .isLambdaAnyContext(true)
                                     .isExprMode(true)
                                     .build());
                     Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
@@ -242,7 +242,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
         ODataMongoFunctionMapper.MappedFunction mongoOperator = ODataMongoFunctionMapper.toOneArgumentMongoOperator(methodCall.toString());
         if (mongoOperator != null) {
-            if (this.context.isLambdaContext() && !mongoOperator.isResultBoolean()) {
+            if (this.context.isLambdaAnyContext() && !mongoOperator.isResultBoolean()) {
                 if (!this.context.isExprMode()) {
                     throw new ExpressionOperantRequiredException("Operant [%s] mapped from [%s] requires expr".formatted(mongoOperator.mappedFunction(), methodCall.toString()));
                 }
@@ -370,7 +370,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Builder
-    public record MongoFilterVisitorContext(boolean isLambdaContext, Map<String, Bson> lambdaVariableAliases,
+    public record MongoFilterVisitorContext(boolean isLambdaAnyContext, Map<String, Bson> lambdaVariableAliases,
                                             boolean isExprMode) {
     }
 
