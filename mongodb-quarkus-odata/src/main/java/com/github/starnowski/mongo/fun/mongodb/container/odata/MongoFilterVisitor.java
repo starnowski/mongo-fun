@@ -88,8 +88,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                     .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
                                     .isLambdaAnyContext(true)
                                     .build());
-                    // TODO add similar method as prepareExprDocumentForAnyLambdaWithExpr but for elementMatch
-                    return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                    return prepareElementMatchDocumentForAnyLambda(innerObject, field);
                 } catch (ExpressionOperantRequiredException ex) {
                     MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
                             MongoFilterVisitorContext.builder()
@@ -99,20 +99,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                     .build());
                     Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                     return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
-//                    $expr: {
-//                        $eq: [
-//                        { $size: "$tags" },
-//                        {
-//                            $size: {
-//                                $filter: {
-//                                    input: "$tags",
-//                                            as: "t",
-//                                            cond: { $gt: [ { $strLenCP: "$$t" }, 3 ] }
-//                                }
-//                            }
-//                        }
-//        ]
-//                    }
 
                 }
 
@@ -137,6 +123,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         ),
                         0
                 ))
+        );
+    }
+
+    private Bson prepareElementMatchDocumentForAnyLambda(Bson innerPart, String field) {
+        return new Document(field,
+                new Document("$elemMatch",
+                        innerPart
+                )
         );
     }
 
