@@ -351,31 +351,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             Bson inner = expression.accept(this);
             return inner;
 
-//            if ("any".equalsIgnoreCase(lambdaFunction)) {
-//                // Extract the array field from inner expression
-//                String field = extractField(inner);
-//                Object value = extractValueObj(inner);
-//
-//                // If the inner expression is just `t eq 'literal'`
-//                if (field != null && value != null) {
-//                    return Filters.eq(field, value);
-//                }
-//                //TODO
-////                return inner;
-//
-//                // Generic fallback: use $elemMatch with the inner filter
-//                return Filters.elemMatch(field, inner);
-//            } else if ("all".equalsIgnoreCase(lambdaFunction)) {
-//                String field = extractField(inner);
-//                Object value = extractValueObj(inner);
-//                if (field != null && value != null) {
-//                    return Filters.all(field, value);
-//                }
-//                return Filters.all(field, inner);
-//            }
-//
-//            throw new UnsupportedOperationException("Lambda function not supported: " + lambdaFunction);
-
         } catch (ExpressionVisitException | ODataApplicationException e) {
             throw new RuntimeException(e);
         }

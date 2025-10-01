@@ -32,7 +32,7 @@ class ExampleDaoTest {
     @Inject
     private MongoClient mongoClient;
 
-    public static Stream<Arguments> provideTestPipeline() {
+    public static Stream<Arguments> provideTestPipelineThatFails() {
         return Stream.of(
                 Arguments.of(Aggregates.match(
                         Filters.elemMatch("tags",
@@ -61,12 +61,6 @@ class ExampleDaoTest {
                 ),
                 Arguments.of(Aggregates.match(
                                 Filters.elemMatch("tags",
-                                        new Document("$regex", "x").append("$options", "i")
-                                )),
-                        0
-                ),
-                Arguments.of(Aggregates.match(
-                                Filters.elemMatch("tags",
                                         Filters.and(
                                                 new Document("$eq", "x")
                                         )
@@ -88,10 +82,27 @@ class ExampleDaoTest {
         );
     }
 
+    public static Stream<Arguments> provideTestPipelineThatWorks() {
+        return Stream.of(
+                Arguments.of(Aggregates.match(
+                                Filters.elemMatch("tags",
+                                        new Document("$regex", "x").append("$options", "i")
+                                )),
+                        1
+                ),
+                Arguments.of(Aggregates.match(
+                                Filters.elemMatch("tags",
+                                        new Document("$regex", "v").append("$options", "i")
+                                                .append("$eq", "developer")
+                                )),
+                        1
+                )
+        );
+    }
 
     @ParameterizedTest
     @MethodSource({
-            "provideTestPipeline"
+            "provideTestPipelineThatFails"
 
     })
     @MongoSetup(mongoDocuments = {
@@ -99,7 +110,7 @@ class ExampleDaoTest {
             @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
             @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples")
     })
-    public void testPipeline(Bson matchStage, long expectedCount){
+    public void testPipelineThatFails(Bson matchStage, long expectedCount){
 
         // WHEN
         try {
@@ -110,7 +121,23 @@ class ExampleDaoTest {
             assertEquals(MongoCommandException.class, ex.getClass());
             assertEquals(2, ((MongoCommandException)ex).getErrorCode());
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource({
+            "provideTestPipelineThatWorks"
+
+    })
+    @MongoSetup(mongoDocuments = {
+            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples")
+    })
+    public void testPipeline(Bson matchStage, long expectedCount){
+
+        // WHEN
+            ArrayList<Document> documents = mongoClient.getDatabase(TEST_DATABASE).getCollection("examples").aggregate(List.of(matchStage)).into(new ArrayList<>());
         // THEN
-//        assertEquals(expectedCount, documents.size());
+        assertEquals(expectedCount, documents.size());
     }
 }
