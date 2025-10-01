@@ -188,8 +188,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     BsonDocument leftDoc = left.toBsonDocument();
                     BsonDocument rightDoc = right.toBsonDocument();
                     Document finalDOcument = new Document();
-                    enrichDocumentWithQueryDocumentValues(leftDoc, finalDOcument);
-                    enrichDocumentWithQueryDocumentValues(rightDoc, finalDOcument);
+                    Document leftPartDocument = new Document();
+                    Document partPartDocument = new Document();
+                    enrichDocumentWithQueryDocumentValues(leftDoc, leftPartDocument);
+                    enrichDocumentWithQueryDocumentValues(rightDoc, partPartDocument);
+
+                    //TODO Checking if keys conflict
+                    if (leftPartDocument.keySet().stream().anyMatch(partPartDocument::containsKey)
+                    ){
+                        throw new ExpressionOperantRequiredException("Operators duplicated!");
+                    }
+
+                    finalDOcument.putAll(leftPartDocument);
+                    finalDOcument.putAll(partPartDocument);
                     return finalDOcument;
                 }
                 return Filters.and(left, right);
