@@ -120,7 +120,8 @@ class Example2ControllerTest {
                 Arguments.of(List.of("tags/any(t:startswith(t,'spider') and endswith(t, 'web'))"), "examples/query/responses/example2_2.json", "COLLSCAN"),
                 Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t eq 'spiderweb')"), "examples/query/responses/example2_2.json", "COLLSCAN"),
                 Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb')"), "examples/query/responses/example2_1.json", "COLLSCAN"),
-                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb')"), "examples/query/responses/example2_1.json", "COLLSCAN")
+                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb')"), "examples/query/responses/example2_1.json", "COLLSCAN"),
+                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb' or contains(t,'wide') and t ne 'word wide')"), "examples/query/responses/example2_1.json", "COLLSCAN")
         );
     }
 
@@ -141,7 +142,14 @@ class Example2ControllerTest {
 // Numeric functions
                 Arguments.of(List.of("ceiling(floatValue) eq 1"), ALL_EXAMPLES_IN_RESPONSE),
                 Arguments.of(List.of("floor(floatValue) eq 0"), ALL_EXAMPLES_IN_RESPONSE),
-                Arguments.of(List.of("round(floatValue) eq 1"), ALL_EXAMPLES_IN_RESPONSE)
+                Arguments.of(List.of("round(floatValue) eq 1"), ALL_EXAMPLES_IN_RESPONSE),
+                // Arrays
+                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')"), prepareResponseForQueryWithPlainStringProperties(
+                        "Some text",
+                        "eOMtThyhVNLWUZNRcBaQKxI")),
+                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')"), prepareResponseForQueryWithPlainStringProperties(
+                        "Some text",
+                        "eOMtThyhVNLWUZNRcBaQKxI"))
         );
     }
 

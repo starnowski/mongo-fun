@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
+import com.google.common.collect.Streams;
 import com.mongodb.client.model.Filters;
 import lombok.Builder;
 import org.apache.olingo.commons.api.edm.*;
@@ -176,6 +177,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         );
     }
 
+    private List<Bson> tryExtractElementMatchDocumentForAnyLambda(Bson innerPart, String field) {
+        if (innerPart.toBsonDocument().containsKey("$or")) {
+            return (List<Bson>) innerPart.toBsonDocument().get("$or");
+        }
+        return List.of(prepareElementMatchDocumentForAnyLambda(innerPart, field));
+    }
+
     private Document prepareMemberDocument(String field) {
         Optional<EdmEntityType> entityType = edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
         Document result = new Document(ODATA_MEMBER_PROPERTY, field);
@@ -243,8 +251,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     if (!this.context.elementMatchContext().multipleElemMatch()) {
                         throw new MultipleElementMatchOperantRequiredException("Multiple elemMatch required");
                     }
-                    return Filters.or(prepareElementMatchDocumentForAnyLambda(left, this.context.elementMatchContext().property()),
-                            prepareElementMatchDocumentForAnyLambda(right, this.context.elementMatchContext().property()));
+
+                    List<Bson> orFilters = Streams.concat(tryExtractElementMatchDocumentForAnyLambda(left, this.context.elementMatchContext().property())
+                                    .stream(),
+                            tryExtractElementMatchDocumentForAnyLambda(right, this.context.elementMatchContext().property())
+                                    .stream()
+                    ).toList();
+                    return new Document("$or", orFilters);
                 }
                 return Filters.or(left, right);
             default:
@@ -290,17 +303,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     private Bson visitMethodWithTwoParameters(MethodKind methodCall, List<Bson> parameters) {
         String field = extractField(parameters.get(0));
         String value = extractValue(parameters.get(1));
-
-//        switch (methodCall) {
-//            case STARTSWITH:
-//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
-//            case ENDSWITH:
-//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
-//            case CONTAINS:
-//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
-//            default:
-//                throw new UnsupportedOperationException("Method not supported: " + methodCall);
-//        }
         switch (methodCall) {
             case STARTSWITH:
                 return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
@@ -314,9 +316,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private Bson prepareRegexOperator(String field, String regex) {
-//        return new Document("$regex", new Document("pattern", regex).append("options", "i"));
-//        return new Document(field, new Document("$regex", regex));
-//        return new Document("$regex", regex);
         return new Document("$regex", regex);
     }
 
