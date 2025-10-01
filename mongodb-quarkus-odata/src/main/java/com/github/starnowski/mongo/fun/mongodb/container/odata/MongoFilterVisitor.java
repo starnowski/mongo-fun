@@ -105,10 +105,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
         boolean expressionOperantRequiredExceptionThrown = false;
         boolean elementMatchOperantRequiredExceptionThrown = false;
+        boolean multipleElementMatchOperantRequiredExceptionThrown = false;
         boolean allVariantTested = false;
         while (!allVariantTested) {
             try {
-                allVariantTested = expressionOperantRequiredExceptionThrown && elementMatchOperantRequiredExceptionThrown;
+                allVariantTested = expressionOperantRequiredExceptionThrown && elementMatchOperantRequiredExceptionThrown && multipleElementMatchOperantRequiredExceptionThrown;
                 return function.get();
             } catch (ExpressionOperantRequiredException ex) {
                 expressionOperantRequiredExceptionThrown = true;
@@ -129,10 +130,21 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                             MongoFilterVisitorContext.builder()
                                     .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
                                     .isLambdaAnyContext(true)
-                                    .elementMatchContext(new ElementMatchContext(field))
+                                    .elementMatchContext(new ElementMatchContext(field, false))
                                     .build());
                     Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                     return prepareElementMatchDocumentForAnyLambda(innerObject, field);
+                };
+            } catch (MultipleElementMatchOperantRequiredException ex) {
+                multipleElementMatchOperantRequiredExceptionThrown = true;
+                function = () -> {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAnyContext(true)
+                                    .elementMatchContext(new ElementMatchContext(field, true))
+                                    .build());
+                    return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                 };
             }
         }
@@ -212,7 +224,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     enrichDocumentWithQueryDocumentValues(leftDoc, leftPartDocument);
                     enrichDocumentWithQueryDocumentValues(rightDoc, partPartDocument);
 
-                    //TODO Checking if keys conflict
+                    // Checking keys conflict
                     if (leftPartDocument.keySet().stream().anyMatch(partPartDocument::containsKey)
                     ) {
                         throw new ExpressionOperantRequiredException("Operators duplicated!");
@@ -226,6 +238,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             case OR:
                 if (this.context.isLambdaAnyContext() && !this.context.isExprMode() && !this.context.isElementMatchContext()) {
                     throw new ElementMatchOperantRequiredException("Required elementMatch");
+                }
+                if (this.context.isElementMatchContext()) {
+                    if (!this.context.elementMatchContext().multipleElemMatch()) {
+                        throw new MultipleElementMatchOperantRequiredException("Multiple elemMatch required");
+                    }
+                    return Filters.or(prepareElementMatchDocumentForAnyLambda(left, this.context.elementMatchContext().property()),
+                            prepareElementMatchDocumentForAnyLambda(right, this.context.elementMatchContext().property()));
                 }
                 return Filters.or(left, right);
             default:
@@ -424,7 +443,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         return null;
     }
 
-    public record ElementMatchContext(String property) {
+    public record ElementMatchContext(String property, boolean multipleElemMatch) {
     }
 
     @Builder
@@ -446,6 +465,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     private static class ElementMatchOperantRequiredException extends RuntimeException {
 
         public ElementMatchOperantRequiredException(String message) {
+            super(message);
+        }
+    }
+
+    private static class MultipleElementMatchOperantRequiredException extends RuntimeException {
+
+        public MultipleElementMatchOperantRequiredException(String message) {
             super(message);
         }
     }
