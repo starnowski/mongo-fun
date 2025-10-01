@@ -1,6 +1,5 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
-import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import lombok.Builder;
 import org.apache.olingo.commons.api.edm.*;
@@ -104,32 +103,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
         };
 
-//        try {
-//
-//        } catch (ExpressionOperantRequiredException ex) {
-//            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
-//                    MongoFilterVisitorContext.builder()
-//                            .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-//                            .isLambdaAnyContext(true)
-//                            .isExprMode(true)
-//                            .build());
-//            Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
-//            return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
-//        } catch (ElementMatchOperantRequiredException ex) {
-//            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
-//                    MongoFilterVisitorContext.builder()
-//                            .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-//                            .isLambdaAnyContext(true)
-//                            .elementMatchContext(new ElementMatchContext(field))
-//                            .build());
-//            Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
-//            return prepareElementMatchDocumentForAnyLambda(innerObject, field);
-//        }
-
         boolean expressionOperantRequiredExceptionThrown = false;
         boolean elementMatchOperantRequiredExceptionThrown = false;
-        while (!(expressionOperantRequiredExceptionThrown && elementMatchOperantRequiredExceptionThrown)) {
+        boolean allVariantTested = false;
+        while (!allVariantTested) {
             try {
+                allVariantTested = expressionOperantRequiredExceptionThrown && elementMatchOperantRequiredExceptionThrown;
                 return function.get();
             } catch (ExpressionOperantRequiredException ex) {
                 expressionOperantRequiredExceptionThrown = true;
@@ -224,7 +203,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 if (this.context.isLambdaAnyContext() && !this.context.isExprMode() && !this.context.isElementMatchContext()) {
                     throw new ElementMatchOperantRequiredException("Required elementMatch");
                 }
-                if (this.context.isElementMatchContext()){
+                if (this.context.isElementMatchContext()) {
                     BsonDocument leftDoc = left.toBsonDocument();
                     BsonDocument rightDoc = right.toBsonDocument();
                     Document finalDOcument = new Document();
@@ -235,7 +214,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
                     //TODO Checking if keys conflict
                     if (leftPartDocument.keySet().stream().anyMatch(partPartDocument::containsKey)
-                    ){
+                    ) {
                         throw new ExpressionOperantRequiredException("Operators duplicated!");
                     }
 
@@ -255,11 +234,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private void enrichDocumentWithQueryDocumentValues(BsonDocument doc, Document finalDOcument) {
-        if (doc.containsKey(this.context.elementMatchContext().property())){
+        if (doc.containsKey(this.context.elementMatchContext().property())) {
             BsonValue value = doc.get(this.context.elementMatchContext().property());
             if (value.isDocument()) {
                 finalDOcument.putAll(value.asDocument());
-            } else  {
+            } else {
                 finalDOcument.append("$eq", value);
             }
         } else {
@@ -305,11 +284,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 //        }
         switch (methodCall) {
             case STARTSWITH:
-                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field,Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
             case ENDSWITH:
-                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field,Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
             case CONTAINS:
-                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field,Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field, Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
             default:
                 throw new UnsupportedOperationException("Method not supported: " + methodCall);
         }
@@ -445,7 +424,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         return null;
     }
 
-    public record ElementMatchContext(String property){}
+    public record ElementMatchContext(String property) {
+    }
 
     @Builder
     public record MongoFilterVisitorContext(boolean isLambdaAnyContext, Map<String, Bson> lambdaVariableAliases,
