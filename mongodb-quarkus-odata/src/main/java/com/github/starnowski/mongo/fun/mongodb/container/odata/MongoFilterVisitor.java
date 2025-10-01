@@ -6,6 +6,7 @@ import lombok.Builder;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
 import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
 import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
@@ -86,12 +87,72 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             if (last instanceof UriResourceLambdaAny any) {
                 String field = member.getResourcePath().getUriResourceParts().get(0).toString();
                 return getBsonForUriResourceLambdaAny(any, field);
-
+            } else if (last instanceof UriResourceLambdaAll all){
+                String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+                return getBsonForUriResourceLambdaAll(all, field);
             }
 
         }
         String field = member.getResourcePath().getUriResourceParts().get(0).toString();
         return prepareMemberDocument(field);
+    }
+
+    private Bson getBsonForUriResourceLambdaAll(UriResourceLambdaAll all, String field) {
+        Supplier<Bson> function = () -> {
+            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                    MongoFilterVisitorContext.builder()
+                            .lambdaVariableAliases(Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
+                            .isLambdaAllContext(true)
+                            .build());
+            return innerMongoFilterVisitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+        };
+
+        boolean expressionOperantRequiredExceptionThrown = false;
+        boolean elementMatchOperantRequiredExceptionThrown = false;
+        boolean multipleElementMatchOperantRequiredExceptionThrown = false;
+        boolean allVariantTested = false;
+        while (!allVariantTested) {
+            try {
+                allVariantTested = expressionOperantRequiredExceptionThrown && elementMatchOperantRequiredExceptionThrown && multipleElementMatchOperantRequiredExceptionThrown;
+                return function.get();
+            } catch (ExpressionOperantRequiredException ex) {
+                expressionOperantRequiredExceptionThrown = true;
+                function = () -> {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAllContext(true)
+                                    .isExprMode(true)
+                                    .build());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+                    return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, all.getLambdaVariable());
+                };
+            } catch (ElementMatchOperantRequiredException ex) {
+                elementMatchOperantRequiredExceptionThrown = true;
+                function = () -> {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAllContext(true)
+                                    .elementMatchContext(new ElementMatchContext(field, false))
+                                    .build());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+                    return prepareElementMatchDocumentForAnyLambda(innerObject, field);
+                };
+            } catch (MultipleElementMatchOperantRequiredException ex) {
+                multipleElementMatchOperantRequiredExceptionThrown = true;
+                function = () -> {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAllContext(true)
+                                    .elementMatchContext(new ElementMatchContext(field, true))
+                                    .build());
+                    return innerMongoFilterVisitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+                };
+            }
+        }
+        return null;
     }
 
     private Bson getBsonForUriResourceLambdaAny(UriResourceLambdaAny any, String field) {
@@ -447,7 +508,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     @Builder
     public record MongoFilterVisitorContext(boolean isLambdaAnyContext, Map<String, Bson> lambdaVariableAliases,
-                                            boolean isExprMode, ElementMatchContext elementMatchContext) {
+                                            boolean isExprMode, ElementMatchContext elementMatchContext,
+                                            boolean isLambdaAllContext) {
 
         public boolean isElementMatchContext() {
             return elementMatchContext != null;
