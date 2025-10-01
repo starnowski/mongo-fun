@@ -11,12 +11,14 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -40,7 +42,49 @@ class ExampleDaoTest {
                                 )
                                 )),
                             0
-                        )
+                        ),
+                Arguments.of(Aggregates.match(
+                                Filters.elemMatch("tags",
+                                        Filters.and(
+                                                new Document("$regex", "x").append("$options", "i")
+                                        )
+                                )),
+                        0
+                ),
+                Arguments.of(Aggregates.match(
+                                Filters.elemMatch("tags",
+                                        Filters.or(
+                                                new Document("$regex", "x").append("$options", "i")
+                                        )
+                                )),
+                        0
+                ),
+                Arguments.of(Aggregates.match(
+                                Filters.elemMatch("tags",
+                                        new Document("$regex", "x").append("$options", "i")
+                                )),
+                        0
+                ),
+                Arguments.of(Aggregates.match(
+                                Filters.elemMatch("tags",
+                                        Filters.and(
+                                                new Document("$eq", "x")
+                                        )
+                                )),
+                        0
+                ),
+                //Command failed with error 2 (BadValue): '$elemMatch needs an Object'
+                Arguments.of(Aggregates.match(
+                                new Document("tags",
+                                                new Document("$elemMatch", Arrays.asList(
+                                                        new Document("$regex", "x").append("$options", "i"),
+                                                        new Document("$regex", "y").append("$options", "i")
+                                                        )
+                                                    )
+                                                )
+                                ),
+                        0
+                )
         );
     }
 
@@ -60,6 +104,7 @@ class ExampleDaoTest {
         // WHEN
         try {
             ArrayList<Document> documents = mongoClient.getDatabase(TEST_DATABASE).getCollection("examples").aggregate(List.of(matchStage)).into(new ArrayList<>());
+            Assertions.fail("It works");
         } catch (Exception ex) {
             System.out.println(ex);
             assertEquals(MongoCommandException.class, ex.getClass());
