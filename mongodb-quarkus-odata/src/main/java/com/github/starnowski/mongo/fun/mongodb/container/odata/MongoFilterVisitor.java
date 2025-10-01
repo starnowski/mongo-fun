@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
@@ -94,32 +95,69 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private Bson getBsonForUriResourceLambdaAny(UriResourceLambdaAny any, String field) {
-        try {
+        Supplier<Bson> function = () -> {
             MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
                     MongoFilterVisitorContext.builder()
                             .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
                             .isLambdaAnyContext(true)
                             .build());
             return innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
-        } catch (ExpressionOperantRequiredException ex) {
-            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
-                    MongoFilterVisitorContext.builder()
-                            .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-                            .isLambdaAnyContext(true)
-                            .isExprMode(true)
-                            .build());
-            Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
-            return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
-        } catch (ElementMatchOperantRequiredException ex) {
-            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
-                    MongoFilterVisitorContext.builder()
-                            .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
-                            .isLambdaAnyContext(true)
-                            .elementMatchContext(new ElementMatchContext(field))
-                            .build());
-            Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
-            return prepareElementMatchDocumentForAnyLambda(innerObject, field);
+        };
+
+//        try {
+//
+//        } catch (ExpressionOperantRequiredException ex) {
+//            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+//                    MongoFilterVisitorContext.builder()
+//                            .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+//                            .isLambdaAnyContext(true)
+//                            .isExprMode(true)
+//                            .build());
+//            Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+//            return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
+//        } catch (ElementMatchOperantRequiredException ex) {
+//            MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+//                    MongoFilterVisitorContext.builder()
+//                            .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+//                            .isLambdaAnyContext(true)
+//                            .elementMatchContext(new ElementMatchContext(field))
+//                            .build());
+//            Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+//            return prepareElementMatchDocumentForAnyLambda(innerObject, field);
+//        }
+
+        boolean expressionOperantRequiredExceptionThrown = false;
+        boolean elementMatchOperantRequiredExceptionThrown = false;
+        while (!(expressionOperantRequiredExceptionThrown && elementMatchOperantRequiredExceptionThrown)) {
+            try {
+                return function.get();
+            } catch (ExpressionOperantRequiredException ex) {
+                expressionOperantRequiredExceptionThrown = true;
+                function = () -> {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAnyContext(true)
+                                    .isExprMode(true)
+                                    .build());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                    return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
+                };
+            } catch (ElementMatchOperantRequiredException ex) {
+                elementMatchOperantRequiredExceptionThrown = true;
+                function = () -> {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAnyContext(true)
+                                    .elementMatchContext(new ElementMatchContext(field))
+                                    .build());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                    return prepareElementMatchDocumentForAnyLambda(innerObject, field);
+                };
+            }
         }
+        return null;
     }
 
     private Bson prepareExprDocumentForAnyLambdaWithExpr(Bson innerPart, String field, String lambdaVariable) {

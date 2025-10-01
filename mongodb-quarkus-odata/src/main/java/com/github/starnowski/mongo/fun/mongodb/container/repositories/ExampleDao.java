@@ -39,7 +39,7 @@ public class ExampleDao extends AbstractDao<Document> {
 
     public List<Document> query(List<String> filters) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
         List<Bson> pipeline = preparePipelineBasedOnFilter(filters);
-
+        System.out.println("pipeline: " + pipeline);
         return pipeline.isEmpty() ? new ArrayList<>() : getCollection().aggregate(pipeline).into(new ArrayList<>());
     }
 
