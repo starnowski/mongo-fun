@@ -118,7 +118,8 @@ class Example2ControllerTest {
                 Arguments.of(List.of("tags/any(t:length(t) eq 13)"), "examples/query/responses/example2_1.json", "COLLSCAN"),
                 Arguments.of(List.of("tags/any(t:tolower(t) eq 'developer')"), "examples/query/responses/example2_3.json", "COLLSCAN"),
                 Arguments.of(List.of("tags/any(t:startswith(t,'spider') and endswith(t, 'web'))"), "examples/query/responses/example2_2.json", "COLLSCAN"),
-                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t eq 'spiderweb')"), "examples/query/responses/example2_2.json", "COLLSCAN")
+                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t eq 'spiderweb')"), "examples/query/responses/example2_2.json", "COLLSCAN"),
+                Arguments.of(List.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb')"), "examples/query/responses/example2_2.json", "COLLSCAN")
         );
     }
 

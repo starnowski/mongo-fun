@@ -1,5 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import lombok.Builder;
 import org.apache.olingo.commons.api.edm.*;
@@ -10,6 +11,7 @@ import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -105,7 +107,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                             MongoFilterVisitorContext.builder()
                                     .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
                                     .isLambdaAnyContext(true)
-                                    .isElementMatchContext(true)
+                                    .elementMatchContext(new ElementMatchContext(field))
                                     .build());
                     Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                     return prepareElementMatchDocumentForAnyLambda(innerObject, field);
@@ -182,6 +184,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 if (this.context.isLambdaAnyContext() && !this.context.isExprMode() && !this.context.isElementMatchContext()) {
                     throw new ElementMatchOperantRequiredException("Required elementMatch");
                 }
+                if (this.context.isElementMatchContext()){
+                    BsonDocument leftDoc = left.toBsonDocument();
+                    BsonDocument rightDoc = right.toBsonDocument();
+                    Document finalDOcument = new Document();
+                    enrichDocumentWithQueryDocumentValues(leftDoc, finalDOcument);
+                    enrichDocumentWithQueryDocumentValues(rightDoc, finalDOcument);
+                    return finalDOcument;
+                }
                 return Filters.and(left, right);
             case OR:
                 if (this.context.isLambdaAnyContext() && !this.context.isExprMode() && !this.context.isElementMatchContext()) {
@@ -190,6 +200,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 return Filters.or(left, right);
             default:
                 throw new UnsupportedOperationException("Operator not supported: " + operator);
+        }
+    }
+
+    private void enrichDocumentWithQueryDocumentValues(BsonDocument doc, Document finalDOcument) {
+        if (doc.containsKey(this.context.elementMatchContext().property())){
+            BsonValue value = doc.get(this.context.elementMatchContext().property());
+            if (value.isDocument()) {
+                finalDOcument.putAll(value.asDocument());
+            } else  {
+                finalDOcument.append("$eq", value);
+            }
+        } else {
+            finalDOcument.putAll(doc);
         }
     }
 
@@ -242,10 +265,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private Bson prepareRegexOperator(String field, String regex) {
-        return new Document("$regularExpression", new Document("pattern", regex).append("options", "i"));
+//        return new Document("$regex", new Document("pattern", regex).append("options", "i"));
 //        return new Document(field, new Document("$regex", regex));
 //        return new Document("$regex", regex);
-//        return new Document("$regex", regex);
+        return new Document("$regex", regex);
     }
 
     private Bson prepareRegexMatchExpr(String field, String regex) {
@@ -371,9 +394,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         return null;
     }
 
+    public record ElementMatchContext(String property){}
+
     @Builder
     public record MongoFilterVisitorContext(boolean isLambdaAnyContext, Map<String, Bson> lambdaVariableAliases,
-                                            boolean isExprMode, boolean isElementMatchContext) {
+                                            boolean isExprMode, ElementMatchContext elementMatchContext) {
+
+        public boolean isElementMatchContext() {
+            return elementMatchContext != null;
+        }
     }
 
     private static class ExpressionOperantRequiredException extends RuntimeException {
