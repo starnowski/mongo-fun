@@ -100,7 +100,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                     .build());
                     Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
                     return prepareExprDocumentForAnyLambdaWithExpr(innerObject, field, any.getLambdaVariable());
-
+                } catch (ElementMatchOperantRequiredException ex) {
+                    MongoFilterVisitor innerMongoFilterVisitor = new MongoFilterVisitor(edm,
+                            MongoFilterVisitorContext.builder()
+                                    .lambdaVariableAliases(Map.of(any.getLambdaVariable(), prepareMemberDocument(field)))
+                                    .isLambdaAnyContext(true)
+                                    .isElementMatchContext(true)
+                                    .build());
+                    Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+                    return prepareElementMatchDocumentForAnyLambda(innerObject, field);
                 }
 
             }
@@ -171,8 +179,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             case LE:
                 return combineFieldOp(left, right, Filters::lte);
             case AND:
+                if (this.context.isLambdaAnyContext() && !this.context.isExprMode() && !this.context.isElementMatchContext()) {
+                    throw new ElementMatchOperantRequiredException("Required elementMatch");
+                }
                 return Filters.and(left, right);
             case OR:
+                if (this.context.isLambdaAnyContext() && !this.context.isExprMode() && !this.context.isElementMatchContext()) {
+                    throw new ElementMatchOperantRequiredException("Required elementMatch");
+                }
                 return Filters.or(left, right);
             default:
                 throw new UnsupportedOperationException("Operator not supported: " + operator);
@@ -205,31 +219,33 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         String field = extractField(parameters.get(0));
         String value = extractValue(parameters.get(1));
 
-        switch (methodCall) {
-            case STARTSWITH:
-                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
-            case ENDSWITH:
-                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
-            case CONTAINS:
-                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
-            default:
-                throw new UnsupportedOperationException("Method not supported: " + methodCall);
-        }
 //        switch (methodCall) {
 //            case STARTSWITH:
-//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : this.context.isLambdaAnyContext() ? prepareRegularExpressionOperator(Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
+//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
 //            case ENDSWITH:
-//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : this.context.isLambdaAnyContext() ? prepareRegularExpressionOperator(Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
+//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
 //            case CONTAINS:
-//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : this.context.isLambdaAnyContext() ? prepareRegularExpressionOperator(Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
+//                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
 //            default:
 //                throw new UnsupportedOperationException("Method not supported: " + methodCall);
 //        }
+        switch (methodCall) {
+            case STARTSWITH:
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field,Pattern.compile("^" + Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
+            case ENDSWITH:
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field,Pattern.compile(Pattern.quote(value) + "$").pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
+            case CONTAINS:
+                return this.context.isExprMode() ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern()) : this.context.isElementMatchContext() ? prepareRegexOperator(field,Pattern.compile(Pattern.quote(value)).pattern()) : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
+            default:
+                throw new UnsupportedOperationException("Method not supported: " + methodCall);
+        }
     }
 
-    private Bson prepareRegularExpressionOperator(String regex) {
-        return new Document("$regex", regex)
-                        .append("options", "i");
+    private Bson prepareRegexOperator(String field, String regex) {
+        return new Document("$regularExpression", new Document("pattern", regex).append("options", "i"));
+//        return new Document(field, new Document("$regex", regex));
+//        return new Document("$regex", regex);
+//        return new Document("$regex", regex);
     }
 
     private Bson prepareRegexMatchExpr(String field, String regex) {
@@ -382,12 +398,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     @Builder
     public record MongoFilterVisitorContext(boolean isLambdaAnyContext, Map<String, Bson> lambdaVariableAliases,
-                                            boolean isExprMode) {
+                                            boolean isExprMode, boolean isElementMatchContext) {
     }
 
     private static class ExpressionOperantRequiredException extends RuntimeException {
 
         public ExpressionOperantRequiredException(String message) {
+            super(message);
+        }
+    }
+
+    private static class ElementMatchOperantRequiredException extends RuntimeException {
+
+        public ElementMatchOperantRequiredException(String message) {
             super(message);
         }
     }
