@@ -252,6 +252,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         return List.of(prepareElementMatchDocumentForAnyLambda(innerPart, field));
     }
 
+    private List<Bson> tryExtractElementMatchDocumentForAllLambdaWithAndOperator(Bson innerPart, String field) {
+        if (innerPart.toBsonDocument().containsKey("$and")) {
+            return (List<Bson>) innerPart.toBsonDocument().get("$and");
+        }
+        return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field));
+    }
+
     private List<Bson> tryExtractElementMatchDocumentForAllLambda(Bson innerPart, String field) {
         if (innerPart.toBsonDocument().containsKey("$or")) {
             return (List<Bson>) innerPart.toBsonDocument().get("$or");
@@ -299,6 +306,23 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     throw new ElementMatchOperantRequiredException("Required elementMatch");
                 }
                 if (this.context.isElementMatchContext()) {
+                    if (this.context.isLambdaAllContext() && !this.context.elementMatchContext().multipleElemMatch() && !this.context.isExprMode()) {
+                        throw new MultipleElementMatchOperantRequiredException("Multiple elemMatch required");
+                    }
+                    if (this.context.isLambdaAllContext() && this.context.elementMatchContext().multipleElemMatch()) {
+                        BsonDocument leftDoc = left.toBsonDocument();
+                        BsonDocument rightDoc = right.toBsonDocument();
+                        Document leftPartDocument = new Document();
+                        Document partPartDocument = new Document();
+                        enrichDocumentWithQueryDocumentValues(leftDoc, leftPartDocument);
+                        enrichDocumentWithQueryDocumentValues(rightDoc, partPartDocument);
+                        List<Bson> andFilters = Streams.concat(tryExtractElementMatchDocumentForAllLambdaWithAndOperator(leftPartDocument, this.context.elementMatchContext().property())
+                                        .stream(),
+                                tryExtractElementMatchDocumentForAllLambdaWithAndOperator(partPartDocument, this.context.elementMatchContext().property())
+                                        .stream()
+                        ).toList();
+                        return new Document("$and", andFilters);
+                    }
                     BsonDocument leftDoc = left.toBsonDocument();
                     BsonDocument rightDoc = right.toBsonDocument();
                     Document finalDOcument = new Document();
