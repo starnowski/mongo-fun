@@ -141,7 +141,8 @@ class Example2ControllerAllLambdaTest {
             @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
             @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
             @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples")
+            @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
     })
     public void provideShouldReturnResponseStringBasedOnFilters(List<String> filters, String expectedResponse) throws IOException, JSONException {
         // WHEN
