@@ -87,7 +87,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             if (last instanceof UriResourceLambdaAny any) {
                 String field = member.getResourcePath().getUriResourceParts().get(0).toString();
                 return getBsonForUriResourceLambdaAny(any, field);
-            } else if (last instanceof UriResourceLambdaAll all){
+            } else if (last instanceof UriResourceLambdaAll all) {
                 String field = member.getResourcePath().getUriResourceParts().get(0).toString();
                 return getBsonForUriResourceLambdaAll(all, field);
             }
@@ -326,7 +326,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     if (!this.context.elementMatchContext().multipleElemMatch()) {
                         throw new MultipleElementMatchOperantRequiredException("Multiple elemMatch required");
                     }
-                    if (this.context.isLambdaAnyContext() ) {
+                    if (this.context.isLambdaAnyContext()) {
                         List<Bson> orFilters = Streams.concat(tryExtractElementMatchDocumentForAnyLambda(left, this.context.elementMatchContext().property())
                                         .stream(),
                                 tryExtractElementMatchDocumentForAnyLambda(right, this.context.elementMatchContext().property())
@@ -457,8 +457,20 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         Object value = extractValueObj(right);
         String type = extractFieldType(left);
         value = tryConvertValueByEdmType(value, type);
-        return fn.apply(field, value);
+        Bson result = fn.apply(field, value);
+        if (this.context.isExprMode()) {
+            BsonDocument document = result.toBsonDocument();
+            if (document.size() == 1 && document.containsKey(field)) {
+                BsonValue operator = document.get(field);
+                if (operator.isDocument()) {
+                    document = operator.asDocument();
+                    return new Document(document.getFirstKey(), Arrays.asList(field, value));
+                }
+            }
+        }
+        return result;
     }
+
 
     private String extractField(Bson bson) {
         BsonDocument document = bson.toBsonDocument();
