@@ -12,7 +12,11 @@ import java.util.stream.Collectors;
 
 public class OpenApiToODataMapper {
 
-    public record ODataProperty(String name, String reference, String type, boolean isCollection) {}
+    public record ODataProperty(String name, String reference, String type, boolean isCollection, ODataType object) {
+        public boolean isObjectType() {
+            return object != null;
+        }
+    }
 
     public record ODataType(Map<String, ODataProperty> properties){}
 
@@ -80,19 +84,22 @@ public class OpenApiToODataMapper {
         String format = schema.getFormat();
 
         if (schema.getProperties() != null) {
-            Map<String, Object> newMap = new LinkedHashMap<>();
             schema.getProperties() .forEach((k, v) -> {
-                ODataProperty odata = enrichWithTypeDefinitions(v, oDataType);
-                oDataType.properties.put(k, new ODataProperty(k, k, odata.type, odata.isCollection));
+                ODataType nestedOdataDataType = new ODataType(new HashMap<>());
+                ODataProperty odata = enrichWithTypeDefinitions(v, nestedOdataDataType);
+                //TODO
+                oDataType.properties.put(k, new ODataProperty(k, k, odata.type, odata.isCollection, odata.object));
             });
+            String odataType = mapToODataType(type, format);
+            return new ODataProperty(null, null, odataType, false, oDataType);
         } else if (schema.getItems() != null) {
             if ("array".equals(schema.getType())) {
                 ODataProperty odata = enrichWithTypeDefinitions(schema.getItems(), oDataType);
-                return new ODataProperty(null, null, "Collection(%s)".formatted(odata.type), true);
+                return new ODataProperty(null, null, "Collection(%s)".formatted(odata.type), true, odata.object());
             }
         } else {
             String mappedType = mapToODataType(type, format);
-            return new ODataProperty(null, null, mappedType, false);
+            return new ODataProperty(null, null, mappedType, false, null);
         }
         return null;
     }
