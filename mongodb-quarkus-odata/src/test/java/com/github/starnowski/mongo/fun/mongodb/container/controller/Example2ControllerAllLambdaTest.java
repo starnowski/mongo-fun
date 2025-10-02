@@ -51,7 +51,8 @@ class Example2ControllerAllLambdaTest {
     private static final String ALL_EXAMPLES_IN_RESPONSE = prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
             "Some text",
             "Poem",
-            "Mario");
+            "Mario",
+            "Oleksa");
     private JavaTimeModule javaTimeModule;
     private EasyRandom generator;
     private ObjectMapper mapper;
