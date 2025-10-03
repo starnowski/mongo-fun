@@ -5,10 +5,7 @@ import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.*;
 import org.apache.olingo.commons.api.ex.ODataException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class GenericEdmProvider extends CsdlAbstractEdmProvider {
 
@@ -31,7 +28,9 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
         return getSchemas().get(0).getEntityType(entityTypeName.getName());
     }
 
-    private String addCsdlComplexType(OpenApiToODataMapper.ODataType oDataType, String typePrefix, List<CsdlComplexType> types, int level){
+    private final Map<String, String> typesPaths = new HashMap<>();
+
+    private String addCsdlComplexType(String path, OpenApiToODataMapper.ODataType oDataType, String typePrefix, List<CsdlComplexType> types, int level){
         String typeName = NAMESPACE + "." + typePrefix + "Type" + level;
         CsdlComplexType csdlComplexType = new CsdlComplexType()
                 .setName(typeName).setProperties(
@@ -39,7 +38,7 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
                                 entry -> {
                                     String type;
                                     if (entry.getValue().object() != null){
-                                        type = addCsdlComplexType(entry.getValue().object(), entry.getKey(), types, level + 1);
+                                        type = addCsdlComplexType(path + "." + entry.getKey(), entry.getValue().object(), entry.getKey(), types, level + 1);
                                     } else  {
                                         type = entry.getValue().type();
                                     }
@@ -49,8 +48,8 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
                                 ).toList()
 
                 );
-        //TODO
         types.add(csdlComplexType);
+        typesPaths.put(typeName, path);
         return typeName;
     }
 
@@ -69,7 +68,7 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
                                 entry -> {
                                     String type;
                                     if (entry.getValue().object() != null){
-                                        type = addCsdlComplexType(entry.getValue().object(), entry.getKey(), types, 1);
+                                        type = addCsdlComplexType(entry.getKey(), entry.getValue().object(), entry.getKey(), types, 1);
                                     } else  {
                                         type = entry.getValue().type();
                                     }
@@ -135,6 +134,6 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
 
     @Override
     public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
-        return getSchemas().get(0).getComplexType(complexTypeName.getName());
+        return getSchemas().get(0).getComplexType(complexTypeName.getFullQualifiedNameAsString());
     }
 }
