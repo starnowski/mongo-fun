@@ -5,10 +5,7 @@ import com.mongodb.client.model.Filters;
 import lombok.Builder;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
-import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
-import org.apache.olingo.server.api.uri.UriResourceLambdaVariable;
+import org.apache.olingo.server.api.uri.*;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
@@ -16,10 +13,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -43,6 +37,26 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     public static Document literal(Object value) {
         return new Document(CUSTOM_LITERAL_VALUE_PROPERTY, value);
+    }
+
+    private static String extractFieldName(Member member) {
+        StringBuilder field = new StringBuilder();
+        Iterator<UriResource> it = member.getResourcePath().getUriResourceParts().iterator();
+        boolean nested = false;
+        while (it.hasNext()) {
+            UriResource property = it.next();
+            if (property instanceof UriResourcePrimitiveProperty || property instanceof UriResourceComplexProperty) {
+                UriResourceProperty uiProperty = (UriResourceProperty) property;
+                if (nested) {
+                    field.append(".");
+                }
+                field.append(uiProperty.getProperty().getName());
+            } else {
+                break;
+            }
+            nested = true;
+        }
+        return field.toString();
     }
 
     // --- Literals ---
@@ -70,7 +84,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     @Override
     public Bson visitMember(Member member) {
         if (member.getResourcePath().getUriResourceParts().size() == 1) {
-            String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+            String field = extractFieldName(member);
             if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
                 if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext()) && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
                     if (this.context.isExprMode()) {
@@ -85,15 +99,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         } else {
             UriResource last = member.getResourcePath().getUriResourceParts().get(member.getResourcePath().getUriResourceParts().size() - 1);
             if (last instanceof UriResourceLambdaAny any) {
-                String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+                String field = extractFieldName(member);
                 return getBsonForUriResourceLambdaAny(any, field);
             } else if (last instanceof UriResourceLambdaAll all) {
-                String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+                String field = extractFieldName(member);
                 return getBsonForUriResourceLambdaAll(all, field);
             }
 
         }
-        String field = member.getResourcePath().getUriResourceParts().get(0).toString();
+        String field = extractFieldName(member);
         return prepareMemberDocument(field);
     }
 
