@@ -31,9 +31,32 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
         return getSchemas().get(0).getEntityType(entityTypeName.getName());
     }
 
+    private String addCsdlComplexType(OpenApiToODataMapper.ODataType oDataType, String typePrefix, List<CsdlComplexType> types, int level){
+        String typeName = NAMESPACE + "." + typePrefix + "Type" + level;
+        CsdlComplexType csdlComplexType = new CsdlComplexType()
+                .setName(typeName).setProperties(
+                        oDataType.properties().entrySet().stream().map(
+                                entry -> {
+                                    String type;
+                                    if (entry.getValue().object() != null){
+                                        type = addCsdlComplexType(entry.getValue().object(), entry.getKey(), types, level + 1);
+                                    } else  {
+                                        type = entry.getValue().type();
+                                    }
+                                    return new CsdlProperty().setName(entry.getKey()).setType(type).setCollection(entry.getValue().isCollection());
+
+                                }
+                                ).toList()
+
+                );
+        //TODO
+        types.add(csdlComplexType);
+        return typeName;
+    }
+
     private List<CsdlSchema> prepareSchemas(GenericEdmProviderProperties genericEdmProviderProperties, OpenApiToODataMapper.OpenApiToODataMapperResult odataConfig) {
         List<CsdlSchema> schemas = new ArrayList<>();
-
+        List<CsdlComplexType> types = new ArrayList<>();
         // --- Define Example2 entity type ---
         CsdlEntityType example2Type = new CsdlEntityType()
                 .setName(genericEdmProviderProperties.entityTypeName())
@@ -42,7 +65,17 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
 //                                entry -> new CsdlProperty().setName(entry.getKey())
 //                                        .setType(entry.getValue())
 //                        ).toList()
-                        odataConfig.mainEntity().properties().entrySet().stream().map(entry -> new CsdlProperty().setName(entry.getKey()).setType(entry.getValue().type()).setCollection(entry.getValue().isCollection())).toList()
+                        odataConfig.mainEntity().properties().entrySet().stream().map(
+                                entry -> {
+                                    String type;
+                                    if (entry.getValue().object() != null){
+                                        type = addCsdlComplexType(entry.getValue().object(), entry.getKey(), types, 1);
+                                    } else  {
+                                        type = entry.getValue().type();
+                                    }
+                                    return new CsdlProperty().setName(entry.getKey()).setType(type).setCollection(entry.getValue().isCollection());
+                                }
+                                ).toList()
 
                 )
                 //TODO set _id guid
@@ -59,10 +92,13 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
                 .setName(CONTAINER_NAME)
                 .setEntitySets(Collections.singletonList(entitySet));
 
+        // --- Define types
+
         // --- Define schema ---
         CsdlSchema schema = new CsdlSchema()
                 .setNamespace(NAMESPACE)
                 .setEntityTypes(Collections.singletonList(example2Type))
+                .setComplexTypes(types)
                 .setEntityContainer(container);
 
         schemas.add(schema);
@@ -95,5 +131,10 @@ public class GenericEdmProvider extends CsdlAbstractEdmProvider {
                     .setContainerName(container);
         }
         return null;
+    }
+
+    @Override
+    public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+        return getSchemas().get(0).getComplexType(complexTypeName.getName());
     }
 }
