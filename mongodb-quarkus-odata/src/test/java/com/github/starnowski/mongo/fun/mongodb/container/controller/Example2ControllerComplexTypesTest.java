@@ -47,6 +47,7 @@ class Example2ControllerComplexTypesTest {
             "Poem",
             "Mario",
             "Oleksa");
+    public static final List<String> TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27 = List.of("nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)");
     private JavaTimeModule javaTimeModule;
     private EasyRandom generator;
     private ObjectMapper mapper;
@@ -85,9 +86,9 @@ class Example2ControllerComplexTypesTest {
 
     public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFiltersExample2() {
         return Stream.of(
-                Arguments.of(List.of("nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)"), prepareResponseForQueryWithPlainStringProperties("example1"))
-//                Arguments.of(List.of("nestedObject/tokens/any(t:t eq 'first example')"), prepareResponseForQueryWithPlainStringProperties("example1"))
-//                Arguments.of(List.of("nestedObject/numbers/any(t:t > 5 and t < 27)"), prepareResponseForQueryWithPlainStringProperties("example1"))
+                Arguments.of(TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27, prepareResponseForQueryWithPlainStringProperties("example1"))
+//                ,
+//                Arguments.of(List.of("nestedObject/tokens/any(t:t in ('Bond', 'James'))"), prepareResponseForQueryWithPlainStringProperties("example2"))
         );
     }
 
@@ -165,7 +166,8 @@ class Example2ControllerComplexTypesTest {
             "provideShouldReturnResponseStringBasedOnFiltersExample2"
     })
     @MongoSetup(mongoDocuments = {
-            @MongoDocument(bsonFilePath = "examples/query/example2_6.json", collection = "examples")
+            @MongoDocument(bsonFilePath = "examples/query/example2_6.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_7.json", collection = "examples")
     })
     public void shouldReturnResponseStringBasedOnFiltersExample2(List<String> filters, String expectedResponse) throws IOException, JSONException {
         // WHEN

@@ -1,7 +1,7 @@
 {
   "_id": {
     "$binary": {
-      "base64": "FivsoWtQTbS00EnGI7PbuQ==",
+      "base64": "fivsoWtQTbS00EnGI7PbuQ==",
       "subType": "04"
     }
   },
