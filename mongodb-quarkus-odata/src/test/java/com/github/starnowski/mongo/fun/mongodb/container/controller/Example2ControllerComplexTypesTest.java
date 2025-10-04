@@ -83,6 +83,14 @@ class Example2ControllerComplexTypesTest {
         );
     }
 
+    public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFiltersExample2() {
+        return Stream.of(
+                Arguments.of(List.of("nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)"), prepareResponseForQueryWithPlainStringProperties("example1"))
+//                Arguments.of(List.of("nestedObject/tokens/any(t:t eq 'first example')"), prepareResponseForQueryWithPlainStringProperties("example1"))
+//                Arguments.of(List.of("nestedObject/numbers/any(t:t > 5 and t < 27)"), prepareResponseForQueryWithPlainStringProperties("example1"))
+        );
+    }
+
     @PostConstruct
     public void init() {
         javaTimeModule = new JavaTimeModule();
@@ -139,6 +147,27 @@ class Example2ControllerComplexTypesTest {
             @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
     })
     public void provideShouldReturnResponseStringBasedOnFilters(List<String> filters, String expectedResponse) throws IOException, JSONException {
+        // WHEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .queryParams(Map.of("$filter", filters))
+                .get("/examples2/simple-query")
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+    }
+
+
+    @ParameterizedTest
+    @MethodSource({
+            "provideShouldReturnResponseStringBasedOnFiltersExample2"
+    })
+    @MongoSetup(mongoDocuments = {
+            @MongoDocument(bsonFilePath = "examples/query/example2_6.json", collection = "examples")
+    })
+    public void shouldReturnResponseStringBasedOnFiltersExample2(List<String> filters, String expectedResponse) throws IOException, JSONException {
         // WHEN
         ExtractableResponse<Response> getResponse = given()
                 .when()
