@@ -63,7 +63,8 @@ class Example2ControllerOrderQueryParamTest {
                 /*
                  * Passing custom as literal value "normalize(''First example'')" because there is a problem with adding custom method
                  */
-                Arguments.of(List.of("plainString asc"), prepareResponseForQueryWithPlainStringProperties("example1", "example2", "Oleksa"))
+                Arguments.of(List.of("plainString asc"), prepareResponseForQueryWithPlainStringProperties("example1", "example2", "Oleksa")),
+                Arguments.of(List.of("plainString desc"), prepareResponseForQueryWithPlainStringProperties("example1", "example2", "Oleksa"))
 //                ,
         );
     }
@@ -92,6 +93,6 @@ class Example2ControllerOrderQueryParamTest {
                 .statusCode(200).extract();
 
         // THEN
-        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), true);
     }
 }
