@@ -2,6 +2,7 @@ package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 
 import com.github.starnowski.mongo.fun.mongodb.container.odata.Example2StaticEdmSupplier;
 import com.github.starnowski.mongo.fun.mongodb.container.odata.ODataToMongoParser;
+import com.github.starnowski.mongo.fun.mongodb.container.odata.OdataOrderToMongoSortParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -10,6 +11,7 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
@@ -142,6 +144,13 @@ public class ExampleDao extends AbstractDao<Document> {
             if (filterOption != null) {
                 Bson bsonFilter = ODataToMongoParser.parseFilter(uriInfo, example2StaticEdmSupplier.get());
                 pipeline.add(Aggregates.match(Filters.and(bsonFilter)));
+            }
+
+            //OdataOrderToMongoSortParser
+            OrderByOption orderOption = uriInfo.getOrderByOption();
+            if (orderOption != null) {
+                Bson bsonFilter = OdataOrderToMongoSortParser.parseOrder(uriInfo, example2StaticEdmSupplier.get());
+                pipeline.add(bsonFilter);
             }
 
         }
