@@ -67,6 +67,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             return literal(null);
         }
         if (text.startsWith("'") && text.endsWith("'")) {
+            /*
+             * Custom support of "normalize" method because there is a problem with adding custom method to Olingo project.
+             */
+            if (text.startsWith("'normalize('") && text.endsWith("')'")) {
+                return literal(NormalizeHelper.normalize(text.substring("'normalize('".length() + 1, text.length() - "')'".length() - 1))); // placeholder, field comes later
+            }
             return literal(text.substring(1, text.length() - 1)); // placeholder, field comes later
         }
         try {
@@ -410,7 +416,16 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     // --- Methods (functions) ---
     @Override
-    public Bson visitMethodCall(MethodKind methodCall, List<Bson> parameters) {
+    public Bson visitMethodCall(MethodKind methodCall, List<Bson> parameters) throws ExpressionVisitException {
+//        if (methodCall == MethodKind.COMPUTE_AGGREGATE && parameters.size() > 2 && parameters.get(0) instanceof Literal method) {
+//            // Ensure only literals are passed
+//            if ("Normalize".equals(method.getText()) && parameters.get(1) instanceof Literal value) {
+//                // Apply transformation in Java
+//                return literal(NormalizeHelper.normalize(value.getText()));
+//            } else {
+//                throw new ExpressionVisitException("COMPUTE_AGGREGATE() for Normalize only accepts literal values");
+//            }
+//        }
         switch (parameters.size()) {
             case 1:
                 return visitMethodWithOneParameter(methodCall, parameters);
