@@ -5,6 +5,7 @@ import com.github.starnowski.mongo.fun.mongodb.container.odata.ODataToMongoParse
 import com.github.starnowski.mongo.fun.mongodb.container.odata.OdataOrderToMongoSortParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.olingo.server.api.OData;
@@ -139,13 +140,6 @@ public class ExampleDao extends AbstractDao<Document> {
                 pipeline.add(Aggregates.match(Filters.and(bsonFilter)));
             }
 
-            //OdataOrderToMongoSortParser
-            OrderByOption orderOption = uriInfo.getOrderByOption();
-            if (orderOption != null) {
-                Bson bsonFilter = OdataOrderToMongoSortParser.parseOrder(uriInfo, example2StaticEdmSupplier.get());
-                pipeline.add(bsonFilter);
-            }
-
         }
         if (orders != null && !orders.isEmpty() &&
                 orders.stream().filter(Objects::nonNull).anyMatch(order -> !order.trim().isEmpty())) {
@@ -165,7 +159,7 @@ public class ExampleDao extends AbstractDao<Document> {
             OrderByOption orderOption = uriInfo.getOrderByOption();
             if (orderOption != null) {
                 Bson bsonFilter = OdataOrderToMongoSortParser.parseOrder(uriInfo, example2StaticEdmSupplier.get());
-                pipeline.add(bsonFilter);
+                pipeline.add(Aggregates.sort(bsonFilter));
             }
         }
         return pipeline;
