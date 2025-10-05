@@ -39,27 +39,20 @@ public class ExampleDao extends AbstractDao<Document> {
         return Document.class;
     }
 
-    public List<Document> query(List<String> filters) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
-        List<Bson> pipeline = preparePipelineBasedOnFilter(filters);
+    public List<Document> query(List<String> filters, List<String> orders) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders);
         System.out.println("pipeline: " + pipeline);
         return pipeline.isEmpty() ? new ArrayList<>() : getCollection().aggregate(pipeline).into(new ArrayList<>());
     }
 
-    public String explain(List<String> filters) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
-        List<Bson> pipeline = preparePipelineBasedOnFilter(filters);
+    public String explain(List<String> filters, List<String> orders) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders);
 
         // Run explain on the aggregation
         Document explain = getCollection().aggregate(pipeline).explain();
 
         // Navigate to winning plan
         Document queryPlanner = (Document) explain.get("queryPlanner");
-//                (Document) explain.get("stages", List.of())
-//                .stream()
-//                .filter(o -> ((Document) o).containsKey("$cursor"))
-//                .map(o -> (Document) o)
-//                .findFirst()
-//                .map(o -> (Document) ((Document) o.get("$cursor")).get("queryPlanner"))
-//                .orElse(null);
 
         if (queryPlanner == null) {
             System.out.println("No query planner info found in explain output.");
@@ -122,7 +115,7 @@ public class ExampleDao extends AbstractDao<Document> {
         return null;
     }
 
-    private List<Bson> preparePipelineBasedOnFilter(List<String> filters) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+    private List<Bson> preparePipelineBasedOnFilter(List<String> filters, List<String> orders) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
         List<Bson> pipeline = new ArrayList<>();
 
         if (filters != null && !filters.isEmpty() &&
@@ -153,6 +146,27 @@ public class ExampleDao extends AbstractDao<Document> {
                 pipeline.add(bsonFilter);
             }
 
+        }
+        if (orders != null && !orders.isEmpty() &&
+                orders.stream().filter(Objects::nonNull).anyMatch(order -> !order.trim().isEmpty())) {
+            // Parse OData $filter into UriInfo (simplified)
+            UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
+                    .parseUri("examples2",
+                            // https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html?utm_source=chatgpt.com
+                            /*
+                             * "The same system query option MUST NOT be specified more than once for any resource."
+                             */
+                            "$orderby=" +
+                                    orders.stream().filter(Objects::nonNull)
+                                            .filter(order -> !order.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null);
+            //OdataOrderToMongoSortParser
+            OrderByOption orderOption = uriInfo.getOrderByOption();
+            if (orderOption != null) {
+                Bson bsonFilter = OdataOrderToMongoSortParser.parseOrder(uriInfo, example2StaticEdmSupplier.get());
+                pipeline.add(bsonFilter);
+            }
         }
         return pipeline;
     }

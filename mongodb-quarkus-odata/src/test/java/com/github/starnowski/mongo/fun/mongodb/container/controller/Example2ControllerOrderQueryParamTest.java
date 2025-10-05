@@ -86,7 +86,7 @@ class Example2ControllerOrderQueryParamTest {
         // WHEN
         ExtractableResponse<Response> getResponse = given()
                 .when()
-                .queryParams(Map.of("$order", orders, "$select", "plainString"))
+                .queryParams(Map.of("$orderby", orders, "$select", "plainString"))
                 .get("/examples2/simple-query")
                 .then()
                 .statusCode(200).extract();

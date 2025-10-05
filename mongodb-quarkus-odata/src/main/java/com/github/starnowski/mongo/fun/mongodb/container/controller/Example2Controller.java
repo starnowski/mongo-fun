@@ -135,8 +135,10 @@ public class Example2Controller {
     @GET
     @Path("/simple-query")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response simpleFilterQuery(@QueryParam("$filter") List<String> filters) throws Exception {
-        List<Map<String, Object>> results = exampleService.query(filters);
+    public Response simpleFilterQuery(@QueryParam("$filter") List<String> filters,
+                                      @QueryParam("$orderby") List<String> orders
+                                      ) throws Exception {
+        List<Map<String, Object>> results = exampleService.query(filters, orders);
         QueryResponse queryResponse = new QueryResponse(results.stream()
                 .map(rec -> {
                     try {
@@ -144,7 +146,7 @@ public class Example2Controller {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }).toList(), exampleService.explain(filters));
+                }).toList(), exampleService.explain(filters, orders));
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
     }
 
