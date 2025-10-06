@@ -75,7 +75,20 @@ class Example2ControllerSelectQueryParamTest {
                                 "index": "c"
                               }
                         }
+                        """)),
+                Arguments.of(List.of("*"), prepareResponseForQueryWithExpectedJsonObject("""
+                        {
+                              "plainString": "example1",
+                              "password": "bbb",
+                              "nestedObject": {
+                                "tokens": ["first example", "1 ex"],
+                                "numbers": [1, 2, 3, 4, 5, 6, 26, 27, 28],
+                                "index": "c"
+                              }
+                        }
                         """))
+
+
         );
     }
 

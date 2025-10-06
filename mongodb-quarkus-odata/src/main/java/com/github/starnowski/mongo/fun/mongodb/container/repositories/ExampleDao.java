@@ -23,10 +23,7 @@ import org.bson.BsonInt32;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -60,6 +57,15 @@ public class ExampleDao extends AbstractDao<Document> {
 
         // Navigate to winning plan
         Document queryPlanner = (Document) explain.get("queryPlanner");
+
+        if (queryPlanner == null) {
+            //Extracting query plan for $cursor
+            queryPlanner = (Document) Optional.ofNullable(explain.get("stages")).filter(stages -> stages instanceof List)
+                    .map(stages -> (List)stages).orElse(List.of()).stream().filter(i -> i instanceof Document)
+                    .filter(i -> ((Document)i).containsKey("$cursor")).findFirst()
+                    .map(c -> ((Document)c).get("$cursor")).or(() -> new Document())
+                    .map(c -> ((Document)c).get("queryPlanner")).orElse(null);
+        }
 
         if (queryPlanner == null) {
             System.out.println("No query planner info found in explain output.");
@@ -178,13 +184,9 @@ public class ExampleDao extends AbstractDao<Document> {
             SelectOption selectOption = uriInfo.getSelectOption();
             if (selectOption != null) {
                 Bson bsonFilter = OdataSelectToMongoProjectParser.buildProjection(selectOption);
-                if (bsonFilter != null) {
-                    BsonDocument doc = bsonFilter.toBsonDocument();
-                    if (!doc.isEmpty()) {
-                        doc.append("_id", new BsonInt32(0));
-                        bsonFilter = doc;
-                    }
-                }
+                BsonDocument doc = bsonFilter.toBsonDocument();
+                doc.append("_id", new BsonInt32(0));
+                bsonFilter = doc;
                 pipeline.add(Aggregates.project(bsonFilter));
             }
         }
