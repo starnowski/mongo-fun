@@ -1,7 +1,5 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDatabaseSetupExtension;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoDocument;
 import com.github.starnowski.mongo.fun.mongodb.container.test.MongoSetup;
@@ -11,7 +9,6 @@ import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import org.jeasy.random.EasyRandom;
 import org.json.JSONException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,7 +42,9 @@ class Example2ControllerOrderQueryParamTest {
                 {
                   "results": [
                     %s
-                  ]
+                  ],
+                  "winningPlan": "COLLSCAN"
+                
                 }
                 """
                 .formatted(Stream.of(properties)
@@ -63,8 +62,8 @@ class Example2ControllerOrderQueryParamTest {
                 /*
                  * Passing custom as literal value "normalize(''First example'')" because there is a problem with adding custom method
                  */
-                Arguments.of(List.of("plainString asc"), prepareResponseForQueryWithPlainStringProperties("example1", "example2", "Oleksa")),
-                Arguments.of(List.of("plainString desc"), prepareResponseForQueryWithPlainStringProperties("example1", "example2", "Oleksa"))
+                Arguments.of(List.of("plainString asc"), prepareResponseForQueryWithPlainStringProperties("Oleksa", "example1", "example2")),
+                Arguments.of(List.of("plainString desc"), prepareResponseForQueryWithPlainStringProperties("example2", "example1", "Oleksa"))
 //                ,
         );
     }

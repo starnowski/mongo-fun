@@ -18,6 +18,8 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
+import org.bson.BsonDocument;
+import org.bson.BsonInt32;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -168,15 +170,22 @@ public class ExampleDao extends AbstractDao<Document> {
             UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                     .parseUri("examples2",
                             "$select=" +
-                                    orders.stream().filter(Objects::nonNull)
-                                            .filter(order -> !order.trim().isEmpty())
+                                    select.stream().filter(Objects::nonNull)
+                                            .filter(s -> !s.trim().isEmpty())
                                             .collect(Collectors.joining(","))
                             , null, null);
             //OdataSelectToMongoProjectParser
             SelectOption selectOption = uriInfo.getSelectOption();
             if (selectOption != null) {
                 Bson bsonFilter = OdataSelectToMongoProjectParser.buildProjection(selectOption);
-                pipeline.add(Aggregates.sort(bsonFilter));
+                if (bsonFilter != null) {
+                    BsonDocument doc = bsonFilter.toBsonDocument();
+                    if (!doc.isEmpty()) {
+                        doc.append("_id", new BsonInt32(0));
+                        bsonFilter = doc;
+                    }
+                }
+                pipeline.add(Aggregates.project(bsonFilter));
             }
         }
         return pipeline;
