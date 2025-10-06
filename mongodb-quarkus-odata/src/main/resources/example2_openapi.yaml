@@ -74,3 +74,5 @@ components:
               type: array
               items:
                 type: number
+            index:
+              type: string

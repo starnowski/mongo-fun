@@ -9,6 +9,7 @@
   "password": "aaa",
   "nestedObject": {
     "tokens": ["007", "7", "Bond", "James"],
-    "numbers": [107, 113]
+    "numbers": [107, 113],
+    "index": "a"
   }
 }

@@ -59,11 +59,10 @@ class Example2ControllerOrderQueryParamTest {
 
     public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFiltersExample2() {
         return Stream.of(
-                /*
-                 * Passing custom as literal value "normalize(''First example'')" because there is a problem with adding custom method
-                 */
                 Arguments.of(List.of("plainString asc"), prepareResponseForQueryWithPlainStringProperties("Oleksa", "example1", "example2")),
-                Arguments.of(List.of("plainString desc"), prepareResponseForQueryWithPlainStringProperties("example2", "example1", "Oleksa"))
+                Arguments.of(List.of("plainString desc"), prepareResponseForQueryWithPlainStringProperties("example2", "example1", "Oleksa")),
+                Arguments.of(List.of("nestedObject/index asc"), prepareResponseForQueryWithPlainStringProperties("example2", "Oleksa", "example1")),
+                Arguments.of(List.of("nestedObject/index desc"), prepareResponseForQueryWithPlainStringProperties("example1", "Oleksa", "example2"))
 //                ,
         );
     }

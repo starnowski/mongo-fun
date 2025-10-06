@@ -11,5 +11,8 @@
     "star trek",
     "star wars",
     "starlord"
-  ]
+  ],
+  "nestedObject": {
+    "index": "b"
+  }
 }
