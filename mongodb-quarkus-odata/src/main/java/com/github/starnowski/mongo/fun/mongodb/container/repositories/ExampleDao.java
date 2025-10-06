@@ -3,9 +3,9 @@ package com.github.starnowski.mongo.fun.mongodb.container.repositories;
 import com.github.starnowski.mongo.fun.mongodb.container.odata.Example2StaticEdmSupplier;
 import com.github.starnowski.mongo.fun.mongodb.container.odata.ODataToMongoParser;
 import com.github.starnowski.mongo.fun.mongodb.container.odata.OdataOrderToMongoSortParser;
+import com.github.starnowski.mongo.fun.mongodb.container.odata.OdataSelectToMongoProjectParser;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.olingo.server.api.OData;
@@ -13,6 +13,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
@@ -20,7 +21,10 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -40,14 +44,14 @@ public class ExampleDao extends AbstractDao<Document> {
         return Document.class;
     }
 
-    public List<Document> query(List<String> filters, List<String> orders) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
-        List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders);
+    public List<Document> query(List<String> filters, List<String> orders, List<String> select) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders, select);
         System.out.println("pipeline: " + pipeline);
         return pipeline.isEmpty() ? new ArrayList<>() : getCollection().aggregate(pipeline).into(new ArrayList<>());
     }
 
-    public String explain(List<String> filters, List<String> orders) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
-        List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders);
+    public String explain(List<String> filters, List<String> orders, List<String> select) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
+        List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders, select);
 
         // Run explain on the aggregation
         Document explain = getCollection().aggregate(pipeline).explain();
@@ -68,7 +72,7 @@ public class ExampleDao extends AbstractDao<Document> {
         // Check index usage
         if ("IXSCAN".equals(stage)) {
             System.out.println("✅ Pure index scan (covered aggregation).");
-          return "IXSCAN";
+            return "IXSCAN";
         } else if ("FETCH".equals(stage)) {
             Document inputStage = (Document) winningPlan.get("inputStage");
             if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
@@ -116,7 +120,7 @@ public class ExampleDao extends AbstractDao<Document> {
         return null;
     }
 
-    private List<Bson> preparePipelineBasedOnFilter(List<String> filters, List<String> orders) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+    private List<Bson> preparePipelineBasedOnFilter(List<String> filters, List<String> orders, List<String> select) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
         List<Bson> pipeline = new ArrayList<>();
 
         if (filters != null && !filters.isEmpty() &&
@@ -129,9 +133,9 @@ public class ExampleDao extends AbstractDao<Document> {
                              * "The same system query option MUST NOT be specified more than once for any resource."
                              */
                             "$filter=" +
-                            filters.stream().filter(Objects::nonNull)
-                                    .filter(filter -> !filter.trim().isEmpty())
-                                    .collect(Collectors.joining(" and "))
+                                    filters.stream().filter(Objects::nonNull)
+                                            .filter(filter -> !filter.trim().isEmpty())
+                                            .collect(Collectors.joining(" and "))
                             , null, null);
 
             FilterOption filterOption = uriInfo.getFilterOption();
@@ -143,13 +147,9 @@ public class ExampleDao extends AbstractDao<Document> {
         }
         if (orders != null && !orders.isEmpty() &&
                 orders.stream().filter(Objects::nonNull).anyMatch(order -> !order.trim().isEmpty())) {
-            // Parse OData $filter into UriInfo (simplified)
+            // Parse OData $orderby into UriInfo (simplified)
             UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                     .parseUri("examples2",
-                            // https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html?utm_source=chatgpt.com
-                            /*
-                             * "The same system query option MUST NOT be specified more than once for any resource."
-                             */
                             "$orderby=" +
                                     orders.stream().filter(Objects::nonNull)
                                             .filter(order -> !order.trim().isEmpty())
@@ -159,6 +159,23 @@ public class ExampleDao extends AbstractDao<Document> {
             OrderByOption orderOption = uriInfo.getOrderByOption();
             if (orderOption != null) {
                 Bson bsonFilter = OdataOrderToMongoSortParser.parseOrder(uriInfo, example2StaticEdmSupplier.get());
+                pipeline.add(Aggregates.sort(bsonFilter));
+            }
+        }
+        if (select != null && !select.isEmpty() &&
+                select.stream().filter(Objects::nonNull).anyMatch(s -> !s.trim().isEmpty())) {
+            // Parse OData $select into UriInfo (simplified)
+            UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
+                    .parseUri("examples2",
+                            "$select=" +
+                                    orders.stream().filter(Objects::nonNull)
+                                            .filter(order -> !order.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null);
+            //OdataSelectToMongoProjectParser
+            SelectOption selectOption = uriInfo.getSelectOption();
+            if (selectOption != null) {
+                Bson bsonFilter = OdataSelectToMongoProjectParser.buildProjection(selectOption);
                 pipeline.add(Aggregates.sort(bsonFilter));
             }
         }

@@ -19,8 +19,11 @@ https://swagger.io/docs/specification/v3_0/data-models/data-types/#files
 
 https://cloud.google.com/apigee/docs/api-platform/reference/policies/oas-validation-policy
 
-### ODate
+### OData
 https://olingo.apache.org/doc/odata4/tutorials/sqo_f/tutorial_sqo_f.html
+
+### Odata query overview
+https://learn.microsoft.com/en-us/odata/concepts/queryoptions-overview
 
 
 TODO

@@ -19,12 +19,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Path("/examples2")
 public class Example2Controller {
@@ -54,7 +52,7 @@ public class Example2Controller {
     }
 
 
-//    @Secured
+    //    @Secured
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -109,7 +107,7 @@ public class Example2Controller {
     @PATCH
     public Response patchUser(@PathParam("id") UUID id, String patchJson) throws Exception {
         Response getResponse = getExample(id);
-        Map<String, Object> savedModel = mapper.readValue((String)getResponse.getEntity(), Map.class);
+        Map<String, Object> savedModel = mapper.readValue((String) getResponse.getEntity(), Map.class);
 
         JsonReader reader = Json.createReader(new StringReader(patchJson));
         JsonPatch patch = Json.createPatch(reader.readArray());
@@ -123,7 +121,7 @@ public class Example2Controller {
     @PATCH
     public Response mergePatchUser(@PathParam("id") UUID id, String mergePatchJson) throws Exception {
         Response getResponse = getExample(id);
-        Map<String, Object> savedModel = mapper.readValue((String)getResponse.getEntity(), Map.class);
+        Map<String, Object> savedModel = mapper.readValue((String) getResponse.getEntity(), Map.class);
 
         JsonReader reader = Json.createReader(new StringReader(mergePatchJson));
         JsonMergePatch mergePatch = Json.createMergePatch(reader.readValue());
@@ -136,9 +134,10 @@ public class Example2Controller {
     @Path("/simple-query")
     @Produces(MediaType.APPLICATION_JSON)
     public Response simpleFilterQuery(@QueryParam("$filter") List<String> filters,
-                                      @QueryParam("$orderby") List<String> orders
-                                      ) throws Exception {
-        List<Map<String, Object>> results = exampleService.query(filters, orders);
+                                      @QueryParam("$orderby") List<String> orders,
+                                      @QueryParam("$select") List<String> select
+    ) throws Exception {
+        List<Map<String, Object>> results = exampleService.query(filters, orders, select);
         QueryResponse queryResponse = new QueryResponse(results.stream()
                 .map(rec -> {
                     try {
@@ -146,7 +145,7 @@ public class Example2Controller {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }).toList(), exampleService.explain(filters, orders));
+                }).toList(), exampleService.explain(filters, orders, select));
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
     }
 

@@ -9,7 +9,10 @@ import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @ApplicationScoped
 public class ExampleService {
@@ -38,11 +41,11 @@ public class ExampleService {
     }
 
 
-    public List<Map<String, Object>> query(List<String> filters, List<String> orders) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
-        return exampleDao.query(filters, orders).stream().map(doc -> (Map<String, Object>) new HashMap(doc)).toList();
+    public List<Map<String, Object>> query(List<String> filters, List<String> orders, List<String> select) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+        return exampleDao.query(filters, orders, select).stream().map(doc -> (Map<String, Object>) new HashMap(doc)).toList();
     }
 
-    public String explain(List<String> filters, List<String> orders) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
-        return exampleDao.explain(filters, orders);
+    public String explain(List<String> filters, List<String> orders, List<String> select) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+        return exampleDao.explain(filters, orders, select);
     }
 }
