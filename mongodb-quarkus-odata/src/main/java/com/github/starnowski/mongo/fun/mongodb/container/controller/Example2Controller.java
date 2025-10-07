@@ -111,7 +111,18 @@ public class Example2Controller {
 
         JsonReader reader = Json.createReader(new StringReader(patchJson));
         JsonPatch patch = Json.createPatch(reader.readArray());
-        Map patched = patchHelper.applyJsonPatch(patch, savedModel, Map.class);
+        Map patched;
+        try {
+            patched = patchHelper.applyJsonPatch(patch, savedModel, Map.class);
+        } catch (Exception ex) {
+            return Response.status(400).entity(
+                    """
+                        {
+                            "message": "%s"
+                        }
+                       """.formatted(ex.getMessage())
+            ).build();
+        }
         return updateExample(id, patched, null);
     }
 
