@@ -1,7 +1,6 @@
 package com.github.starnowski.mongo.fun.mongodb.container.odata;
 
 import com.mongodb.client.model.Projections;
-import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
