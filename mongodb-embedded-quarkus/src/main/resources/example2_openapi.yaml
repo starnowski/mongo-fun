@@ -63,3 +63,6 @@ components:
         # ---- object ----
         metadata:
           type: object          # -> java.util.Map<String, Object>
+        nestedObject:
+          type: object
+          additionalProperties: true
