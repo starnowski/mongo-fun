@@ -309,6 +309,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson left, Bson right)
             throws ExpressionVisitException, ODataApplicationException {
         switch (operator) {
+            case IN:
+                return combineEq(left, right);
             case EQ:
                 return combineEq(left, right);
             case NE:
