@@ -309,8 +309,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson left, Bson right)
             throws ExpressionVisitException, ODataApplicationException {
         switch (operator) {
-            case IN:
-                return combineEq(left, right);
             case EQ:
                 return combineEq(left, right);
             case NE:
@@ -588,8 +586,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
-    public Bson visitBinaryOperator(BinaryOperatorKind binaryOperatorKind, Bson bson, List<Bson> list) throws ExpressionVisitException, ODataApplicationException {
-        return null;
+    public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson left, List<Bson> list) throws ExpressionVisitException, ODataApplicationException {
+        switch (operator) {
+            case IN:
+                String field = extractField(left);
+                String type = extractFieldType(left);
+                List<Object> values = list.stream().map(this::extractValueObj).map(v -> tryConvertValueByEdmType(v, type)).toList();
+//                if (field == null) {
+//                    return this.context.isExprMode() ? new Document("$in", ) : new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value)));
+//                }
+                return Filters.in(field, values);
+            default:
+                throw new UnsupportedOperationException("Operator not supported: " + operator);
+        }
     }
 
     public record ElementMatchContext(String property, boolean multipleElemMatch) {
