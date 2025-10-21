@@ -19,3 +19,5 @@ https://www.mongodb.com/blog/post/building-with-patterns-a-summary
 ### 100MB limit for aggregation
 https://www.mongodb.com/docs/manual/core/aggregation-pipeline-limits/
 
+### MongoDB indexes
+https://www.mongodb.com/docs/manual/indexes/
