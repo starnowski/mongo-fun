@@ -9,7 +9,8 @@
 
 ### Performance
 https://www.mongodb.com/blog/post/performance-best-practices-indexing
-
+https://www.mongodb.com/docs/manual/applications/indexes/
+https://www.mongodb.com/docs/manual/reference/explain-results/
 
 ### Mongo building patterns
 
