@@ -232,7 +232,70 @@ class Example2ControllerJsonPatchTest {
                 .when()
                 .patch("/examples2/{id}", uuid)
                 .then()
-                .statusCode(400).extract();
+                .statusCode(400).extract().response().asPrettyString();
+    }
+
+    @Test
+    public void shouldSaveAndFailPatchModel222WithJsonPatchSpecification() throws IOException, JSONException {
+        // GIVEN
+        UUID uuid = UUID.randomUUID();
+
+        // Convert to JSON string
+        String json = """
+                    {
+                        "plainString": "test1",
+                        "nestedObject": {}
+                    }
+                """;
+//        String json = """
+//                    {
+//                        "plainString": "test1"
+//                    }
+//                """;
+        System.out.println("Request payload:");
+        System.out.println(json);
+
+        given()
+                .body(json)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract();
+
+        // Adding nestedObject
+        given()
+//                .body("""
+//                        [
+//                          { "op": "test", "path": "/nestedObject", "value": null }
+//                        ]
+//                        """)
+                .body("""
+                        [
+                          { "op": "test", "path": "/nestedObject/tokens", "value": null },
+                          { "op": "add", "path": "/nestedObject, "value": { "tokens": [] } },
+                          { "op": "add", "path": "/nestedObject/tokens/-", "value": "last token" }
+                        ]
+                        """)
+                .contentType("application/json-patch+json")
+                .when()
+                .patch("/examples2/{id}", uuid)
+                .then()
+                .statusCode(200).extract().response().asPrettyString();
+
+        // WHEN
+//        given()
+//                .body("""
+//                        [
+//                          { "op": "add", "path": "/nestedObject/tokens/-", "value": "last token" }
+//                        ]
+//                        """)//doubleValue
+//                //{ "op": "add", "path": "/nestedObject/tokens/-", "value": "last token" }
+//                .contentType("application/json-patch+json")
+//                .when()
+//                .patch("/examples2/{id}", uuid)
+//                .then()
+//                .statusCode(400).extract().response().asPrettyString();
     }
 
     @Test

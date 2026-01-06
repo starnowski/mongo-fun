@@ -22,6 +22,7 @@ import org.bson.BsonDocument;
 import org.bson.BsonInt32;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.json.JsonWriterSettings;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -188,8 +189,19 @@ public class ExampleDao extends AbstractDao<Document> {
                 doc.append("_id", new BsonInt32(0));
                 bsonFilter = doc;
                 pipeline.add(Aggregates.project(bsonFilter));
+                printBSONDocument(Aggregates.project(bsonFilter));
             }
         }
         return pipeline;
+    }
+
+    private void printBSONDocument(Bson bson) {
+        JsonWriterSettings settings = JsonWriterSettings.builder()
+                .outputMode(org.bson.json.JsonMode.RELAXED)
+                .indent(true)
+                .build();
+
+        String json = bson.toBsonDocument().toJson(settings);
+        System.out.println(json);
     }
 }

@@ -76,6 +76,14 @@ class Example2ControllerSelectQueryParamTest {
                               }
                         }
                         """)),
+                Arguments.of(List.of("plainString", "nestedObject/tokens"), prepareResponseForQueryWithExpectedJsonObject("""
+                        {
+                            "plainString": "example1",
+                            "nestedObject": {
+                                "tokens": ["first example", "1 ex"]
+                              }
+                        }
+                        """)),
                 Arguments.of(List.of("*"), prepareResponseForQueryWithExpectedJsonObject("""
                         {
                               "plainString": "example1",
