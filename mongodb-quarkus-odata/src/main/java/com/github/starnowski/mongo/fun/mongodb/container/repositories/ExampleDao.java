@@ -53,8 +53,11 @@ public class ExampleDao extends AbstractDao<Document> {
     public String explain(List<String> filters, List<String> orders, List<String> select) throws ExpressionVisitException, ODataApplicationException, UriValidationException, UriParserException {
         List<Bson> pipeline = preparePipelineBasedOnFilter(filters, orders, select);
 
+        System.out.println(new Document("pipeline", pipeline).toJson(getCollection().getCodecRegistry().get(Document.class)));
+
         // Run explain on the aggregation
         Document explain = getCollection().aggregate(pipeline).explain();
+        System.out.println(explain.toJson());
 
         // Navigate to winning plan
         Document queryPlanner = (Document) explain.get("queryPlanner");
@@ -135,22 +138,31 @@ public class ExampleDao extends AbstractDao<Document> {
         if (filters != null && !filters.isEmpty() &&
                 filters.stream().filter(Objects::nonNull).anyMatch(filter -> !filter.trim().isEmpty())) {
             // Parse OData $filter into UriInfo (simplified)
+            String filterString = "$filter=" +
+                    filters.stream().filter(Objects::nonNull)
+                            .filter(filter -> !filter.trim().isEmpty())
+                            .collect(Collectors.joining(" and "));
             UriInfo uriInfo = new Parser(example2StaticEdmSupplier.get(), OData.newInstance())
                     .parseUri("examples2",
                             // https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html?utm_source=chatgpt.com
                             /*
                              * "The same system query option MUST NOT be specified more than once for any resource."
                              */
-                            "$filter=" +
-                                    filters.stream().filter(Objects::nonNull)
-                                            .filter(filter -> !filter.trim().isEmpty())
-                                            .collect(Collectors.joining(" and "))
+                            filterString
                             , null, null);
 
             FilterOption filterOption = uriInfo.getFilterOption();
             if (filterOption != null) {
                 Bson bsonFilter = ODataToMongoParser.parseFilter(uriInfo, example2StaticEdmSupplier.get());
                 pipeline.add(Aggregates.match(Filters.and(bsonFilter)));
+                try {
+                    System.out.println("<test>");
+                    System.out.println("<filter>" + filterString + "</filter>");
+                    System.out.println("<pipeline>" + Aggregates.match(Filters.and(bsonFilter)).toBsonDocument().toJson() + "</pipeline>");
+                    System.out.println("</test>");
+                } catch (Exception exception) {
+                    //TODO do nothing
+                }
             }
 
         }
