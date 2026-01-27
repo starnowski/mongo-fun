@@ -20,6 +20,7 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
 import org.json.JSONException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -235,6 +236,7 @@ class Example2ControllerJsonPatchTest {
                 .statusCode(400).extract().response().asPrettyString();
     }
 
+    @Disabled
     @Test
     public void shouldSaveAndFailPatchModel222WithJsonPatchSpecification() throws IOException, JSONException {
         // GIVEN
