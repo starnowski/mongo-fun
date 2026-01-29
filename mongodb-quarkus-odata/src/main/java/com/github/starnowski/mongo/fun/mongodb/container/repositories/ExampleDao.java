@@ -24,6 +24,11 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -158,8 +163,21 @@ public class ExampleDao extends AbstractDao<Document> {
                 try {
                     System.out.println("<test>");
                     System.out.println("<filter>" + filterString + "</filter>");
-                    System.out.println("<pipeline>" + Aggregates.match(Filters.and(bsonFilter)).toBsonDocument().toJson() + "</pipeline>");
+                    System.out.println("<pipeline>" + Aggregates.match(Filters.and(bsonFilter)).toBsonDocument(Document.class, this.mongoClient.getCodecRegistry()).toJson() + "</pipeline>");
                     System.out.println("</test>");
+                    String path = Paths.get(new File(getClass().getClassLoader().getResource("/testcases.txt").getFile()).getPath()).toAbsolutePath().toString();
+                    System.out.println("File path is " + path);
+                    boolean logTestsCasesToTestsFile = false;
+                    assert logTestsCasesToTestsFile = true;
+                    if (logTestsCasesToTestsFile) {
+                        try (FileOutputStream outputStream = new FileOutputStream(path, true)) {
+                            outputStream.write("<test>".getBytes(StandardCharsets.UTF_8));
+                            outputStream.write(("<filter>" + filterString + "</filter>").getBytes(StandardCharsets.UTF_8));
+                            outputStream.write(("<pipeline>" + Aggregates.match(Filters.and(bsonFilter)).toBsonDocument(Document.class, this.mongoClient.getCodecRegistry()).toJson() + "</pipeline>").getBytes(StandardCharsets.UTF_8));
+                            outputStream.write("</test>".getBytes(StandardCharsets.UTF_8));
+                            outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                        }
+                    }
                 } catch (Exception exception) {
                     //TODO do nothing
                 }
