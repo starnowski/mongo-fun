@@ -157,7 +157,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                     .elementMatchContext(new ElementMatchContext(field, false))
                                     .build());
                     Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
-                    return prepareElementMatchDocumentForAllLambda(innerObject, field);
+                    return prepareElementMatchDocumentForAllLambda(innerObject, field, false);
                 };
             } catch (MultipleElementMatchOperantRequiredException ex) {
                 multipleElementMatchOperantRequiredExceptionThrown = true;
@@ -258,20 +258,29 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         );
     }
 
-    private Bson prepareElementMatchDocumentForAllLambda(Bson innerPart, String field) {
+    private Bson prepareElementMatchDocumentForAllLambda(Bson innerPart, String field, boolean returnUnwrappedBson) {
         if (this.context.isElementMatchContext()) {
-            if (innerPart.toBsonDocument().containsKey(this.context.elementMatchContext().property())){
+            if (innerPart.toBsonDocument().containsKey(this.context.elementMatchContext().property())) {
                 BsonValue innerValuePart = innerPart.toBsonDocument().get(this.context.elementMatchContext().property());
                 if (!innerValuePart.isDocument() && !innerValuePart.isRegularExpression()) {
+                    if (returnUnwrappedBson) {
+                        return new Document("$eq", innerValuePart);
+                    }
                     return new Document(field, new Document("$not", new Document("$elemMatch",
                             new Document("$ne", innerValuePart)
                     ))
                     );
                 }
-                    return new Document(field, new Document("$not", new Document("$elemMatch",
-                            new Document("$not", innerValuePart)
-                    ))
-                    );
+                if (returnUnwrappedBson) {
+                    return innerValuePart.asDocument();
+                }
+                return new Document(field, new Document("$not", new Document("$elemMatch",
+                        new Document("$not", innerValuePart)
+                ))
+                );
+            }
+            if (returnUnwrappedBson) {
+                return innerPart.toBsonDocument();
             }
         }
         return new Document(field, new Document("$not", new Document("$elemMatch",
@@ -291,14 +300,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (innerPart.toBsonDocument().containsKey("$and")) {
             return (List<Bson>) innerPart.toBsonDocument().get("$and");
         }
-        return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field));
+        return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field, false));
     }
 
-    private List<Bson> tryExtractElementMatchDocumentForAllLambda(Bson innerPart, String field) {
+    private List<Bson> tryExtractElementMatchDocumentForAllLambdaWithOrOperator(Bson innerPart, String field) {
         if (innerPart.toBsonDocument().containsKey("$or")) {
             return (List<Bson>) innerPart.toBsonDocument().get("$or");
         }
-        return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field));
+        return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field, true));
     }
 
     private Document prepareMemberDocument(String field) {
@@ -393,12 +402,43 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         ).toList();
                         return new Document("$or", orFilters);
                     } else if (this.context.isLambdaAllContext()) {
-                        List<Bson> orFilters = Streams.concat(tryExtractElementMatchDocumentForAllLambda(left, this.context.elementMatchContext().property())
+                        //TODO FIX ALL OR
+                        List<Bson> orFilters = Streams.concat(tryExtractElementMatchDocumentForAllLambdaWithOrOperator(left, this.context.elementMatchContext().property())
                                         .stream(),
-                                tryExtractElementMatchDocumentForAllLambda(right, this.context.elementMatchContext().property())
+                                tryExtractElementMatchDocumentForAllLambdaWithOrOperator(right, this.context.elementMatchContext().property())
                                         .stream()
                         ).toList();
-                        return new Document("$or", orFilters);
+//                        return new Document("$nor", List.of(new Document(this.context.elementMatchContext().property(), new Document("$elemMatch",
+//
+//                                        new Document("$and", Arrays.asList(orFilters.get(0), orFilters.get(1)))
+//                                )
+//                                )
+//                        )
+//                        );
+                        // Compile but invalid
+//                        Document main = new Document();
+//                        main.putAll(orFilters.get(0).toBsonDocument());
+//                        main.putAll(orFilters.get(1).toBsonDocument());
+//                        return new Document("$nor", List.of(new Document(this.context.elementMatchContext().property(), new Document("$elemMatch",
+//
+//                                main
+//                                )
+//                                )
+//                        )
+//                        );
+
+
+                        ///
+                        // TODO validate if expression required
+                        Document main = new Document();
+                        main.putAll(orFilters.get(0).toBsonDocument());
+                        main.putAll(orFilters.get(1).toBsonDocument());
+                        return new Document(this.context.elementMatchContext().property(), new Document("$not", new Document("$elemMatch",
+
+                                        new Document("$not", main)
+                                )
+                                )
+                        );
                     }
                 }
                 return Filters.or(left, right);
