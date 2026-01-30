@@ -48,4 +48,8 @@ public class ExampleService {
     public String explain(List<String> filters, List<String> orders, List<String> select) throws UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
         return exampleDao.explain(filters, orders, select);
     }
+
+    public List<Map<String, Object>> query(String pipelineJson) {
+        return exampleDao.query(pipelineJson).stream().map(doc -> (Map<String, Object>) new HashMap(doc)).toList();
+    }
 }

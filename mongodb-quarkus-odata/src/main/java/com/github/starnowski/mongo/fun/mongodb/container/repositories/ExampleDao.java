@@ -234,4 +234,11 @@ public class ExampleDao extends AbstractDao<Document> {
         String json = bson.toBsonDocument().toJson(settings);
         System.out.println(json);
     }
+
+    public List<Document> query(String pipelineJson) {
+        Document pipeLineWrapper = Document.parse(pipelineJson);
+        List<Bson> pipeline = pipeLineWrapper.getList("pipeline", Bson.class);
+        System.out.println("pipeline: " + pipeline);
+        return pipeline.isEmpty() ? new ArrayList<>() : getCollection().aggregate(pipeline).into(new ArrayList<>());
+    }
 }

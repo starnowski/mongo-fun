@@ -87,11 +87,210 @@ class Example2ControllerAllLambdaTest {
         return Stream.of(
                 Arguments.of(List.of("tags/all(t:t ne 'no such text' and t ne 'no such word')"), ALL_EXAMPLES_IN_RESPONSE),
                 Arguments.of(List.of("tags/all(t:startswith(t,'star') and t ne 'starlord')"), prepareResponseForQueryWithPlainStringProperties("Mario")),
-                Arguments.of(List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"), ALL_EXAMPLES_IN_RESPONSE),
+                Arguments.of(List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"), prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
                 Arguments.of(List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:contains(t,'starlord'))"), prepareResponseForQueryWithPlainStringProperties())
+        );
+    }
+
+    public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {
+        return Stream.of(
+//                Arguments.of("""
+//                            {
+//                                "pipeline": [
+//                                    {
+//                                    "$match": {
+//                                      "tags": {
+//                                        "$not": {
+//                                          "$elemMatch": {
+//                                            "$and": [
+//                                              { "$not": { "$regex": "/^star/" } },
+//                                              { "$eq": "starlord" }
+//                                            ]
+//                                          }
+//                                        }
+//                                      }
+//                                    }
+//                                  }
+//                                ]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+//                ,
+                //com.mongodb.MongoCommandException: Command failed with error 2 (BadValue): 'unknown operator: $nor' on server localhost:27018. The full response is {"ok": 0.0, "errmsg": "unknown operator: $nor", "code": 2, "codeName": "BadValue"}
+//                Arguments.of("""
+//                            {
+//                                "pipeline": [
+//                                    {
+//                                    "$match": {
+//                                      "tags": {
+//                                        "$nor": {
+//                                          "$elemMatch": {
+//                                            "$and": [
+//                                              { "$not": { "$regex": "/^star/" } },
+//                                              { "$eq": "starlord" }
+//                                            ]
+//                                          }
+//                                        }
+//                                      }
+//                                    }
+//                                  }
+//                                ]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+                // Caused by: com.mongodb.MongoCommandException: Command failed with error 2 (BadValue): 'unknown top level operator: $not. If you are trying to negate an entire expression, use $nor.' on server localhost:27018. The full response is {"ok": 0.0, "errmsg": "unknown top level operator: $not. If you are trying to negate an entire expression, use $nor.", "code": 2, "codeName": "BadValue"}
+//                Arguments.of("""
+//                            {
+//                            	"pipeline": [
+//                            		{
+//                            			"$match": {
+//                            				"$not": {
+//                            					"tags": {
+//                            						"$elemMatch": {
+//                            							"$and": [
+//                            								{
+//                            									"$not": {
+//                            										"$regex": "/^star/"
+//                            									}
+//                            								},
+//                            								{
+//                            									"$eq": "starlord"
+//                            								}
+//                            							]
+//                            						}
+//                            					}
+//                            				}
+//                            			}
+//                            		}
+//                            	]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+//2026-01-30 21:17:19,154 DEBUG [org.mon.dri.pro.command] (executor-thread-1) Command "aggregate" failed on database "test" in 2.5556 ms using a connection with driver-generated ID 3 and server-generated ID 3 to localhost:27018. The request ID is 11 and the operation ID is 11.: com.mongodb.MongoCommandException: Command failed with error 2 (BadValue): 'unknown top level operator: $not. If you are trying to negate an entire expression, use $nor.' on server localhost:27018. The full response is {"ok": 0.0, "errmsg": "unknown top level operator: $not. If you are trying to negate an entire expression, use $nor.", "code": 2, "codeName": "BadValue"}
+//                Arguments.of("""
+//                            {
+//                            	"pipeline": [
+//                            		{
+//                            			"$match": {
+//                            					"tags": {
+//                            						"$elemMatch": {
+//                            							"$and": [
+//                            								{
+//                            									"$not": {
+//                            										"$regex": "/^star/"
+//                            									}
+//                            								},
+//                            								{
+//                            									"$eq": "starlord"
+//                            								}
+//                            							]
+//                            						}
+//                            					}
+//                            				}
+//                            		}
+//                            	]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+
+//                Arguments.of("""
+//                            {
+//                            	"pipeline": [
+//                            		{
+//                            			"$match": {
+//                            					"tags": {
+//                            						"$elemMatch": {
+//                            							"$and": [
+//                            								{
+//                            									"$regex": "/^star/"
+//                            								},
+//                            								{
+//                            									"$eq": "starlord"
+//                            								}
+//                            							]
+//                            						}
+//                            					}
+//                            				}
+//                            		}
+//                            	]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+                // Compile but invalid record
+//                Arguments.of("""
+//                            {
+//                            	"pipeline": [
+//                            		{
+//                            			"$match": {
+//                            					"tags": {
+//                            						"$elemMatch": {
+//                            							"or": [
+//                            								{
+//                            									"$regex": "/^star/"
+//                            								},
+//                            								{
+//                            									"$eq": "starlord"
+//                            								}
+//                            							]
+//                            						}
+//                            					}
+//                            				}
+//                            		}
+//                            	]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+//                Arguments.of("""
+//                            {
+//                            	"pipeline": [
+//                            		{
+//                            			"$match": {
+//                            					"tags": {
+//                            						"$elemMatch": {
+//                            							"or": [
+//                            								{
+//                            									"$regex": "/^star/"
+//                            								},
+//                            								{
+//                            									"$ne": "starlord"
+//                            								}
+//                            							]
+//                            						}
+//                            					}
+//                            				}
+//                            		}
+//                            	]
+//                            }
+//                        """, ALL_EXAMPLES_IN_RESPONSE)
+
+                Arguments.of("""
+                            {
+                            	"pipeline": [
+                                           {
+                                             "$match": {
+                                               "$expr": {
+                                                 "$allElementsTrue": {
+                                                   "$map": {
+                                                     "input": "$tags",
+                                                     "as": "t",
+                                                     "in": {
+                                                       "$or": [
+                                                         { "$regexMatch": { "input": "$$t", "regex": "/^star/" } },
+                                                         { "$ne": ["$$t", "starlord"] }
+                                                       ]
+                                                     }
+                                                   }
+                                                 }
+                                               }
+                                             }
+                                           }
+                                         ]
+                            }
+                        """, prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
+//                ,
+//
+//                Arguments.of(List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"), ALL_EXAMPLES_IN_RESPONSE),
+//                Arguments.of(List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+//                Arguments.of(List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+//                Arguments.of(List.of("tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+//                Arguments.of(List.of("tags/all(t:contains(t,'starlord'))"), prepareResponseForQueryWithPlainStringProperties())
         );
     }
 
@@ -156,6 +355,30 @@ class Example2ControllerAllLambdaTest {
                 .when()
                 .queryParams(Map.of("$filter", filters))
                 .get("/examples2/simple-query")
+                .then()
+                .statusCode(200).extract();
+
+        // THEN
+        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+    }
+
+    @ParameterizedTest
+    @MethodSource({
+            "provideShouldReturnResponseStringBasedOnPipelines"
+    })
+    @MongoSetup(mongoDocuments = {
+            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples"),
+            @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
+    })
+    public void provideShouldReturnResponseStringBasedOnPipelines(String json, String expectedResponse) throws IOException, JSONException {
+        // WHEN
+        ExtractableResponse<Response> getResponse = given()
+                .when()
+                .body(json)
+                .post("/examples2/simple-query")
                 .then()
                 .statusCode(200).extract();
 

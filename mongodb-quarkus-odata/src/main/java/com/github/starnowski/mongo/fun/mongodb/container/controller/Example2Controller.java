@@ -160,6 +160,24 @@ public class Example2Controller {
         return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
     }
 
+    @POST
+    @Path("/simple-query")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response simpleFilterQuery(String pipelineJson
+    ) throws Exception {
+        List<Map<String, Object>> results = exampleService.query(pipelineJson);
+        QueryResponse queryResponse = new QueryResponse(results.stream()
+                .map(rec -> {
+                    try {
+                        return openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(rec, "src/main/resources/example2_openapi.yaml", "Example2");
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList(),
+                null);
+        return Response.ok(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(queryResponse)).build();
+    }
+
     public record QueryResponse(List<Map<String, Object>> results, String winningPlan) {
 
     }
