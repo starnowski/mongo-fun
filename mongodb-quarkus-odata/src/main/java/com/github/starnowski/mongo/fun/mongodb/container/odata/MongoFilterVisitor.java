@@ -259,6 +259,21 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     private Bson prepareElementMatchDocumentForAllLambda(Bson innerPart, String field) {
+        if (this.context.isElementMatchContext()) {
+            if (innerPart.toBsonDocument().containsKey(this.context.elementMatchContext().property())){
+                BsonValue innerValuePart = innerPart.toBsonDocument().get(this.context.elementMatchContext().property());
+                if (!innerValuePart.isDocument() && !innerValuePart.isRegularExpression()) {
+                    return new Document(field, new Document("$not", new Document("$elemMatch",
+                            new Document("$ne", innerValuePart)
+                    ))
+                    );
+                }
+                    return new Document(field, new Document("$not", new Document("$elemMatch",
+                            new Document("$not", innerValuePart)
+                    ))
+                    );
+            }
+        }
         return new Document(field, new Document("$not", new Document("$elemMatch",
                 new Document("$not", innerPart)
         ))
