@@ -83,7 +83,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         // New test cases
         Arguments.of(
             List.of("tags/all(t:endswith(t,'web') or endswith(t,'trap'))"),
-            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")),
+            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI", "Some text")),
         Arguments.of(
             List.of("tags/all(t:length(t) eq 9)"),
             prepareResponseForQueryWithPlainStringProperties("Mario")),
