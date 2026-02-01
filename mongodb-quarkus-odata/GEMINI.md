@@ -14,13 +14,12 @@ This project is a Java-based application built with the **Quarkus** framework, f
 
 ### Prerequisites
 *   JDK 17
-*   Maven 3.8+
 
 ### Commands
-*   **Build and Test**: `mvn clean install`
-*   **Run in Dev Mode**: `mvn quarkus:dev`
+*   **Build and Test**: `./mvnw clean install`
+*   **Run in Dev Mode**: `./mvnw quarkus:dev`
     *   This enables live coding and hot reload.
-*   **Format Code**: `mvn spotless:apply`
+*   **Format Code**: `./mvnw spotless:apply`
     *   The project uses the Spotless plugin with Google Java Format.
 
 ## Development Conventions
