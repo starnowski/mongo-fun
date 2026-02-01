@@ -39,7 +39,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
 @ExtendWith(MongoDatabaseSetupExtension.class)
-class Example2ControllerComplexTypesTest {
+class Example2ControllerComplexTypesTest extends AbstractExample2ControllerTest {
 
   private static final String ALL_EXAMPLES_IN_RESPONSE =
       prepareResponseForQueryWithPlainStringProperties(
@@ -48,9 +48,6 @@ class Example2ControllerComplexTypesTest {
       TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27 =
           List.of(
               "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)");
-  private JavaTimeModule javaTimeModule;
-  private EasyRandom generator;
-  private ObjectMapper mapper;
   @Inject private MongoClient mongoClient;
 
   public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
@@ -94,62 +91,6 @@ class Example2ControllerComplexTypesTest {
         //                Arguments.of(List.of("nestedObject/tokens/any(t:t in ('Bond', 'James'))"),
         // prepareResponseForQueryWithPlainStringProperties("example2"))
         );
-  }
-
-  @PostConstruct
-  public void init() {
-    javaTimeModule = new JavaTimeModule();
-
-    // Custom serializer for OffsetDateTime
-    javaTimeModule.addSerializer(
-        OffsetDateTime.class,
-        new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
-          @Override
-          public void serialize(
-              OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers)
-              throws IOException {
-            // https://www.mongodb.com/docs/manual/reference/method/Date/
-            /*
-            Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
-            No microseconds or nanoseconds
-            */
-            gen.writeString(
-                value
-                    .truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-          }
-        });
-    //        javaTimeModule.disable();
-    // https://www.mongodb.com/docs/manual/reference/method/Date/
-    EasyRandomParameters parameters =
-        new EasyRandomParameters()
-            .randomize(
-                InputStream.class,
-                new Randomizer<InputStream>() {
-                  private final Random random = new Random();
-
-                  @Override
-                  public InputStream getRandomValue() {
-                    byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
-                    random.nextBytes(bytes);
-                    return new ByteArrayInputStream(bytes);
-                  }
-                })
-            .randomize(
-                Object.class,
-                new Randomizer<Object>() {
-
-                  private final Random random = new Random();
-
-                  @Override
-                  public Object getRandomValue() {
-                    return random.nextInt();
-                  }
-                });
-    generator = new EasyRandom(parameters);
-    mapper = new ObjectMapper();
-    mapper.registerModule(javaTimeModule);
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
   }
 
   @ParameterizedTest

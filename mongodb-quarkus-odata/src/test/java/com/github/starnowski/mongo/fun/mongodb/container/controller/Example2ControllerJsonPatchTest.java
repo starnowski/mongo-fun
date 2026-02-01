@@ -33,14 +33,11 @@ import org.junit.jupiter.params.provider.Arguments;
 
 @QuarkusTest
 @ExtendWith(MongoDatabaseSetupExtension.class)
-class Example2ControllerJsonPatchTest {
+class Example2ControllerJsonPatchTest extends AbstractExample2ControllerTest {
 
   private static final String ALL_EXAMPLES_IN_RESPONSE =
       prepareResponseForQueryWithPlainStringProperties(
           "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem");
-  private JavaTimeModule javaTimeModule;
-  private EasyRandom generator;
-  private ObjectMapper mapper;
   @Inject private MongoClient mongoClient;
 
   public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
@@ -228,62 +225,6 @@ class Example2ControllerJsonPatchTest {
                 "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')"),
             prepareResponseForQueryWithPlainStringProperties(
                 "Some text", "eOMtThyhVNLWUZNRcBaQKxI")));
-  }
-
-  @PostConstruct
-  public void init() {
-    javaTimeModule = new JavaTimeModule();
-
-    // Custom serializer for OffsetDateTime
-    javaTimeModule.addSerializer(
-        OffsetDateTime.class,
-        new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
-          @Override
-          public void serialize(
-              OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers)
-              throws IOException {
-            // https://www.mongodb.com/docs/manual/reference/method/Date/
-            /*
-            Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
-            No microseconds or nanoseconds
-            */
-            gen.writeString(
-                value
-                    .truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-          }
-        });
-    //        javaTimeModule.disable();
-    // https://www.mongodb.com/docs/manual/reference/method/Date/
-    EasyRandomParameters parameters =
-        new EasyRandomParameters()
-            .randomize(
-                InputStream.class,
-                new Randomizer<InputStream>() {
-                  private final Random random = new Random();
-
-                  @Override
-                  public InputStream getRandomValue() {
-                    byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
-                    random.nextBytes(bytes);
-                    return new ByteArrayInputStream(bytes);
-                  }
-                })
-            .randomize(
-                Object.class,
-                new Randomizer<Object>() {
-
-                  private final Random random = new Random();
-
-                  @Override
-                  public Object getRandomValue() {
-                    return random.nextInt();
-                  }
-                });
-    generator = new EasyRandom(parameters);
-    mapper = new ObjectMapper();
-    mapper.registerModule(javaTimeModule);
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
   }
 
   @Test
