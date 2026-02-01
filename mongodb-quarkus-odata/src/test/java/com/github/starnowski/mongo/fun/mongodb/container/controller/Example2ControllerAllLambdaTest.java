@@ -91,7 +91,7 @@ class Example2ControllerAllLambdaTest {
                 Arguments.of(List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
-                Arguments.of(List.of("tags/all(t:contains(t,'starlord'))"), prepareResponseForQueryWithPlainStringProperties())
+                Arguments.of(List.of("tags/all(t:contains(t,'starlord'))"), prepareResponseForQueryWithPlainStringProperties("Oleksa"))
         );
     }
 

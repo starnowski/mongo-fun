@@ -402,7 +402,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         ).toList();
                         return new Document("$or", orFilters);
                     } else if (this.context.isLambdaAllContext()) {
-                        //TODO FIX ALL OR
+                        //TODO FIX ALL
+                        if (!this.context.isExprMode()) {
+                            throw new ExpressionOperantRequiredException("ALL lambda for OR operator required expr");
+                        }
                         List<Bson> orFilters = Streams.concat(tryExtractElementMatchDocumentForAllLambdaWithOrOperator(left, this.context.elementMatchContext().property())
                                         .stream(),
                                 tryExtractElementMatchDocumentForAllLambdaWithOrOperator(right, this.context.elementMatchContext().property())
@@ -647,9 +650,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 String field = extractField(left);
                 String type = extractFieldType(left);
                 List<Object> values = list.stream().map(this::extractValueObj).map(v -> tryConvertValueByEdmType(v, type)).toList();
-//                if (field == null) {
-//                    return this.context.isExprMode() ? new Document("$in", ) : new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value)));
-//                }
+                if (this.context.isExprMode()) {
+                    return new Document("$in", Arrays.asList(field, values));
+                }
                 return Filters.in(field, values);
             default:
                 throw new UnsupportedOperationException("Operator not supported: " + operator);
