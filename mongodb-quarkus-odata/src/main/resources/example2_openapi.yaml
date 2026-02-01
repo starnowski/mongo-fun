@@ -60,6 +60,11 @@ components:
           items:
             type: string        # -> java.util.List<String>
 
+        numericArray:
+          type: array
+          items:
+            type: number        # -> java.util.List<BigDecimal>
+
         # ---- object ----
 #        metadata:
 #          type: object          # -> java.util.Map<String, Object>

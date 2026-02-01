@@ -92,7 +92,14 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
         Arguments.of(
             List.of("tags/all(t:contains(toupper(t),'STAR'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")));
+            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/all(n:n gt 5)"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
+            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")));
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {

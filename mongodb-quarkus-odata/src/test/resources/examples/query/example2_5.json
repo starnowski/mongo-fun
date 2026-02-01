@@ -12,6 +12,11 @@
     "star wars",
     "starlord"
   ],
+  "numericArray": [
+    40,
+    50,
+    60
+  ],
   "nestedObject": {
     "index": "b"
   }
