@@ -15,46 +15,52 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-
 import java.util.Map;
 
 @Path("/examples")
 public class ExampleController {
 
-    private final ObjectMapper mapper;
-    @Inject
-    private ExampleService exampleService;
-    @Inject
-    private OpenApiJsonMapper openApiJsonMapper;
+  private final ObjectMapper mapper;
+  @Inject private ExampleService exampleService;
+  @Inject private OpenApiJsonMapper openApiJsonMapper;
 
-    public ExampleController() {
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule()); // handle java.time types
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
+  public ExampleController() {
+    mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule()); // handle java.time types
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+  }
 
-    @Secured
-    @POST
-    @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveExample(Map<String, Object> body) throws Exception {
-        Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example_openapi.yaml", "Example");
-        Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example_openapi.yaml", "Example");
-        return Response.ok(mapper.writeValueAsString(savedModel)).build();
-    }
+  @Secured
+  @POST
+  @Path("/")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response saveExample(Map<String, Object> body) throws Exception {
+    Map<String, Object> coercedMap =
+        openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(
+            body, "src/main/resources/example_openapi.yaml", "Example");
+    Map<String, Object> savedModel = exampleService.saveExample(coercedMap);
+    savedModel =
+        openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(
+            savedModel, "src/main/resources/example_openapi.yaml", "Example");
+    return Response.ok(mapper.writeValueAsString(savedModel)).build();
+  }
 
-    @Secured
-    @POST
-    @Path("/withParams")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveExample(Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
-        Map<String, Object> coercedMap = openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(body, "src/main/resources/example_openapi.yaml", "Example");
-        Map<String, Object> savedModel = exampleService.saveAndUpdate(coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
-        savedModel = openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(savedModel, "src/main/resources/example_openapi.yaml", "Example");
+  @Secured
+  @POST
+  @Path("/withParams")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response saveExample(Map<String, Object> body, @Context UriInfo uriInfo) throws Exception {
+    Map<String, Object> coercedMap =
+        openApiJsonMapper.coerceRawJsonTypesToOpenApiJavaTypes(
+            body, "src/main/resources/example_openapi.yaml", "Example");
+    Map<String, Object> savedModel =
+        exampleService.saveAndUpdate(coercedMap, Map.copyOf(uriInfo.getQueryParameters()));
+    savedModel =
+        openApiJsonMapper.coerceMongoDecodedTypesToOpenApiJavaTypesV2(
+            savedModel, "src/main/resources/example_openapi.yaml", "Example");
 
-        return Response.ok(mapper.writeValueAsString(savedModel)).build();
-    }
+    return Response.ok(mapper.writeValueAsString(savedModel)).build();
+  }
 }

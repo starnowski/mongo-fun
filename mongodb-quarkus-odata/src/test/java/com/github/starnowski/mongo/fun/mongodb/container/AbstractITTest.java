@@ -3,9 +3,7 @@ package com.github.starnowski.mongo.fun.mongodb.container;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.CommentDao;
 import com.github.starnowski.mongo.fun.mongodb.container.repositories.PostDao;
 import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.common.ResourceArg;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.mongodb.MongoTestResource;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 
@@ -13,24 +11,21 @@ import org.junit.jupiter.api.AfterEach;
 @QuarkusTestResource(EmbeddedMongoResource.class)
 public class AbstractITTest {
 
+  public static final String TEST_DATABASE = "test";
 
-    public static final String TEST_DATABASE = "test";
+  @Inject protected PostDao postDao;
 
-    @Inject
-    protected PostDao postDao;
+  @Inject protected CommentDao commentDao;
 
-    @Inject
-    protected CommentDao commentDao;
+  @AfterEach
+  public void deletePostsAfterTests() {
+    // Delete posts
+    postDao.deleteAll();
+  }
 
-    @AfterEach
-    public void deletePostsAfterTests() {
-        // Delete posts
-        postDao.deleteAll();
-    }
-
-    @AfterEach
-    public void deleteCommentsAfterTests() {
-        // Delete posts
-        commentDao.deleteAll();
-    }
+  @AfterEach
+  public void deleteCommentsAfterTests() {
+    // Delete posts
+    commentDao.deleteAll();
+  }
 }

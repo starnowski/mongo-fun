@@ -1,5 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
+import static io.restassured.RestAssured.given;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -13,14 +15,6 @@ import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
-import org.jeasy.random.api.Randomizer;
-import org.json.JSONException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.skyscreamer.jsonassert.JSONAssert;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,109 +23,132 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.UUID;
-
-import static io.restassured.RestAssured.given;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.api.Randomizer;
+import org.json.JSONException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
 @ExtendWith(MongoDatabaseSetupExtension.class)
 class Example2ControllerMergePatchTest {
 
-    private JavaTimeModule javaTimeModule;
-    private EasyRandom generator;
-    private ObjectMapper mapper;
-    @Inject
-    private MongoClient mongoClient;
+  private JavaTimeModule javaTimeModule;
+  private EasyRandom generator;
+  private ObjectMapper mapper;
+  @Inject private MongoClient mongoClient;
 
-    @PostConstruct
-    public void init() {
-        javaTimeModule = new JavaTimeModule();
+  @PostConstruct
+  public void init() {
+    javaTimeModule = new JavaTimeModule();
 
-        // Custom serializer for OffsetDateTime
-        javaTimeModule.addSerializer(OffsetDateTime.class, new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
-            @Override
-            public void serialize(OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                // https://www.mongodb.com/docs/manual/reference/method/Date/
-                /*
-                 Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
-                 No microseconds or nanoseconds
-                 */
-                gen.writeString(value.truncatedTo(ChronoUnit.MILLIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-            }
+    // Custom serializer for OffsetDateTime
+    javaTimeModule.addSerializer(
+        OffsetDateTime.class,
+        new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
+          @Override
+          public void serialize(
+              OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers)
+              throws IOException {
+            // https://www.mongodb.com/docs/manual/reference/method/Date/
+            /*
+            Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
+            No microseconds or nanoseconds
+            */
+            gen.writeString(
+                value
+                    .truncatedTo(ChronoUnit.MILLIS)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+          }
         });
-//        javaTimeModule.disable();
-        // https://www.mongodb.com/docs/manual/reference/method/Date/
-        EasyRandomParameters parameters = new EasyRandomParameters()
-                .randomize(InputStream.class, new Randomizer<InputStream>() {
-                    private final Random random = new Random();
+    //        javaTimeModule.disable();
+    // https://www.mongodb.com/docs/manual/reference/method/Date/
+    EasyRandomParameters parameters =
+        new EasyRandomParameters()
+            .randomize(
+                InputStream.class,
+                new Randomizer<InputStream>() {
+                  private final Random random = new Random();
 
-                    @Override
-                    public InputStream getRandomValue() {
-                        byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
-                        random.nextBytes(bytes);
-                        return new ByteArrayInputStream(bytes);
-                    }
+                  @Override
+                  public InputStream getRandomValue() {
+                    byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
+                    random.nextBytes(bytes);
+                    return new ByteArrayInputStream(bytes);
+                  }
                 })
-                .randomize(Object.class, new Randomizer<Object>() {
+            .randomize(
+                Object.class,
+                new Randomizer<Object>() {
 
-                    private final Random random = new Random();
+                  private final Random random = new Random();
 
-                    @Override
-                    public Object getRandomValue() {
-                        return random.nextInt();
-                    }
+                  @Override
+                  public Object getRandomValue() {
+                    return random.nextInt();
+                  }
                 });
-        generator = new EasyRandom(parameters);
-        mapper = new ObjectMapper();
-        mapper.registerModule(javaTimeModule);
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
+    generator = new EasyRandom(parameters);
+    mapper = new ObjectMapper();
+    mapper.registerModule(javaTimeModule);
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+  }
 
+  @Test
+  public void shouldUpdateObjectWhenEditingNullObjectOnPathWithMergePatchSpecification()
+      throws IOException, JSONException {
+    // GIVEN
+    UUID uuid = UUID.randomUUID();
 
-    @Test
-    public void shouldUpdateObjectWhenEditingNullObjectOnPathWithMergePatchSpecification() throws IOException, JSONException {
-        // GIVEN
-        UUID uuid = UUID.randomUUID();
-
-        // Convert to JSON string
-        String json = """
+    // Convert to JSON string
+    String json =
+        """
                     {
                         "plainString": "test1"
                     }
                 """;
-        System.out.println("Request payload:");
-        System.out.println(json);
+    System.out.println("Request payload:");
+    System.out.println(json);
 
+    given()
+        .body(json)
+        .contentType(ContentType.JSON)
+        .when()
+        .post("/examples2/{id}", uuid)
+        .then()
+        .statusCode(200)
+        .extract();
+
+    // WHEN
+    ExtractableResponse<Response> mergeResponse =
         given()
-                .body(json)
-                .contentType(ContentType.JSON)
-                .when()
-                .post("/examples2/{id}", uuid)
-                .then()
-                .statusCode(200).extract();
-
-        // WHEN
-        ExtractableResponse<Response> mergeResponse = given()
-                .body("""
+            .body(
+                """
                         {
                             "nestedObject": {
                                 "tokens": ["last token"]
                             }
                         }
-                        """)//doubleValue
-                //{ "op": "add", "path": "/nestedObject/tokens/-", "value": "last token" }
-                .contentType("application/merge-patch+json")
-                .when()
-                .patch("/examples2/{id}", uuid)
-                .then()
-                .statusCode(200).extract();
-        JSONAssert.assertEquals("""
+                        """) // doubleValue
+            // { "op": "add", "path": "/nestedObject/tokens/-", "value": "last token" }
+            .contentType("application/merge-patch+json")
+            .when()
+            .patch("/examples2/{id}", uuid)
+            .then()
+            .statusCode(200)
+            .extract();
+    JSONAssert.assertEquals(
+        """
                 {
                     "plainString": "test1",
                     "nestedObject": {
                         "tokens": ["last token"]
                     }
                 }
-                """, mergeResponse.asString(), true);
-    }
-
+                """,
+        mergeResponse.asString(),
+        true);
+  }
 }

@@ -8,57 +8,58 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import jakarta.enterprise.context.ApplicationScoped;
-
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 @ApplicationScoped
 public class OpenApiJsonValidator {
-    private final ObjectMapper mapper;
-    private final OpenAPI openAPI;
-    private final OpenAPI openAPI2;
+  private final ObjectMapper mapper;
+  private final OpenAPI openAPI;
+  private final OpenAPI openAPI2;
 
-    static {
-        Locale.setDefault(Locale.ENGLISH);  // 👈 must be set before validator loads ResourceBundle
-    }
+  static {
+    Locale.setDefault(Locale.ENGLISH); // 👈 must be set before validator loads ResourceBundle
+  }
 
-    public OpenApiJsonValidator() {
-        mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        openAPI = new OpenAPIV3Parser().read("src/main/resources/example_openapi.yaml");// Exclude all null fields globally
-        openAPI2 = new OpenAPIV3Parser().read("src/main/resources/example2_openapi.yaml");// Exclude all null fields globally
-    }
+  public OpenApiJsonValidator() {
+    mapper = new ObjectMapper();
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    openAPI =
+        new OpenAPIV3Parser()
+            .read("src/main/resources/example_openapi.yaml"); // Exclude all null fields globally
+    openAPI2 =
+        new OpenAPIV3Parser()
+            .read("src/main/resources/example2_openapi.yaml"); // Exclude all null fields globally
+  }
 
-    public Set<ValidationMessage> validateObject(String model, String json) throws JsonProcessingException {
-        String schemaString = mapper.writeValueAsString(
-                openAPI.getComponents().getSchemas().get(model)
-        );
+  public Set<ValidationMessage> validateObject(String model, String json)
+      throws JsonProcessingException {
+    String schemaString =
+        mapper.writeValueAsString(openAPI.getComponents().getSchemas().get(model));
 
-        // 3. Build schema validator
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-        JsonSchema schema = factory.getSchema(schemaString);
+    // 3. Build schema validator
+    JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
+    JsonSchema schema = factory.getSchema(schemaString);
 
-        // 4. Parse and validate input JSON
-        JsonNode jsonNode = mapper.readTree(json);
-        return schema.validate(jsonNode);
-    }
+    // 4. Parse and validate input JSON
+    JsonNode jsonNode = mapper.readTree(json);
+    return schema.validate(jsonNode);
+  }
 
-    public Set<ValidationMessage> validateObjectSpec2(String model, String json) throws JsonProcessingException {
-        String schemaString = mapper.writeValueAsString(
-                openAPI2.getComponents().getSchemas().get(model)
-        );
+  public Set<ValidationMessage> validateObjectSpec2(String model, String json)
+      throws JsonProcessingException {
+    String schemaString =
+        mapper.writeValueAsString(openAPI2.getComponents().getSchemas().get(model));
 
-        // 3. Build schema validator
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-        JsonSchema schema = factory.getSchema(schemaString);
+    // 3. Build schema validator
+    JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
+    JsonSchema schema = factory.getSchema(schemaString);
 
-        // 4. Parse and validate input JSON
-        JsonNode jsonNode = mapper.readTree(json);
-        return schema.validate(jsonNode);
-    }
-
+    // 4. Parse and validate input JSON
+    JsonNode jsonNode = mapper.readTree(json);
+    return schema.validate(jsonNode);
+  }
 }

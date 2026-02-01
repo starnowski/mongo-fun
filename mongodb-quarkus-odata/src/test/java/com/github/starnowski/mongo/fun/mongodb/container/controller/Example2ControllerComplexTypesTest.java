@@ -1,5 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.controller;
 
+import static io.restassured.RestAssured.given;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,16 +16,6 @@ import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
-import org.jeasy.random.api.Randomizer;
-import org.json.JSONException;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,151 +27,177 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.api.Randomizer;
+import org.json.JSONException;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
 @ExtendWith(MongoDatabaseSetupExtension.class)
 class Example2ControllerComplexTypesTest {
 
-    private static final String ALL_EXAMPLES_IN_RESPONSE = prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI",
-            "Some text",
-            "Poem",
-            "Mario",
-            "Oleksa");
-    public static final List<String> TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27 = List.of("nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)");
-    private JavaTimeModule javaTimeModule;
-    private EasyRandom generator;
-    private ObjectMapper mapper;
-    @Inject
-    private MongoClient mongoClient;
+  private static final String ALL_EXAMPLES_IN_RESPONSE =
+      prepareResponseForQueryWithPlainStringProperties(
+          "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
+  public static final List<String>
+      TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27 =
+          List.of(
+              "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)");
+  private JavaTimeModule javaTimeModule;
+  private EasyRandom generator;
+  private ObjectMapper mapper;
+  @Inject private MongoClient mongoClient;
 
-    public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
-        return Stream.of(
-                Arguments.of("examples/invalid_request_example2.json", "examples/oas_response_example2.json")
-        );
-    }
+  public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
+    return Stream.of(
+        Arguments.of(
+            "examples/invalid_request_example2.json", "examples/oas_response_example2.json"));
+  }
 
-    private static String prepareResponseForQueryWithPlainStringProperties(String... properties) {
-        return """
+  private static String prepareResponseForQueryWithPlainStringProperties(String... properties) {
+    return """
                 {
                   "results": [
                     %s
                   ]
                 }
                 """
-                .formatted(Stream.of(properties)
-                        .map("""
+        .formatted(
+            Stream.of(properties)
+                .map(
+                    """
                                         {
                                               "plainString": "%s"
                                         }
-                                """::formatted
-                        ).collect(Collectors.joining("\n,"))
-                );
-    }
+                                """
+                        ::formatted)
+                .collect(Collectors.joining("\n,")));
+  }
 
-    public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFilters() {
-        return Stream.of(
-                Arguments.of(List.of("nestedObject/tokens/any(t:t ne 'no such text')"), ALL_EXAMPLES_IN_RESPONSE)
+  public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFilters() {
+    return Stream.of(
+        Arguments.of(
+            List.of("nestedObject/tokens/any(t:t ne 'no such text')"), ALL_EXAMPLES_IN_RESPONSE));
+  }
+
+  public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFiltersExample2() {
+    return Stream.of(
+        Arguments.of(
+            TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27,
+            prepareResponseForQueryWithPlainStringProperties("example1"))
+        //                ,
+        //                Arguments.of(List.of("nestedObject/tokens/any(t:t in ('Bond', 'James'))"),
+        // prepareResponseForQueryWithPlainStringProperties("example2"))
         );
-    }
+  }
 
-    public static Stream<Arguments> provideShouldReturnResponseStringBasedOnFiltersExample2() {
-        return Stream.of(
-                Arguments.of(TEST_CASE_NESTED_OBJECT_TOKENS_ANY_T_T_EQ_FIRST_EXAMPLE_AND_NESTED_OBJECT_NUMBERS_ANY_T_T_GT_5_AND_T_LT_27, prepareResponseForQueryWithPlainStringProperties("example1"))
-//                ,
-//                Arguments.of(List.of("nestedObject/tokens/any(t:t in ('Bond', 'James'))"), prepareResponseForQueryWithPlainStringProperties("example2"))
-        );
-    }
+  @PostConstruct
+  public void init() {
+    javaTimeModule = new JavaTimeModule();
 
-    @PostConstruct
-    public void init() {
-        javaTimeModule = new JavaTimeModule();
-
-        // Custom serializer for OffsetDateTime
-        javaTimeModule.addSerializer(OffsetDateTime.class, new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
-            @Override
-            public void serialize(OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                // https://www.mongodb.com/docs/manual/reference/method/Date/
-                /*
-                 Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
-                 No microseconds or nanoseconds
-                 */
-                gen.writeString(value.truncatedTo(ChronoUnit.MILLIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-            }
+    // Custom serializer for OffsetDateTime
+    javaTimeModule.addSerializer(
+        OffsetDateTime.class,
+        new com.fasterxml.jackson.databind.JsonSerializer<OffsetDateTime>() {
+          @Override
+          public void serialize(
+              OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers)
+              throws IOException {
+            // https://www.mongodb.com/docs/manual/reference/method/Date/
+            /*
+            Internally, Mongod Date objects are stored as a signed 64-bit integer representing the number of milliseconds since the Unix epoch (Jan 1, 1970).
+            No microseconds or nanoseconds
+            */
+            gen.writeString(
+                value
+                    .truncatedTo(ChronoUnit.MILLIS)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+          }
         });
-//        javaTimeModule.disable();
-        // https://www.mongodb.com/docs/manual/reference/method/Date/
-        EasyRandomParameters parameters = new EasyRandomParameters()
-                .randomize(InputStream.class, new Randomizer<InputStream>() {
-                    private final Random random = new Random();
+    //        javaTimeModule.disable();
+    // https://www.mongodb.com/docs/manual/reference/method/Date/
+    EasyRandomParameters parameters =
+        new EasyRandomParameters()
+            .randomize(
+                InputStream.class,
+                new Randomizer<InputStream>() {
+                  private final Random random = new Random();
 
-                    @Override
-                    public InputStream getRandomValue() {
-                        byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
-                        random.nextBytes(bytes);
-                        return new ByteArrayInputStream(bytes);
-                    }
+                  @Override
+                  public InputStream getRandomValue() {
+                    byte[] bytes = new byte[16 + random.nextInt(64)]; // random size 16–80 bytes
+                    random.nextBytes(bytes);
+                    return new ByteArrayInputStream(bytes);
+                  }
                 })
-                .randomize(Object.class, new Randomizer<Object>() {
+            .randomize(
+                Object.class,
+                new Randomizer<Object>() {
 
-                    private final Random random = new Random();
+                  private final Random random = new Random();
 
-                    @Override
-                    public Object getRandomValue() {
-                        return random.nextInt();
-                    }
+                  @Override
+                  public Object getRandomValue() {
+                    return random.nextInt();
+                  }
                 });
-        generator = new EasyRandom(parameters);
-        mapper = new ObjectMapper();
-        mapper.registerModule(javaTimeModule);
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
+    generator = new EasyRandom(parameters);
+    mapper = new ObjectMapper();
+    mapper.registerModule(javaTimeModule);
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+  }
 
-    @ParameterizedTest
-    @MethodSource({
-            "provideShouldReturnResponseStringBasedOnFilters"
-    })
-    @MongoSetup(mongoDocuments = {
-            @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
-    })
-    public void provideShouldReturnResponseStringBasedOnFilters(List<String> filters, String expectedResponse) throws IOException, JSONException {
-        // WHEN
-        ExtractableResponse<Response> getResponse = given()
-                .when()
-                .queryParams(Map.of("$filter", filters))
-                .get("/examples2/simple-query")
-                .then()
-                .statusCode(200).extract();
+  @ParameterizedTest
+  @MethodSource({"provideShouldReturnResponseStringBasedOnFilters"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(bsonFilePath = "examples/query/example2_1.json", collection = "examples"),
+        @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
+        @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples"),
+        @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples"),
+        @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
+      })
+  public void provideShouldReturnResponseStringBasedOnFilters(
+      List<String> filters, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+        given()
+            .when()
+            .queryParams(Map.of("$filter", filters))
+            .get("/examples2/simple-query")
+            .then()
+            .statusCode(200)
+            .extract();
 
-        // THEN
-        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
-    }
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
 
+  @ParameterizedTest
+  @MethodSource({"provideShouldReturnResponseStringBasedOnFiltersExample2"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(bsonFilePath = "examples/query/example2_6.json", collection = "examples"),
+        @MongoDocument(bsonFilePath = "examples/query/example2_7.json", collection = "examples")
+      })
+  public void shouldReturnResponseStringBasedOnFiltersExample2(
+      List<String> filters, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+        given()
+            .when()
+            .queryParams(Map.of("$filter", filters))
+            .get("/examples2/simple-query")
+            .then()
+            .statusCode(200)
+            .extract();
 
-    @ParameterizedTest
-    @MethodSource({
-            "provideShouldReturnResponseStringBasedOnFiltersExample2"
-    })
-    @MongoSetup(mongoDocuments = {
-            @MongoDocument(bsonFilePath = "examples/query/example2_6.json", collection = "examples"),
-            @MongoDocument(bsonFilePath = "examples/query/example2_7.json", collection = "examples")
-    })
-    public void shouldReturnResponseStringBasedOnFiltersExample2(List<String> filters, String expectedResponse) throws IOException, JSONException {
-        // WHEN
-        ExtractableResponse<Response> getResponse = given()
-                .when()
-                .queryParams(Map.of("$filter", filters))
-                .get("/examples2/simple-query")
-                .then()
-                .statusCode(200).extract();
-
-        // THEN
-        JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
-    }
-
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
 }
