@@ -20,7 +20,7 @@ This project is a Java-based application built with the **Quarkus** framework, f
 *   **Run in Dev Mode**: `./mvnw quarkus:dev`
     *   This enables live coding and hot reload.
 *   **Format Code**: `./mvnw spotless:apply`
-    *   The project uses the Spotless plugin with Google Java Format.
+    *   The project uses the Spotless plugin with Google Java Format. **Executing this command is required after any change to Java source files.**
 
 ## Development Conventions
 
