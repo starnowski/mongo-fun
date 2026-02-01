@@ -559,6 +559,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (field == null) {
             return this.context.isExprMode() ? new Document("$eq", Arrays.asList(left, value == null ? right : value)) : new Document("$expr", new Document("$eq", Arrays.asList(left, value == null ? right : value)));
         }
+        if (this.context.isExprMode()) {
+            return new Document("$eq", Arrays.asList(field, value == null ? right : value));
+        }
         return Filters.eq(field, value);
     }
 

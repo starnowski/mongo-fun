@@ -87,7 +87,7 @@ class Example2ControllerAllLambdaTest {
         return Stream.of(
                 Arguments.of(List.of("tags/all(t:t ne 'no such text' and t ne 'no such word')"), ALL_EXAMPLES_IN_RESPONSE),
                 Arguments.of(List.of("tags/all(t:startswith(t,'star') and t ne 'starlord')"), prepareResponseForQueryWithPlainStringProperties("Mario")),
-                Arguments.of(List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"), prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+                Arguments.of(List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"), ALL_EXAMPLES_IN_RESPONSE),
                 Arguments.of(List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
                 Arguments.of(List.of("tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"), prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
