@@ -17,6 +17,7 @@ This project is a Java-based application built with the **Quarkus** framework, f
 
 ### Commands
 *   **Build and Test**: `./mvnw clean install`
+    *   Important! Consider of invoking the "spotless:apply" goal before build, check "Format Code" section below.
 *   **Run in Dev Mode**: `./mvnw quarkus:dev`
     *   This enables live coding and hot reload.
 *   **Format Code**: `./mvnw spotless:apply`
