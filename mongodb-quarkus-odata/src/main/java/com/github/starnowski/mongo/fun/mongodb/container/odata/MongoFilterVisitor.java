@@ -167,7 +167,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               Bson innerObject =
                   innerMongoFilterVisitor.visitLambdaExpression(
                       "ALL", all.getLambdaVariable(), all.getExpression());
-              return prepareExprDocumentForAnyLambdaWithExpr(
+              return prepareExprDocumentForAllLambdaWithExpr(
                   innerObject, field, all.getLambdaVariable());
             };
       } catch (ElementMatchOperantRequiredException ex) {
@@ -308,6 +308,23 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                             .append("as", lambdaVariable)
                             .append("cond", innerPart))),
                 0)));
+  }
+
+  private Bson prepareExprDocumentForAllLambdaWithExpr(
+      Bson innerPart, String field, String lambdaVariable) {
+    return new Document(
+        "$expr",
+        new Document(
+            "$eq",
+            Arrays.asList(
+                new Document(
+                    "$size",
+                    new Document(
+                        "$filter",
+                        new Document("input", "$" + field)
+                            .append("as", lambdaVariable)
+                            .append("cond", innerPart))),
+                new Document("$size", "$" + field))));
   }
 
   private Bson prepareElementMatchDocumentForAnyLambda(Bson innerPart, String field) {
