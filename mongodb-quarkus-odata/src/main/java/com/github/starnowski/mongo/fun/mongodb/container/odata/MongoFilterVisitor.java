@@ -560,34 +560,26 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private Bson visitMethodWithTwoParameters(MethodKind methodCall, List<Bson> parameters) {
     String field = extractField(parameters.get(0));
     String value = extractValue(parameters.get(1));
+    String pattern = null;
     switch (methodCall) {
       case STARTSWITH:
-        return this.context.isExprMode()
-            ? prepareRegexMatchExpr(
-                field == null ? parameters.get(0) : field,
-                Pattern.compile("^" + Pattern.quote(value)).pattern())
-            : this.context.isElementMatchContext()
-                ? prepareRegexOperator(field, Pattern.compile("^" + Pattern.quote(value)).pattern())
-                : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
+        pattern = "^" + Pattern.quote(value);
+        break;
       case ENDSWITH:
-        return this.context.isExprMode()
-            ? prepareRegexMatchExpr(
-                field == null ? parameters.get(0) : field,
-                Pattern.compile(Pattern.quote(value) + "$").pattern())
-            : this.context.isElementMatchContext()
-                ? prepareRegexOperator(field, Pattern.compile(Pattern.quote(value) + "$").pattern())
-                : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
+        pattern = Pattern.quote(value) + "$";
+        break;
       case CONTAINS:
-        return this.context.isExprMode()
-            ? prepareRegexMatchExpr(
-                field == null ? parameters.get(0) : field,
-                Pattern.compile(Pattern.quote(value)).pattern())
-            : this.context.isElementMatchContext()
-                ? prepareRegexOperator(field, Pattern.compile(Pattern.quote(value)).pattern())
-                : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
+        pattern = Pattern.quote(value);
+        break;
       default:
         throw new UnsupportedOperationException("Method not supported: " + methodCall);
     }
+    return this.context.isExprMode()
+        ? prepareRegexMatchExpr(
+            field == null ? parameters.get(0) : field, Pattern.compile(pattern).pattern())
+        : this.context.isElementMatchContext()
+            ? prepareRegexOperator(field, Pattern.compile(pattern).pattern())
+            : Filters.regex(field, Pattern.compile(pattern));
   }
 
   private Bson prepareRegexOperator(String field, String regex) {
@@ -692,7 +684,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private String extractValue(Bson bson) {
     BsonDocument document = bson.toBsonDocument();
-    return document.containsKey(CUSTOM_LITERAL_VALUE_PROPERTY) ? document.get(CUSTOM_LITERAL_VALUE_PROPERTY).asString().getValue() : null;
+    return document.containsKey(CUSTOM_LITERAL_VALUE_PROPERTY)
+        ? document.get(CUSTOM_LITERAL_VALUE_PROPERTY).asString().getValue()
+        : null;
   }
 
   private Object extractValueObj(Bson bson) {
