@@ -561,15 +561,49 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     String field = extractField(parameters.get(0));
     String value = extractValue(parameters.get(1));
     String pattern = null;
+    if (value == null || field == null) {
+      if (!this.context.isExprMode()) {
+        throw new ExpressionOperantRequiredException("value for regex pattern is null");
+      }
+    }
     switch (methodCall) {
       case STARTSWITH:
-        pattern = "^" + Pattern.quote(value);
+        if (value == null) {
+          return new Document(
+              "$startsWith",
+              new Document("input", field == null ? parameters.get(0) : "$" + field)
+                  .append("prefix", parameters.get(1)));
+        } else {
+          pattern = "^" + Pattern.quote(value);
+        }
         break;
       case ENDSWITH:
-        pattern = Pattern.quote(value) + "$";
+        if (value == null) {
+          return new Document(
+              "$endsWith",
+              new Document("input", field == null ? parameters.get(0) : "$" + field)
+                  .append("suffix", parameters.get(1)));
+        } else {
+          pattern = Pattern.quote(value) + "$";
+        }
         break;
       case CONTAINS:
-        pattern = Pattern.quote(value);
+        //        $gte: [
+        //      { $indexOfBytes: ["$text", "mid"] },
+        //      0
+        //    ]
+        if (value == null) {
+          return new Document(
+              "$gte",
+              Arrays.asList(
+                  new Document(
+                      "$indexOfBytes",
+                      Arrays.asList(
+                          field == null ? parameters.get(0) : "$" + field, parameters.get(1))),
+                  0));
+        } else {
+          pattern = Pattern.quote(value);
+        }
         break;
       default:
         throw new UnsupportedOperationException("Method not supported: " + methodCall);
