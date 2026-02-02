@@ -563,19 +563,25 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     switch (methodCall) {
       case STARTSWITH:
         return this.context.isExprMode()
-            ? prepareRegexMatchExpr(field, Pattern.compile("^" + Pattern.quote(value)).pattern())
+            ? prepareRegexMatchExpr(
+                field == null ? parameters.get(0) : field,
+                Pattern.compile("^" + Pattern.quote(value)).pattern())
             : this.context.isElementMatchContext()
                 ? prepareRegexOperator(field, Pattern.compile("^" + Pattern.quote(value)).pattern())
                 : Filters.regex(field, Pattern.compile("^" + Pattern.quote(value)));
       case ENDSWITH:
         return this.context.isExprMode()
-            ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value) + "$").pattern())
+            ? prepareRegexMatchExpr(
+                field == null ? parameters.get(0) : field,
+                Pattern.compile(Pattern.quote(value) + "$").pattern())
             : this.context.isElementMatchContext()
                 ? prepareRegexOperator(field, Pattern.compile(Pattern.quote(value) + "$").pattern())
                 : Filters.regex(field, Pattern.compile(Pattern.quote(value) + "$"));
       case CONTAINS:
         return this.context.isExprMode()
-            ? prepareRegexMatchExpr(field, Pattern.compile(Pattern.quote(value)).pattern())
+            ? prepareRegexMatchExpr(
+                field == null ? parameters.get(0) : field,
+                Pattern.compile(Pattern.quote(value)).pattern())
             : this.context.isElementMatchContext()
                 ? prepareRegexOperator(field, Pattern.compile(Pattern.quote(value)).pattern())
                 : Filters.regex(field, Pattern.compile(Pattern.quote(value)));
@@ -588,9 +594,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return new Document("$regex", regex);
   }
 
-  private Bson prepareRegexMatchExpr(String field, String regex) {
+  private Bson prepareRegexMatchExpr(Object input, String regex) {
     return new Document(
-        "$regexMatch", new Document("input", field).append("regex", regex).append("options", "i"));
+        "$regexMatch", new Document("input", input).append("regex", regex).append("options", "i"));
   }
 
   private Bson visitMethodWithOneParameter(MethodKind methodCall, List<Bson> parameters) {
