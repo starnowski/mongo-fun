@@ -705,7 +705,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         BsonValue operator = document.get(field);
         if (operator.isDocument()) {
           document = operator.asDocument();
-          return new Document(document.getFirstKey(), Arrays.asList(field, value));
+          return new Document(
+              document.getFirstKey(), Arrays.asList(field, value == null ? right : value));
         }
       }
     }

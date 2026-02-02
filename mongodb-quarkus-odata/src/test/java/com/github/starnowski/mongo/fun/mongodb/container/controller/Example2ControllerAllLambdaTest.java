@@ -96,7 +96,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of("tags/all(t:startswith(toupper(t),toupper('star')))"),
             prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
-        Arguments.of(// all documents matches
+        Arguments.of( // all documents matches
             List.of("tags/all(t:endswith(tolower(t),tolower(t)))"), ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:contains(toupper(t),'STAR'))"),
@@ -105,7 +105,11 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             List.of("numericArray/all(n:n gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(
                 "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
-        // TODO Add tests cae for the $gt number round(5.05)
+        Arguments.of(
+            List.of("numericArray/all(n:n gt floor(5.05))"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+        Arguments.of(List.of("numericArray/all(n:n add 2 gt round(n))"), ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
             prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")));
