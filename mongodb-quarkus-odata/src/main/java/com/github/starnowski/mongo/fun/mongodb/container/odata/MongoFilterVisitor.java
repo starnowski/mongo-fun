@@ -570,28 +570,44 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       case STARTSWITH:
         if (value == null) {
           return new Document(
-              "$startsWith",
-              new Document("input", field == null ? parameters.get(0) : "$" + field)
-                  .append("prefix", parameters.get(1)));
+              "$eq",
+              Arrays.asList(
+                  new Document(
+                      "$indexOfBytes",
+                      Arrays.asList(
+                          field == null ? parameters.get(0) : "$" + field, parameters.get(1))),
+                  0));
         } else {
           pattern = "^" + Pattern.quote(value);
         }
         break;
       case ENDSWITH:
         if (value == null) {
-          return new Document(
+          new Document(
               "$endsWith",
               new Document("input", field == null ? parameters.get(0) : "$" + field)
                   .append("suffix", parameters.get(1)));
+          return new Document(
+              "$eq",
+              Arrays.asList(
+                  new Document(
+                      "$substrBytes",
+                      Arrays.asList(
+                          field == null ? parameters.get(0) : "$" + field,
+                          new Document(
+                              "$subtract",
+                              Arrays.asList(
+                                  new Document(
+                                      "$strLenBytes",
+                                      field == null ? parameters.get(0) : "$" + field),
+                                  new Document("$strLenBytes", parameters.get(1)))),
+                          new Document("$strLenBytes", parameters.get(1)))),
+                  parameters.get(1)));
         } else {
           pattern = Pattern.quote(value) + "$";
         }
         break;
       case CONTAINS:
-        //        $gte: [
-        //      { $indexOfBytes: ["$text", "mid"] },
-        //      0
-        //    ]
         if (value == null) {
           return new Document(
               "$gte",
