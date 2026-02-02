@@ -691,7 +691,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private String extractValue(Bson bson) {
-    return bson.toBsonDocument().get(CUSTOM_LITERAL_VALUE_PROPERTY).asString().getValue();
+    BsonDocument document = bson.toBsonDocument();
+    return document.containsKey(CUSTOM_LITERAL_VALUE_PROPERTY) ? document.get(CUSTOM_LITERAL_VALUE_PROPERTY).asString().getValue() : null;
   }
 
   private Object extractValueObj(Bson bson) {
