@@ -506,29 +506,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                             right, this.context.elementMatchContext().property())
                             .stream())
                     .toList();
-            //                        return new Document("$nor", List.of(new
-            // Document(this.context.elementMatchContext().property(), new Document("$elemMatch",
-            //
-            //                                        new Document("$and",
-            // Arrays.asList(orFilters.get(0), orFilters.get(1)))
-            //                                )
-            //                                )
-            //                        )
-            //                        );
-            // Compile but invalid
-            //                        Document main = new Document();
-            //                        main.putAll(orFilters.get(0).toBsonDocument());
-            //                        main.putAll(orFilters.get(1).toBsonDocument());
-            //                        return new Document("$nor", List.of(new
-            // Document(this.context.elementMatchContext().property(), new Document("$elemMatch",
-            //
-            //                                main
-            //                                )
-            //                                )
-            //                        )
-            //                        );
-
-            ///
             // TODO validate if expression required
             Document main = new Document();
             main.putAll(orFilters.get(0).toBsonDocument());
@@ -570,18 +547,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   @Override
   public Bson visitMethodCall(MethodKind methodCall, List<Bson> parameters)
       throws ExpressionVisitException {
-    //        if (methodCall == MethodKind.COMPUTE_AGGREGATE && parameters.size() > 2 &&
-    // parameters.get(0) instanceof Literal method) {
-    //            // Ensure only literals are passed
-    //            if ("Normalize".equals(method.getText()) && parameters.get(1) instanceof Literal
-    // value) {
-    //                // Apply transformation in Java
-    //                return literal(NormalizeHelper.normalize(value.getText()));
-    //            } else {
-    //                throw new ExpressionVisitException("COMPUTE_AGGREGATE() for Normalize only
-    // accepts literal values");
-    //            }
-    //        }
     switch (parameters.size()) {
       case 1:
         return visitMethodWithOneParameter(methodCall, parameters);
@@ -693,6 +658,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (operator.isDocument()) {
           document = operator.asDocument();
           return new Document(document.getFirstKey(), Arrays.asList(field, value));
+        }
+      }
+    }
+    if (this.context.isLambdaAllContext()) {
+      if (!this.context.isElementMatchContext()) {
+        throw new ElementMatchOperantRequiredException("element match required for the ALL lambda");
+      }
+      BsonDocument document = result.toBsonDocument();
+      if (document.size() == 1 && document.containsKey(field)) {
+        BsonValue operator = document.get(field);
+        if (operator.isDocument()) {
+          document = operator.asDocument();
+          return new Document(document.getFirstKey(), value);
         }
       }
     }
