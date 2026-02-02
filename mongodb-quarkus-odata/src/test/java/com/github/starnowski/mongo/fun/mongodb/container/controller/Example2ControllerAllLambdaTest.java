@@ -100,6 +100,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             List.of("numericArray/all(n:n gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(
                 "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+        //TODO Add tests cae for the $gt number round(5.05)
         Arguments.of(
             List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
             prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")));
