@@ -116,6 +116,22 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")));
   }
 
+  public static Stream<Arguments> provideShouldReturnResponseStringBasedOnComplexListFilters() {
+    return Stream.of(
+        Arguments.of(
+            List.of("complexList/all(c:startswith(c/someString,'Ap'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1")),
+        Arguments.of(
+            List.of("complexList/all(c:contains(c/someString,'ana'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+        Arguments.of(
+            List.of("complexList/all(c:endswith(c/someString,'erry'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc3")),
+        Arguments.of(
+            List.of("complexList/all(c:contains(c/someString,'e'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc3")));
+  }
+
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {
     return Stream.of(
         //                Arguments.of("""
@@ -349,6 +365,36 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
       })
   public void provideShouldReturnResponseStringBasedOnFilters(
+      List<String> filters, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+        given()
+            .when()
+            .queryParams(Map.of("$filter", filters))
+            .get("/examples2/simple-query")
+            .then()
+            .statusCode(200)
+            .extract();
+
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
+
+  @ParameterizedTest
+  @MethodSource({"provideShouldReturnResponseStringBasedOnComplexListFilters"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_1.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_2.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_3.json",
+            collection = "examples")
+      })
+  public void shouldReturnResponseStringBasedOnComplexListFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
     // WHEN
     ExtractableResponse<Response> getResponse =
