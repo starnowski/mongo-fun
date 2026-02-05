@@ -410,6 +410,64 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
   }
 
+  public static Stream<Arguments>
+      provideShouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties() {
+    return Stream.of(
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber gt 5)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber gt 25)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber lt 25)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber eq 10 or c/someNumber eq 20)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber add 5 gt 20)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber gt floor(5.05))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber add 2 gt round(c/someNumber))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3")));
+  }
+
+  @ParameterizedTest
+  @MethodSource({
+    "provideShouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties"
+  })
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_1.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_2.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_3.json",
+            collection = "examples")
+      })
+  public void shouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties(
+      List<String> filters, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+        given()
+            .when()
+            .queryParams(Map.of("$filter", filters))
+            .get("/examples2/simple-query")
+            .then()
+            .statusCode(200)
+            .extract();
+
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
+
   @ParameterizedTest
   @MethodSource({"provideShouldReturnResponseStringBasedOnPipelines"})
   @MongoSetup(
