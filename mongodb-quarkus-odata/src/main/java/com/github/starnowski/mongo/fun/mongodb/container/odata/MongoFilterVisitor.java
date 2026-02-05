@@ -38,8 +38,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private static String extractFieldName(Member member) {
+    return extractFieldName(member, 0);
+  }
+
+  private static String extractFieldName(Member member, int startIndex) {
     StringBuilder field = new StringBuilder();
-    Iterator<UriResource> it = member.getResourcePath().getUriResourceParts().iterator();
+    Iterator<UriResource> it =
+        member
+            .getResourcePath()
+            .getUriResourceParts()
+            .subList(startIndex, member.getResourcePath().getUriResourceParts().size())
+            .iterator();
     boolean nested = false;
     while (it.hasNext()) {
       UriResource property = it.next();
@@ -107,6 +116,33 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       } else {
         return prepareMemberDocument(field);
       }
+    } else if (member.getResourcePath().getUriResourceParts().get(0)
+        instanceof UriResourceLambdaVariable variable) {
+      String field = extractFieldName(member, 1);
+      EdmType fieldType = null;
+      if (member
+              .getResourcePath()
+              .getUriResourceParts()
+              .get(member.getResourcePath().getUriResourceParts().size() - 1)
+          instanceof UriResourceProperty uriResourceProperty) {
+        fieldType = uriResourceProperty.getType();
+      }
+      if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
+          && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
+        if (this.context.isExprMode()) {
+          return prepareMemberDocument("$$" + variable.getVariableName() + "." + field, fieldType);
+        }
+        String rootPath =
+            this.context
+                .lambdaVariableAliases()
+                .get(variable.getVariableName())
+                .toBsonDocument()
+                .get(ODATA_MEMBER_PROPERTY)
+                .asString()
+                .getValue();
+        return prepareMemberDocument(rootPath + "." + field, fieldType);
+      }
+      return prepareMemberDocument(field, variable.getType());
     } else {
       UriResource last =
           member
