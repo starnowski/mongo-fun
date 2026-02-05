@@ -93,6 +93,7 @@ components:
               someDateTime:
                 type: string
                 format: date-time
+#                TODO Add complex object
               someDate:
                 type: string
                 format: date
