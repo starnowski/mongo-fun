@@ -437,9 +437,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource({
-    "provideShouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties"
-  })
+  @MethodSource({"provideShouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties"})
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(

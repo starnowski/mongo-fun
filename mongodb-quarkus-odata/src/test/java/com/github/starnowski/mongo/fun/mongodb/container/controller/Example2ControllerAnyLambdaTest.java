@@ -55,16 +55,16 @@ class Example2ControllerAnyLambdaTest extends AbstractExample2ControllerTest {
     return Stream.of(
         Arguments.of(
             List.of("complexList/any(c:startswith(c/someString,'Ap'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1")),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc4")),
         Arguments.of(
             List.of("complexList/any(c:contains(c/someString,'ana'))"),
             prepareResponseForQueryWithPlainStringProperties("Doc2")),
         Arguments.of(
             List.of("complexList/any(c:endswith(c/someString,'erry'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc3")),
+            prepareResponseForQueryWithPlainStringProperties("Doc3", "Doc4")),
         Arguments.of(
             List.of("complexList/any(c:contains(c/someString,'e'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc3")));
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc3", "Doc4")));
   }
 
   @ParameterizedTest
@@ -79,7 +79,10 @@ class Example2ControllerAnyLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_3.json",
-            collection = "examples")
+            collection = "examples"),
+              @MongoDocument(
+                      bsonFilePath = "examples/query/example2_complex_4.json",
+                      collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
