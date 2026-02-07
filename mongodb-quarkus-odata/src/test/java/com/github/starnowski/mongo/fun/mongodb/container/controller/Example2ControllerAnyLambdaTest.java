@@ -80,9 +80,9 @@ class Example2ControllerAnyLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_3.json",
             collection = "examples"),
-              @MongoDocument(
-                      bsonFilePath = "examples/query/example2_complex_4.json",
-                      collection = "examples")
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_4.json",
+            collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {

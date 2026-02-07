@@ -21,6 +21,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String CUSTOM_LITERAL_VALUE_PROPERTY = "$odata.literal";
   public static final String ODATA_MEMBER_PROPERTY = "$odata.member";
   public static final String ODATA_MEMBER_TYPE_PROPERTY = "$odata.member.type";
+  public static final String ODATA_MEMBER_LAMBDA_ROOT_PROPERTY =
+      "$odata.member.lambda.root.property";
   private final Edm edm;
   private final MongoFilterVisitorContext context;
 
@@ -140,6 +142,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 .get(ODATA_MEMBER_PROPERTY)
                 .asString()
                 .getValue();
+        if (this.context.isElementMatchContext()) {
+          return prepareMemberDocumentForLambda(field, fieldType, rootPath);
+        }
         return prepareMemberDocument(rootPath + "." + field, fieldType);
       }
       return prepareMemberDocument(field, variable.getType());
@@ -453,6 +458,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private Document prepareMemberDocument(String field, EdmType edmType) {
     Document result = new Document(ODATA_MEMBER_PROPERTY, field);
     result.append(ODATA_MEMBER_TYPE_PROPERTY, edmType.getFullQualifiedName().toString());
+    return result;
+  }
+
+  private Document prepareMemberDocumentForLambda(
+      String field, EdmType edmType, String lambdaRootProperty) {
+    Document result = prepareMemberDocument(field, edmType);
+    result.append(ODATA_MEMBER_LAMBDA_ROOT_PROPERTY, lambdaRootProperty);
     return result;
   }
 
@@ -787,6 +799,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         BsonValue operator = document.get(field);
         if (operator.isDocument()) {
           document = operator.asDocument();
+          if (left.toBsonDocument().containsKey(ODATA_MEMBER_LAMBDA_ROOT_PROPERTY)
+              && left.toBsonDocument().containsKey(ODATA_MEMBER_PROPERTY)) {
+            return new Document(field, new Document(document.getFirstKey(), value));
+          }
           return new Document(document.getFirstKey(), value);
         }
       }
