@@ -440,7 +440,6 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3")));
   }
 
-  @Disabled
   @ParameterizedTest
   @MethodSource({"provideShouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties"})
   @MongoSetup(
