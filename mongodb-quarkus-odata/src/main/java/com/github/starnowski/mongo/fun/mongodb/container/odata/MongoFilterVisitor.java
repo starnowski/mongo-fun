@@ -168,27 +168,23 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private Bson getBsonForUriResourceLambdaAll(UriResourceLambdaAll all, String field) {
     MongoFilterVisitor visitor =
-            new MongoFilterVisitor(
-                    edm,
-                    MongoFilterVisitorContext.builder()
-                            .lambdaVariableAliases(
-                                    Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
-                            .isLambdaAllContext(true)
-                            .isExprMode(false)
-                            .elementMatchContext(
-                                    new ElementMatchContext(
-                                            field, false))
-                            .build());
+        new MongoFilterVisitor(
+            edm,
+            MongoFilterVisitorContext.builder()
+                .lambdaVariableAliases(
+                    Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
+                .isLambdaAllContext(true)
+                .isExprMode(false)
+                .elementMatchContext(new ElementMatchContext(field, false))
+                .build());
     Supplier<Bson> function =
-            () -> {
-              Bson innerObject =
-                      visitor.visitLambdaExpression(
-                              "ALL", all.getLambdaVariable(), all.getExpression());
-              return visitor.context.isExprMode()
-                      ? prepareExprDocumentForAllLambdaWithExpr(
-                      innerObject, field, all.getLambdaVariable())
-                      : visitor.prepareElementMatchDocumentForAllLambda(innerObject, field, false);
-            };
+        () -> {
+          Bson innerObject =
+              visitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+          return visitor.context.isExprMode()
+              ? prepareExprDocumentForAllLambdaWithExpr(innerObject, field, all.getLambdaVariable())
+              : visitor.prepareElementMatchDocumentForAllLambda(innerObject, field, false);
+        };
 
     boolean expressionOperantRequiredExceptionThrown = false;
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
@@ -420,13 +416,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (doc.size() == 1 && !doc.getFirstKey().startsWith("$")) {
           String innerField = doc.getFirstKey();
           return new Document(
-                  field, new Document("$not", new Document("$elemMatch",
-                  new Document(innerField
-                          ,
-                  new Document("$not", doc.get(innerField)))
-
-
-          )));
+              field,
+              new Document(
+                  "$not",
+                  new Document(
+                      "$elemMatch",
+                      new Document(innerField, new Document("$not", doc.get(innerField))))));
         }
       }
       if (returnUnwrappedBson) {
@@ -723,7 +718,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson prepareRegexOperator(String field, String regex) {
-    return new Document("$regex", regex);
+    Document regexObject = new Document("$regex", regex);
+    if (field != null
+        && !field.startsWith("$")
+        && this.context.isElementMatchContext()
+        && !field.equals(this.context.elementMatchContext().property())) {
+      return new Document(field, regexObject);
+    }
+    return regexObject;
   }
 
   private Bson prepareRegexMatchExpr(Object input, String regex) {

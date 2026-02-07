@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.json.JSONException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -130,7 +129,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             prepareResponseForQueryWithPlainStringProperties("Doc3")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'e'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc3", "Doc4")));
+            prepareResponseForQueryWithPlainStringProperties("Doc3", "Doc4")));
+
+    // TODO eq tests case with two item that have the same string
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {
