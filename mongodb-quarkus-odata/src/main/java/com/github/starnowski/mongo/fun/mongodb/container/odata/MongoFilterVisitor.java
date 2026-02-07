@@ -187,7 +187,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               return visitor.context.isExprMode()
                       ? prepareExprDocumentForAllLambdaWithExpr(
                       innerObject, field, all.getLambdaVariable())
-                      : prepareElementMatchDocumentForAllLambda(innerObject, field, false);
+                      : visitor.prepareElementMatchDocumentForAllLambda(innerObject, field, false);
             };
 
     boolean expressionOperantRequiredExceptionThrown = false;
@@ -415,6 +415,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         return new Document(
             field,
             new Document("$not", new Document("$elemMatch", new Document("$not", innerValuePart))));
+      } else {
+        BsonDocument doc = innerPart.toBsonDocument();
+        if (doc.size() == 1 && !doc.getFirstKey().startsWith("$")) {
+          String innerField = doc.getFirstKey();
+          return new Document(
+                  field, new Document("$not", new Document("$elemMatch",
+                  new Document(innerField
+                          ,
+                  new Document("$not", doc.get(innerField)))
+
+
+          )));
+        }
       }
       if (returnUnwrappedBson) {
         return innerPart.toBsonDocument();
