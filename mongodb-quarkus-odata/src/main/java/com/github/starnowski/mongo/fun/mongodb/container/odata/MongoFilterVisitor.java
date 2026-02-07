@@ -176,13 +176,16 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       .lambdaVariableAliases(
                           Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
                       .isLambdaAllContext(true)
+                          .elementMatchContext(
+                                  new ElementMatchContext(
+                                          field, true))
                       .build());
           return innerMongoFilterVisitor.visitLambdaExpression(
               "ALL", all.getLambdaVariable(), all.getExpression());
         };
 
     boolean expressionOperantRequiredExceptionThrown = false;
-    boolean elementMatchOperantRequiredExceptionThrown = false;
+    boolean elementMatchOperantRequiredExceptionThrown = true;
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
     while (!allVariantTested) {
