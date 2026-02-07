@@ -178,11 +178,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       .isLambdaAllContext(true)
                           .elementMatchContext(
                                   new ElementMatchContext(
-                                          field, true))
+                                          field, false))
                       .build());
-          Bson result = innerMongoFilterVisitor.visitLambdaExpression(
+          Bson innerObject = innerMongoFilterVisitor.visitLambdaExpression(
                   "ALL", all.getLambdaVariable(), all.getExpression());
-          return prepareElementMatchDocumentForAllLambda(result, field, false);
+          return innerMongoFilterVisitor.context.isExprMode()
+                  ? prepareExprDocumentForAllLambdaWithExpr(
+                  innerObject, field, all.getLambdaVariable())
+                  : prepareElementMatchDocumentForAllLambda(innerObject, field, false);
         };
 
     boolean expressionOperantRequiredExceptionThrown = false;
