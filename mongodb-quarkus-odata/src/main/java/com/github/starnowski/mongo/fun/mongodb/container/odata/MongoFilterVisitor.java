@@ -180,8 +180,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                   new ElementMatchContext(
                                           field, true))
                       .build());
-          return innerMongoFilterVisitor.visitLambdaExpression(
-              "ALL", all.getLambdaVariable(), all.getExpression());
+          Bson result = innerMongoFilterVisitor.visitLambdaExpression(
+                  "ALL", all.getLambdaVariable(), all.getExpression());
+          return prepareElementMatchDocumentForAllLambda(result, field, false);
         };
 
     boolean expressionOperantRequiredExceptionThrown = false;
