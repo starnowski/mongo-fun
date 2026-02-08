@@ -415,13 +415,21 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         BsonDocument doc = innerPart.toBsonDocument();
         if (doc.size() == 1 && !doc.getFirstKey().startsWith("$")) {
           String innerField = doc.getFirstKey();
+          BsonValue innerValuePart = doc.get(innerField);
+          Bson finalValue = null;
+          if (!innerValuePart.isDocument() && !innerValuePart.isRegularExpression()) {
+            finalValue = new Document("$eq", innerValuePart);
+          }
           return new Document(
               field,
               new Document(
                   "$not",
                   new Document(
                       "$elemMatch",
-                      new Document(innerField, new Document("$not", doc.get(innerField))))));
+                      new Document(
+                          innerField,
+                          new Document(
+                              "$not", finalValue == null ? innerValuePart : finalValue)))));
         }
       }
       if (returnUnwrappedBson) {
