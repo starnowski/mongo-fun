@@ -14,43 +14,40 @@ import org.junit.jupiter.params.provider.ValueSource;
 @QuarkusTest
 class CommentDaoTest extends AbstractITTest {
 
-    @Inject
-    PostDao postDao;
+  @Inject PostDao postDao;
 
-    @Inject
-    CommentDao tested;
+  @Inject CommentDao tested;
 
-    private ObjectId postObjectId;
+  private ObjectId postObjectId;
 
-    @BeforeEach
-    public void createPost() {
-        Post post = new Post();
-        post.setText("Test post");
-        post.setEmail("john.doe.2014@gmail.com");
-        post = postDao.save(post);
-        postObjectId = post.getOid();
-    }
+  @BeforeEach
+  public void createPost() {
+    Post post = new Post();
+    post.setText("Test post");
+    post.setEmail("john.doe.2014@gmail.com");
+    post = postDao.save(post);
+    postObjectId = post.getOid();
+  }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"comment1", "comment2", "commentFinal"})
-    public void shouldSavePost(String commentText) {
-        // GIVEN
-        Comment comment = new Comment();
-        String email = "john2001.doe@gmailcom";
-        comment.setEmail(email);
-        comment.setText(commentText);
-        comment.setPostObjectId(postObjectId);
+  @ParameterizedTest
+  @ValueSource(strings = {"comment1", "comment2", "commentFinal"})
+  public void shouldSavePost(String commentText) {
+    // GIVEN
+    Comment comment = new Comment();
+    String email = "john2001.doe@gmailcom";
+    comment.setEmail(email);
+    comment.setText(commentText);
+    comment.setPostObjectId(postObjectId);
 
-        // WHEN
-        Comment result = tested.save(comment);
+    // WHEN
+    Comment result = tested.save(comment);
 
-        // THEN
-        Assertions.assertNotNull(result.getId());
-        result = tested.find(result.getOid());
-        Assertions.assertNotNull(result.getId());
-        Assertions.assertEquals(commentText, result.getText());
-        Assertions.assertEquals(email, result.getEmail());
-        Assertions.assertEquals(postObjectId, result.getPostObjectId());
-    }
-
+    // THEN
+    Assertions.assertNotNull(result.getId());
+    result = tested.find(result.getOid());
+    Assertions.assertNotNull(result.getId());
+    Assertions.assertEquals(commentText, result.getText());
+    Assertions.assertEquals(email, result.getEmail());
+    Assertions.assertEquals(postObjectId, result.getPostObjectId());
+  }
 }

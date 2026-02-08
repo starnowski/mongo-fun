@@ -6,4 +6,4 @@ import java.lang.annotation.RetentionPolicy;
 
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Secured { }
+public @interface Secured {}

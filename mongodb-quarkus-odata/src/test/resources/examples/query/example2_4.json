@@ -9,5 +9,9 @@
   "tags": [
     "star trek",
     "star wars"
+  ],
+  "numericArray": [
+    100,
+    200
   ]
 }

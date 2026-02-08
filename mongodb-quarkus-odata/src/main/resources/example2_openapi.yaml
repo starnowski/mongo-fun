@@ -60,6 +60,11 @@ components:
           items:
             type: string        # -> java.util.List<String>
 
+        numericArray:
+          type: array
+          items:
+            type: number        # -> java.util.List<BigDecimal>
+
         # ---- object ----
 #        metadata:
 #          type: object          # -> java.util.Map<String, Object>
@@ -76,3 +81,39 @@ components:
                 type: number
             index:
               type: string
+        complexList:
+          type: array
+          items:
+            type: object
+            properties:
+              someString:
+                type: string
+              someNumber:
+                type: number
+              someDateTime:
+                type: string
+                format: date-time
+#                TODO Add complex object
+              someDate:
+                type: string
+                format: date
+              someUuid:
+                type: string
+                format: uuid
+              strings:
+                type: array
+                items:
+                  type: string
+              numbers:
+                type: array
+                items:
+                  type: number
+              nestedComplexArray:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    stringVal:
+                      type: string
+                    numberVal:
+                      type: number

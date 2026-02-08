@@ -1,0 +1,25 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "zhJHGT+jS4uJzYurBrA+5A==",
+      "subType": "04"
+    }
+  },
+  "plainString": "Doc3",
+  "complexList": [
+    {
+      "someString": "Cherry",
+      "someNumber": 50,
+      "someDateTime": { "$date": "2024-03-01T10:00:00Z" },
+      "someDate": { "$date": "2024-03-01T00:00:00Z" },
+      "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } }
+    },
+    {
+      "someString": "Berry",
+      "someNumber": 60,
+      "someDateTime": { "$date": "2024-03-02T10:00:00Z" },
+      "someDate": { "$date": "2024-03-02T00:00:00Z" },
+      "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } }
+    }
+  ]
+}
