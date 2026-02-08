@@ -120,7 +120,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     return Stream.of(
         Arguments.of(
             List.of("complexList/all(c:startswith(c/someString,'Ap'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1")),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'ana'))"),
             prepareResponseForQueryWithPlainStringProperties("Doc2")),
@@ -129,9 +129,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             prepareResponseForQueryWithPlainStringProperties("Doc3")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'e'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc3", "Doc4")));
-
-    // TODO eq tests case with two item that have the same string
+            prepareResponseForQueryWithPlainStringProperties("Doc3", "Doc4")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someString eq 'Application')"),
+            prepareResponseForQueryWithPlainStringProperties("Doc5")));
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {
@@ -397,6 +398,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_4.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_5.json",
             collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFilters(
