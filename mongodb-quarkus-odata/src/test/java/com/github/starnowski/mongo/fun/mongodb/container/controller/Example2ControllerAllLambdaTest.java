@@ -445,7 +445,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 2 gt round(c/someNumber))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")));
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+        Arguments.of(
+            List.of("complexList/all(c:c/someNumber eq 20)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc5")));
   }
 
   @ParameterizedTest
