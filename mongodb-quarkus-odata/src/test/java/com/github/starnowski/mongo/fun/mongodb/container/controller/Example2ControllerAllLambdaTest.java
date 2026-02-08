@@ -424,25 +424,28 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     return Stream.of(
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt 5)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt 25)"),
             prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber lt 25)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc4", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber eq 10 or c/someNumber eq 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc4", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 5 gt 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3", "Doc4", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3", "Doc5")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt floor(5.05))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 2 gt round(c/someNumber))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2", "Doc3", "Doc4", "Doc5")));
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")));
   }
 
   @ParameterizedTest
@@ -458,8 +461,12 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_3.json",
             collection = "examples"),
-              @MongoDocument(bsonFilePath = "examples/query/example2_complex_4.json", collection = "examples"),
-              @MongoDocument(bsonFilePath = "examples/query/example2_complex_5.json", collection = "examples")
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_4.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
