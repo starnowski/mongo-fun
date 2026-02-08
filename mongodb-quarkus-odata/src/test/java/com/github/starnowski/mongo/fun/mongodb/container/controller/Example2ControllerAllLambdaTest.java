@@ -487,6 +487,60 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
   }
 
+  public static Stream<Arguments>
+      provideShouldReturnResponseStringBasedOnNestedComplexArrayFilters() {
+    return Stream.of(
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:startswith(n/stringVal,'val')))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:contains(n/stringVal,'match')))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc5")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc4")));
+  }
+
+  @ParameterizedTest
+  @MethodSource({"provideShouldReturnResponseStringBasedOnNestedComplexArrayFilters"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_1.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_2.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_3.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_4.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples")
+      })
+  public void shouldReturnResponseStringBasedOnNestedComplexArrayFilters(
+      List<String> filters, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+        given()
+            .when()
+            .queryParams(Map.of("$filter", filters))
+            .get("/examples2/simple-query")
+            .then()
+            .statusCode(200)
+            .extract();
+
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
+
   @ParameterizedTest
   @MethodSource({"provideShouldReturnResponseStringBasedOnPipelines"})
   @MongoSetup(
