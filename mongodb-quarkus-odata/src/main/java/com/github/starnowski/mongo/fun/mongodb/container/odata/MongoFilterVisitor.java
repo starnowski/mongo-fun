@@ -179,6 +179,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson getBsonForUriResourceLambdaAll(UriResourceLambdaAll all, String field) {
+    boolean expressionOperantRequiredExceptionThrown = false;
+    boolean multipleElementMatchOperantRequiredExceptionThrown = false;
+    boolean allVariantTested = false;
     MongoFilterVisitor visitor =
         new MongoFilterVisitor(
             edm,
@@ -186,8 +189,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 .lambdaVariableAliases(
                     Map.of(all.getLambdaVariable(), prepareMemberDocument(field)))
                 .isLambdaAllContext(true)
-                .isExprMode(false)
-                .elementMatchContext(new ElementMatchContext(field, false))
+                .isExprMode(expressionOperantRequiredExceptionThrown)
+                .elementMatchContext(
+                    new ElementMatchContext(
+                        field, multipleElementMatchOperantRequiredExceptionThrown))
                 .build());
     Supplier<Bson> function =
         () -> {
@@ -197,10 +202,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               ? prepareExprDocumentForAllLambdaWithExpr(innerObject, field, all.getLambdaVariable())
               : visitor.prepareElementMatchDocumentForAllLambda(innerObject, field, false);
         };
-
-    boolean expressionOperantRequiredExceptionThrown = false;
-    boolean multipleElementMatchOperantRequiredExceptionThrown = false;
-    boolean allVariantTested = false;
     while (!allVariantTested) {
       try {
         allVariantTested =
