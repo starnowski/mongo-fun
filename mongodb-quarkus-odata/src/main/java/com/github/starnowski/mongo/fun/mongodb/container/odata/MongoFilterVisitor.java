@@ -410,6 +410,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private Bson prepareExprDocumentForAllLambdaWithExpr(
       Bson innerPart, String field, String lambdaVariable, boolean nestedExpr) {
+    String fieldReference = "$" + field;
+    if (nestedExpr && this.context.lambdaVariableAliases().size() == 1) {
+      //TODO Add lambdas branch with correct order
+      fieldReference = "$$" + this.context.lambdaVariableAliases().keySet().stream().findFirst().get() + "." + field;
+    }
     Document innerDocument = new Document(
             "$eq",
             Arrays.asList(
@@ -419,7 +424,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                     "$filter",
                                     new Document(
                                             "input",
-                                            new Document("$ifNull", Arrays.asList("$" + field, List.of())))
+                                            new Document("$ifNull", Arrays.asList(fieldReference, List.of())))
                                             .append("as", lambdaVariable)
                                             .append("cond", innerPart))),
                     /*
@@ -428,14 +433,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                      * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html?utm_source=chatgpt.com#sec_all
                      */
                     new Document(
-                            "$size", new Document("$ifNull", Arrays.asList("$" + field, List.of())))
+                            "$size", new Document("$ifNull", Arrays.asList(fieldReference, List.of())))
                     //                new Document(
                     //                    "$cond",
                     //                    Arrays.asList(
                     //                        new Document(
                     //                            "$eq", Arrays.asList(new Document("$type", "$" +
                     // field), "array")),
-                    //                        new Document("$size", "$" + field),
+                    //                        new Document("$size", fieldReference),
                     //                        -1))
 
             ));
