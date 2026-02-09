@@ -120,19 +120,21 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     return Stream.of(
         Arguments.of(
             List.of("complexList/all(c:startswith(c/someString,'Ap'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'ana'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:endswith(c/someString,'erry'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc3")),
+            prepareResponseForQueryWithPlainStringProperties("Doc3", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'e'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc3", "Doc4")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc3", "Doc4", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someString eq 'Application')"),
-            prepareResponseForQueryWithPlainStringProperties("Doc5")));
+            prepareResponseForQueryWithPlainStringProperties("Doc5", "only_id_and_plainString")));
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {
@@ -762,17 +764,19 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     return Stream.of(
         Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/all(n:startswith(n/stringVal,'val')))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc2")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/all(n:contains(n/stringVal,'match')))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc5")),
+            prepareResponseForQueryWithPlainStringProperties("Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of(
                 "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc4")));
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc2", "Doc4", "only_id_and_plainString")));
   }
 
   @ParameterizedTest
