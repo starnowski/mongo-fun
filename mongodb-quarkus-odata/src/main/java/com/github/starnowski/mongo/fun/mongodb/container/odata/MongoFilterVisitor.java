@@ -413,10 +413,24 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     "$size",
                     new Document(
                         "$filter",
-                        new Document("input", "$" + field)
+                        new Document("input", new Document("$ifNull", Arrays.asList("$" + field, List.of())))
                             .append("as", lambdaVariable)
                             .append("cond", innerPart))),
-                new Document("$size", "$" + field))));
+                    /*
+                     * The all operator applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false.
+                     * This implies that the all operator always returns true for an empty collection.
+                     * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html?utm_source=chatgpt.com#sec_all
+                     */
+                    new Document("$size", new Document("$ifNull", Arrays.asList("$" + field, List.of())))
+//                new Document(
+//                    "$cond",
+//                    Arrays.asList(
+//                        new Document(
+//                            "$eq", Arrays.asList(new Document("$type", "$" + field), "array")),
+//                        new Document("$size", "$" + field),
+//                        -1))
+
+            )));
   }
 
   private Bson prepareElementMatchDocumentForAnyLambda(Bson innerPart, String field) {

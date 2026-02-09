@@ -626,7 +626,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
         @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples"),
         @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples"),
-        @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
+        @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
+            collection = "examples")
       })
   public void provideShouldReturnResponseStringBasedOnFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
@@ -663,9 +666,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
             collection = "examples"),
-              @MongoDocument(
-                      bsonFilePath = "examples/query/example2_only_id.json",
-                      collection = "examples")
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
+            collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
@@ -734,9 +737,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
             collection = "examples"),
-              @MongoDocument(
-                      bsonFilePath = "examples/query/example2_only_id.json",
-                      collection = "examples")
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
+            collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
