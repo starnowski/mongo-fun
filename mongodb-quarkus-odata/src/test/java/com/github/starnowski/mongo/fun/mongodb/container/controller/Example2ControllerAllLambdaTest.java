@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.json.JSONException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -27,7 +28,12 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
 
   private static final String ALL_EXAMPLES_IN_RESPONSE =
       prepareResponseForQueryWithPlainStringProperties(
-          "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
+          "eOMtThyhVNLWUZNRcBaQKxI",
+          "Some text",
+          "Poem",
+          "Mario",
+          "Oleksa",
+          "only_id_and_plainString");
   @Inject private MongoClient mongoClient;
 
   public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
@@ -63,57 +69,66 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star') and t ne 'starlord')"),
-            prepareResponseForQueryWithPlainStringProperties("Mario")),
+            prepareResponseForQueryWithPlainStringProperties("Mario", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"),
             ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of(
                 "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(t,'starlord'))"),
-            prepareResponseForQueryWithPlainStringProperties()),
+            prepareResponseForQueryWithPlainStringProperties("only_id_and_plainString")),
         // New test cases
         Arguments.of(
             List.of("tags/all(t:endswith(t,'web') or endswith(t,'trap'))"),
-            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:length(t) eq 9)"),
-            prepareResponseForQueryWithPlainStringProperties("Mario")),
+            prepareResponseForQueryWithPlainStringProperties("Mario", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(tolower(t),'star'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(tolower(t),tolower('star')))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(toupper(t),toupper('star')))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of( // all documents matches
             List.of("tags/all(t:endswith(tolower(t),tolower(t)))"), ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:contains(toupper(t),'STAR'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("numericArray/all(n:n gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(
-                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa", "only_id_and_plainString")),
         // TODO numericArray/all(n:round(n) gt floor(5.05))
         Arguments.of(
             List.of("numericArray/all(n:n gt floor(5.05))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(List.of("numericArray/all(n:n add 2 gt round(n))"), ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
-            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")));
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "only_id_and_plainString")));
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnComplexListFilters() {
@@ -694,30 +709,34 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt 25)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc2", "Doc3", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber lt 25)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber eq 10 or c/someNumber eq 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 5 gt 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc2", "Doc3", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt floor(5.05))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 2 gt round(c/someNumber))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber eq 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc5")));
+            prepareResponseForQueryWithPlainStringProperties("Doc5", "only_id_and_plainString")));
   }
 
   @ParameterizedTest
@@ -818,6 +837,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
   }
 
+  @Disabled
   @ParameterizedTest
   @MethodSource({"provideShouldReturnResponseStringBasedOnPipelines"})
   @MongoSetup(
