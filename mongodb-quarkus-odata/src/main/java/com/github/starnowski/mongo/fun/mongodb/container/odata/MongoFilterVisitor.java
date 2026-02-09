@@ -142,6 +142,18 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 .get(ODATA_MEMBER_PROPERTY)
                 .asString()
                 .getValue();
+        // Checking if another lambda is beaing used
+        UriResource last =
+            member
+                .getResourcePath()
+                .getUriResourceParts()
+                .get(member.getResourcePath().getUriResourceParts().size() - 1);
+        if (last instanceof UriResourceLambdaAny any) {
+          return getBsonForUriResourceLambdaAny(any, field);
+        } else if (last instanceof UriResourceLambdaAll all) {
+          return getBsonForUriResourceLambdaAll(all, field);
+        }
+
         if (this.context.isElementMatchContext()) {
           return prepareMemberDocumentForLambda(field, fieldType, rootPath);
         }
