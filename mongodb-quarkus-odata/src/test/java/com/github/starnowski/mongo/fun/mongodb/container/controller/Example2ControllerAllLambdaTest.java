@@ -339,10 +339,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                             }
                         """,
             prepareResponseForQueryWithPlainStringProperties(
-                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
-            ,
-            Arguments.of(
-                    """
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
                                     {
                                      "pipeline": [
                                                {
@@ -402,11 +401,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                              ]
                                 }
                                 """,
-                    prepareResponseForQueryWithPlainStringProperties(
-                            "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
-            ,
-            Arguments.of(
-                    """
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
                                     {
                                      "pipeline": [
                                                {
@@ -466,10 +464,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                              ]
                                 }
                                 """,
-                    prepareResponseForQueryWithPlainStringProperties(
-                            "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
-            Arguments.of(
-                    """
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
                                     {
                                      "pipeline": [
                                                {
@@ -529,10 +527,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                              ]
                                 }
                                 """,
-                    prepareResponseForQueryWithPlainStringProperties(
-                            "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
-            Arguments.of(
-                    """
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
                                     {
                                      "pipeline": [
                                                {
@@ -600,8 +598,8 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                              ]
                                 }
                                 """,
-                    prepareResponseForQueryWithPlainStringProperties(
-                            "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
 
         //                ,
         //
@@ -664,7 +662,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
-            collection = "examples")
+            collection = "examples"),
+              @MongoDocument(
+                      bsonFilePath = "examples/query/example2_only_id.json",
+                      collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
@@ -732,7 +733,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
-            collection = "examples")
+            collection = "examples"),
+              @MongoDocument(
+                      bsonFilePath = "examples/query/example2_only_id.json",
+                      collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
@@ -786,6 +790,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
             collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnNestedComplexArrayFilters(
