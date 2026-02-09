@@ -194,6 +194,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       boolean expressionOperantRequiredExceptionThrown) {
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
+    boolean nestedExpression = expressionOperantRequiredExceptionThrown;
     MongoFilterVisitor visitor =
         new MongoFilterVisitor(
             edm,
@@ -287,7 +288,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       "ALL", all.getLambdaVariable(), all.getExpression());
               return innerMongoFilterVisitor.context.isExprMode()
                   ? prepareExprDocumentForAllLambdaWithExpr(
-                      innerObject, field, all.getLambdaVariable())
+                      innerObject, field, all.getLambdaVariable(), nestedExpression)
                   : innerObject;
             };
       }
@@ -403,38 +404,45 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson prepareExprDocumentForAllLambdaWithExpr(
-      Bson innerPart, String field, String lambdaVariable) {
-    return new Document(
-        "$expr",
-        new Document(
+          Bson innerPart, String field, String lambdaVariable) {
+    return prepareExprDocumentForAllLambdaWithExpr(innerPart, field, lambdaVariable, false);
+  }
+
+  private Bson prepareExprDocumentForAllLambdaWithExpr(
+      Bson innerPart, String field, String lambdaVariable, boolean nestedExpr) {
+    Document innerDocument = new Document(
             "$eq",
             Arrays.asList(
-                new Document(
-                    "$size",
                     new Document(
-                        "$filter",
-                        new Document(
-                                "input",
-                                new Document("$ifNull", Arrays.asList("$" + field, List.of())))
-                            .append("as", lambdaVariable)
-                            .append("cond", innerPart))),
-                /*
-                 * The all operator applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false.
-                 * This implies that the all operator always returns true for an empty collection.
-                 * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html?utm_source=chatgpt.com#sec_all
-                 */
-                new Document(
-                    "$size", new Document("$ifNull", Arrays.asList("$" + field, List.of())))
-                //                new Document(
-                //                    "$cond",
-                //                    Arrays.asList(
-                //                        new Document(
-                //                            "$eq", Arrays.asList(new Document("$type", "$" +
-                // field), "array")),
-                //                        new Document("$size", "$" + field),
-                //                        -1))
+                            "$size",
+                            new Document(
+                                    "$filter",
+                                    new Document(
+                                            "input",
+                                            new Document("$ifNull", Arrays.asList("$" + field, List.of())))
+                                            .append("as", lambdaVariable)
+                                            .append("cond", innerPart))),
+                    /*
+                     * The all operator applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false.
+                     * This implies that the all operator always returns true for an empty collection.
+                     * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html?utm_source=chatgpt.com#sec_all
+                     */
+                    new Document(
+                            "$size", new Document("$ifNull", Arrays.asList("$" + field, List.of())))
+                    //                new Document(
+                    //                    "$cond",
+                    //                    Arrays.asList(
+                    //                        new Document(
+                    //                            "$eq", Arrays.asList(new Document("$type", "$" +
+                    // field), "array")),
+                    //                        new Document("$size", "$" + field),
+                    //                        -1))
 
-                )));
+            ));
+    return nestedExpr ? innerDocument : new Document(
+        "$expr",
+            innerDocument
+    );
   }
 
   private Bson prepareElementMatchDocumentForAnyLambda(Bson innerPart, String field) {
@@ -651,12 +659,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                             .stream())
                     .toList();
             // TODO validate if expression required
-            Document main = new Document();
-            main.putAll(orFilters.get(0).toBsonDocument());
-            main.putAll(orFilters.get(1).toBsonDocument());
-            return new Document(
-                this.context.elementMatchContext().property(),
-                new Document("$not", new Document("$elemMatch", new Document("$not", main))));
+//            Document main = new Document();
+//            main.putAll(orFilters.get(0).toBsonDocument());
+//            main.putAll(orFilters.get(1).toBsonDocument());
+//            return new Document(
+//                this.context.elementMatchContext().property(),
+//                new Document("$not", new Document("$elemMatch", new Document("$not", main))));
+            return new Document("$or", orFilters);
           }
         }
         return Filters.or(left, right);
