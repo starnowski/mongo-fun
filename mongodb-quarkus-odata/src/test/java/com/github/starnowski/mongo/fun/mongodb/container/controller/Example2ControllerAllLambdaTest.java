@@ -799,7 +799,16 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of(
                 "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1') and c/someNumber ge 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")));
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
+//            The any operator applies a Boolean expression to each member of a collection and returns true if and only if the expression is true for any member of the collection, otherwise it returns false.
+//            This implies that the any operator always returns false for an empty collection.
+//            The any operator can be used without an argument expression. This short form returns false if and only if the collection is empty.
+            Arguments.of(
+                    List.of(
+                            "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1')) and complexList/any()"),
+                    prepareResponseForQueryWithPlainStringProperties(
+                            "Doc2", "Doc4"))
+    );
   }
 
   @ParameterizedTest
