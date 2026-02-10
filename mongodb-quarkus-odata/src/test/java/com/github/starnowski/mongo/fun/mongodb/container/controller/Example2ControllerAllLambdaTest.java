@@ -795,7 +795,11 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             List.of(
                 "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc2", "Doc4", "only_id_and_plainString")));
+                "Doc2", "Doc4", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1') and c/someNumber ge 20)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")));
   }
 
   @ParameterizedTest
