@@ -811,6 +811,7 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             // TODO nestedComplexArray with more than one item in array
             // TODO nestedComplexArray with one operator (eq) and some numeric operator
             // TODO nested Array with primitive type (array of strings)
+            // TODO nestedComplexArray where there is reference to parent lambda like c:(nestedComplexArray/all(n:n/stringVal eq c) .... and more cases
     );
   }
 
