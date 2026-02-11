@@ -310,6 +310,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson getBsonForUriResourceLambdaAny(UriResourceLambdaAny any, String field) {
+    if (any.getLambdaVariable() == null) {
+      return prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(field);
+    }
     // TODO Fix Resolving like it was done to ALL lambda (check isExprMode() before return results)
     Supplier<Bson> function =
         () -> {
@@ -409,6 +412,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         new Document("input", "$" + field)
                             .append("as", lambdaVariable)
                             .append("cond", innerPart))),
+                0)));
+  }
+
+  private Bson prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(String field) {
+    return new Document(
+        "$expr",
+        new Document(
+            "$gt",
+            Arrays.asList(
+                new Document(
+                    "$size", new Document("$ifNull", Arrays.asList("$" + field, List.of()))),
                 0)));
   }
 
