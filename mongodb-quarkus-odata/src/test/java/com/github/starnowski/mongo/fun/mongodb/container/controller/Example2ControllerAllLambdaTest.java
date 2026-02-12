@@ -828,6 +828,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of(
                 "complexList/all(c:c/nestedComplexArray/any(n:n/numberVal eq 71) and c/nestedComplexArray/any(n:n/numberVal eq 72))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/$count ge 2)"),
             prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString"))
         // TODO nestedComplexArray with one operator (eq) and some numeric operator
         // TODO nested Array with primitive type (array of strings)
