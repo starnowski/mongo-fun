@@ -230,7 +230,13 @@ class Example2ControllerTest extends AbstractExample2ControllerTest {
             List.of(
                 "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Some text", "eOMtThyhVNLWUZNRcBaQKxI")));
+                "Some text", "eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            List.of("tags/$count ge 2"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Some text", "eOMtThyhVNLWUZNRcBaQKxI", "Poem")),
+        Arguments.of(
+            List.of("tags/$count ge 3"), prepareResponseForQueryWithPlainStringProperties("Poem")));
   }
 
   @Test
