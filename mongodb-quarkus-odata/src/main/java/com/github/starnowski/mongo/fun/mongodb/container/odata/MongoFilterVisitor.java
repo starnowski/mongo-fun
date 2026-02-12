@@ -167,6 +167,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               !this.context.isExprMode(),
               this.context.isExprMode(),
               variable.getVariableName());
+        } else if (last instanceof UriResourceCount) {
+          return prepareCollectionSize(
+              "$$" + variable.getVariableName() + "." + field, this.context.isExprMode());
         }
         if (this.context.isExprMode()) {
           return prepareMemberDocument("$$" + variable.getVariableName() + "." + field, fieldType);
@@ -190,10 +193,18 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       } else if (last instanceof UriResourceLambdaAll all) {
         String field = extractFieldName(member);
         return getBsonForUriResourceLambdaAll(all, field);
+      } else if (last instanceof UriResourceCount) {
+        System.out.println(last);
       }
     }
     String field = extractFieldName(member);
     return prepareMemberDocument(field);
+  }
+
+  private Bson prepareCollectionSize(String field, boolean nestedExpr) {
+    Document innerDocument =
+        new Document("$size", new Document("$ifNull", Arrays.asList(field, List.of())));
+    return nestedExpr ? innerDocument : new Document("$expr", innerDocument);
   }
 
   private Bson getBsonForUriResourceLambdaAll(
