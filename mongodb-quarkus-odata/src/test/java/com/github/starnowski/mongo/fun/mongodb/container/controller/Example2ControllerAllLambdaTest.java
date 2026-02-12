@@ -790,7 +790,8 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                 "Doc1", "Doc2", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/all(n:contains(n/stringVal,'match')))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc5", "only_id_and_plainString")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc5", "Doc6", "only_id_and_plainString")),
         Arguments.of(
             List.of(
                 "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))"),
@@ -817,8 +818,13 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of(
                 "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1') and c/nestedComplexArray/any()) and complexList/any(c:c/nestedComplexArray/any())"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2"))
-        // TODO nestedComplexArray with more than one item in array
+            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'matchAll'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/numberVal gt 70))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString"))
         // TODO nestedComplexArray with one operator (eq) and some numeric operator
         // TODO nested Array with primitive type (array of strings)
         // TODO nestedComplexArray where there is reference to parent lambda like
@@ -844,6 +850,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_6.json",
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_only_id.json",
