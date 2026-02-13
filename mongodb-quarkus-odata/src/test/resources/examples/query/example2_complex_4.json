@@ -6,6 +6,7 @@
     }
   },
   "plainString": "Doc4",
+  "primitiveStringList": ["item7", "item8"],
   "complexList": [
     {
       "someString": "Apple",

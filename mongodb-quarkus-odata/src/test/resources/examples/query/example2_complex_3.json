@@ -6,6 +6,7 @@
     }
   },
   "plainString": "Doc3",
+  "primitiveStringList": ["item5", "item6"],
   "complexList": [
     {
       "someString": "Cherry",

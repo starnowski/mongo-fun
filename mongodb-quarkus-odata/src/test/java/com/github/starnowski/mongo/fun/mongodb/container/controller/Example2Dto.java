@@ -25,7 +25,16 @@ public class Example2Dto {
   private Long bigInteger;
   private Boolean isActive;
   private List<String> tags;
+  private List<String> primitiveStringList;
   private Map<String, Object> metadata;
+
+  public List<String> getPrimitiveStringList() {
+    return primitiveStringList;
+  }
+
+  public void setPrimitiveStringList(List<String> primitiveStringList) {
+    this.primitiveStringList = primitiveStringList;
+  }
 
   public UUID getUuidProp() {
     return uuidProp;

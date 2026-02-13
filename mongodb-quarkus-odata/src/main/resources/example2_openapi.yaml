@@ -65,6 +65,11 @@ components:
           items:
             type: number        # -> java.util.List<BigDecimal>
 
+        primitiveStringList:
+          type: array
+          items:
+            type: string
+
         # ---- object ----
 #        metadata:
 #          type: object          # -> java.util.Map<String, Object>

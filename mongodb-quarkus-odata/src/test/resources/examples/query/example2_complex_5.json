@@ -6,6 +6,7 @@
     }
   },
   "plainString": "Doc5",
+  "primitiveStringList": ["item9", "item10"],
   "complexList": [
     {
       "someString": "Application",

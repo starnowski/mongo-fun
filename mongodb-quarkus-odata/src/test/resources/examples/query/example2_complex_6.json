@@ -6,6 +6,7 @@
     }
   },
   "plainString": "Doc6",
+  "primitiveStringList": ["item11", "item12"],
   "complexList": [
     {
       "someString": "MultipleNested",
