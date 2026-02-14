@@ -59,25 +59,27 @@ class Example2ControllerAnyLambdaTest extends AbstractExample2ControllerTest {
             List.of("tags/any(t:contains(t,'spider'))"),
             prepareResponseForQueryWithPlainStringProperties(
                 "eOMtThyhVNLWUZNRcBaQKxI", "Some text")),
-                Arguments.of(
-                    List.of("numericArray/any(n:n gt 25)"),
-                    prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
-                        Arguments.of(
-                            List.of("numericArray/any(n:n lt 10)"),
-                            prepareResponseForQueryWithPlainStringProperties("Some text", "Poem")),
-                        Arguments.of(
-                            List.of("tags/any(t:contains(tolower(t),'star'))"),
-                            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
-                        Arguments.of(
-                            List.of("tags/any(t:endswith(toupper(t),'TRAP'))"),
-                            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")),
-                                Arguments.of(
-                                    List.of("tags/any(t:length(t) eq 8)"),
-                                    prepareResponseForQueryWithPlainStringProperties("Some text", "Poem", "Oleksa")),                        Arguments.of(
-                            List.of("numericArray/any(n:n add 2 gt 100)"),
-                            prepareResponseForQueryWithPlainStringProperties("Mario"))
-                    );
-                  }
+        Arguments.of(
+            List.of("numericArray/any(n:n gt 25)"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/any(n:n lt 10)"),
+            prepareResponseForQueryWithPlainStringProperties("Some text", "Poem")),
+        Arguments.of(
+            List.of("tags/any(t:contains(tolower(t),'star'))"),
+            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+        Arguments.of(
+            List.of("tags/any(t:endswith(toupper(t),'TRAP'))"),
+            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            List.of("tags/any(t:length(t) eq 8)"),
+            prepareResponseForQueryWithPlainStringProperties("Some text", "Poem", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/any(n:n add 2 gt 100)"),
+            prepareResponseForQueryWithPlainStringProperties("Mario")));
+  }
+
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnComplexListFilters() {
     return Stream.of(
         Arguments.of(
