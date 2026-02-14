@@ -93,6 +93,14 @@ components:
               someDateTime:
                 type: string
                 format: date-time
+              primitiveStringList:
+                type: array
+                items:
+                  type: string
+              primitiveNumberList:
+                type: array
+                items:
+                  type: number
 #                TODO Add complex object
               someDate:
                 type: string

@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.json.JSONException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -27,7 +28,12 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
 
   private static final String ALL_EXAMPLES_IN_RESPONSE =
       prepareResponseForQueryWithPlainStringProperties(
-          "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
+          "eOMtThyhVNLWUZNRcBaQKxI",
+          "Some text",
+          "Poem",
+          "Mario",
+          "Oleksa",
+          "only_id_and_plainString");
   @Inject private MongoClient mongoClient;
 
   public static Stream<Arguments> provideShouldReturnBadRequestForInvalidPayload() {
@@ -63,76 +69,87 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star') and t ne 'starlord')"),
-            prepareResponseForQueryWithPlainStringProperties("Mario")),
+            prepareResponseForQueryWithPlainStringProperties("Mario", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"),
             ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of(
                 "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(t,'starlord'))"),
-            prepareResponseForQueryWithPlainStringProperties()),
+            prepareResponseForQueryWithPlainStringProperties("only_id_and_plainString")),
         // New test cases
         Arguments.of(
             List.of("tags/all(t:endswith(t,'web') or endswith(t,'trap'))"),
-            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:length(t) eq 9)"),
-            prepareResponseForQueryWithPlainStringProperties("Mario")),
+            prepareResponseForQueryWithPlainStringProperties("Mario", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(tolower(t),'star'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(tolower(t),tolower('star')))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(toupper(t),toupper('star')))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of( // all documents matches
             List.of("tags/all(t:endswith(tolower(t),tolower(t)))"), ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("tags/all(t:contains(toupper(t),'STAR'))"),
-            prepareResponseForQueryWithPlainStringProperties("Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(
             List.of("numericArray/all(n:n gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(
-                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa", "only_id_and_plainString")),
         // TODO numericArray/all(n:round(n) gt floor(5.05))
         Arguments.of(
             List.of("numericArray/all(n:n gt floor(5.05))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa")),
+                "eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa", "only_id_and_plainString")),
         Arguments.of(List.of("numericArray/all(n:n add 2 gt round(n))"), ALL_EXAMPLES_IN_RESPONSE),
         Arguments.of(
             List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
-            prepareResponseForQueryWithPlainStringProperties("eOMtThyhVNLWUZNRcBaQKxI")));
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "only_id_and_plainString")));
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnComplexListFilters() {
     return Stream.of(
         Arguments.of(
             List.of("complexList/all(c:startswith(c/someString,'Ap'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'ana'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:endswith(c/someString,'erry'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc3")),
+            prepareResponseForQueryWithPlainStringProperties("Doc3", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'e'))"),
-            prepareResponseForQueryWithPlainStringProperties("Doc3", "Doc4")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc3", "Doc4", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someString eq 'Application')"),
-            prepareResponseForQueryWithPlainStringProperties("Doc5")));
+            prepareResponseForQueryWithPlainStringProperties("Doc5", "only_id_and_plainString")));
   }
 
   public static Stream<Arguments> provideShouldReturnResponseStringBasedOnPipelines() {
@@ -339,7 +356,268 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                             }
                         """,
             prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
+                                    {
+                                     "pipeline": [
+                                               {
+                                           	"$match": {
+                                           		"$and": [
+                                           			{
+                                           				"$expr": {
+                                           					"$eq": [
+                                           						{
+                                           							"$size": {
+                                           								"$filter": {
+                                           									"input": "$complexList",
+                                           									"as": "c",
+                                           									"cond": {
+                                           										"$eq": [
+                                           											{
+                                           												"$size": {
+                                           													"$filter": {
+                                           														"input": "$nestedComplexArray",
+                                           														"as": "n",
+                                           														"cond": {
+                                           															"$or": [
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"test1"
+                                           																	]
+                                           																},
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"val1"
+                                           																	]
+                                           																}
+                                           															]
+                                           														}
+                                           													}
+                                           												}
+                                           											},
+                                           											{
+                                           												"$size": "$nestedComplexArray"
+                                           											}
+                                           										]
+                                           									}
+                                           								}
+                                           							}
+                                           						},
+                                           						{
+                                           							"$size": "$complexList"
+                                           						}
+                                           					]
+                                           				}
+                                           			}
+                                           		]
+                                           	}
+                                           }
+                                             ]
+                                }
+                                """,
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
+                                    {
+                                     "pipeline": [
+                                               {
+                                           	"$match": {
+                                           		"$and": [
+                                           			{
+                                           				"$expr": {
+                                           					"$eq": [
+                                           						{
+                                           							"$size": {
+                                           								"$filter": {
+                                           									"input": { "$ifNull": ["$complexList", []] },
+                                           									"as": "c",
+                                           									"cond": {
+                                           										"$eq": [
+                                           											{
+                                           												"$size": {
+                                           													"$filter": {
+                                           														"input": { "$ifNull": ["$nestedComplexArray", []] },
+                                           														"as": "n",
+                                           														"cond": {
+                                           															"$or": [
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"test1"
+                                           																	]
+                                           																},
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"val1"
+                                           																	]
+                                           																}
+                                           															]
+                                           														}
+                                           													}
+                                           												}
+                                           											},
+                                           											{
+                                           												"$size": { "$ifNull": ["$nestedComplexArray", []] }
+                                           											}
+                                           										]
+                                           									}
+                                           								}
+                                           							}
+                                           						},
+                                           						{
+                                           							"$size": { "$ifNull": ["$complexList", []] }
+                                           						}
+                                           					]
+                                           				}
+                                           			}
+                                           		]
+                                           	}
+                                           }
+                                             ]
+                                }
+                                """,
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
+                                    {
+                                     "pipeline": [
+                                               {
+                                           	"$match": {
+                                           		"$and": [
+                                           			{
+                                           				"$expr": {
+                                           					"$eq": [
+                                           						{
+                                           							"$size": {
+                                           								"$filter": {
+                                           									"input": { "$ifNull": ["$complexList", []] },
+                                           									"as": "c",
+                                           									"cond": {
+                                           										"$eq": [
+                                           											{
+                                           												"$size": {
+                                           													"$filter": {
+                                           														"input": { "$ifNull": ["$nestedComplexArray", []] },
+                                           														"as": "n",
+                                           														"cond": {
+                                           															"$or": [
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"test1"
+                                           																	]
+                                           																},
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"val1"
+                                           																	]
+                                           																}
+                                           															]
+                                           														}
+                                           													}
+                                           												}
+                                           											},
+                                           											{
+                                           												"$size": { "$ifNull": ["$nestedComplexArray", []] }
+                                           											}
+                                           										]
+                                           									}
+                                           								}
+                                           							}
+                                           						},
+                                           						{
+                                           							"$size": { "$ifNull": ["$complexList", []] }
+                                           						}
+                                           					]
+                                           				}
+                                           			}
+                                           		]
+                                           	}
+                                           }
+                                             ]
+                                }
+                                """,
+            prepareResponseForQueryWithPlainStringProperties(
+                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        Arguments.of(
+            """
+                                    {
+                                     "pipeline": [
+                                               {
+                                           	"$match": {
+                                           		"$and": [
+                                           			{
+                                           				"$expr": {
+                                           					"$eq": [
+                                           						{
+                                           							"$size": {
+                                           								"$filter": {
+                                           									"input": { "$ifNull": ["$complexList", []] },
+                                           									"as": "c",
+                                           									"cond": {
+                                           										"$eq": [
+                                           											{
+                                           												"$size": {
+                                           													"$filter": {
+                                           														"input": { "$ifNull": ["$nestedComplexArray", []] },
+                                           														"as": "n",
+                                           														"cond": {
+                                           															"$or": [
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"test1"
+                                           																	]
+                                           																},
+                                           																{
+                                           																	"$eq": [
+                                           																		"$$n.stringVal",
+                                           																		"val1"
+                                           																	]
+                                           																}
+                                           															]
+                                           														}
+                                           													}
+                                           												}
+                                           											},
+                                           											{
+                                           												"$cond": [
+                                                                                          { "$eq": [{ "$type": "$nestedComplexArray" }, "array"] },
+                                                                                          { "$size": "$nestedComplexArray" },
+                                                                                          -1
+                                                                                        ]
+                                           											}
+                                           										]
+                                           									}
+                                           								}
+                                           							}
+                                           						},
+                                           						{
+                                           							"$cond": [
+                                                                      { "$eq": [{ "$type": "$complexList" }, "array"] },
+                                                                      { "$size": "$complexList" },
+                                                                      -1
+                                                                    ]
+                                           						}
+                                           					]
+                                           				}
+                                           			}
+                                           		]
+                                           	}
+                                           }
+                                             ]
+                                }
+                                """,
+            prepareResponseForQueryWithPlainStringProperties(
                 "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
+
         //                ,
         //
         //                Arguments.of(List.of("tags/all(t:startswith(t,'star') or t ne
@@ -365,7 +643,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         @MongoDocument(bsonFilePath = "examples/query/example2_2.json", collection = "examples"),
         @MongoDocument(bsonFilePath = "examples/query/example2_3.json", collection = "examples"),
         @MongoDocument(bsonFilePath = "examples/query/example2_4.json", collection = "examples"),
-        @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples")
+        @MongoDocument(bsonFilePath = "examples/query/example2_5.json", collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
+            collection = "examples")
       })
   public void provideShouldReturnResponseStringBasedOnFilters(
       List<String> filters, String expectedResponse) throws IOException, JSONException {
@@ -401,6 +682,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
             collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFilters(
@@ -425,30 +709,34 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt 25)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc2", "Doc3", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber lt 25)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber eq 10 or c/someNumber eq 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc1", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 5 gt 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc3", "Doc5")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc2", "Doc3", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber gt floor(5.05))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber add 2 gt round(c/someNumber))"),
             prepareResponseForQueryWithPlainStringProperties(
-                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someNumber eq 20)"),
-            prepareResponseForQueryWithPlainStringProperties("Doc5")));
+            prepareResponseForQueryWithPlainStringProperties("Doc5", "only_id_and_plainString")));
   }
 
   @ParameterizedTest
@@ -469,6 +757,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
             collection = "examples"),
         @MongoDocument(
             bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
             collection = "examples")
       })
   public void shouldReturnResponseStringBasedOnComplexListFiltersWithNumericProperties(
@@ -487,6 +778,141 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
   }
 
+  public static Stream<Arguments>
+      provideShouldReturnResponseStringBasedOnNestedComplexArrayFilters() {
+    return Stream.of(
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:startswith(n/stringVal,'val')))"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:contains(n/stringVal,'match')))"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc5", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc2", "Doc4", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1') and c/someNumber ge 20)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
+        //            The any operator applies a Boolean expression to each member of a collection
+        // and returns true if and only if the expression is true for any member of the collection,
+        // otherwise it returns false.
+        //            This implies that the any operator always returns false for an empty
+        // collection.
+        //            The any operator can be used without an argument expression. This short form
+        // returns false if and only if the collection is empty.
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1')) and complexList/any()"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "Doc4")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1') and c/nestedComplexArray/any()) and complexList/any(c:c/nestedComplexArray/any())"),
+            prepareResponseForQueryWithPlainStringProperties("Doc2")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'matchAll'))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/numberVal gt 70))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/any(n:n/numberVal eq 71) and c/nestedComplexArray/any(n:n/numberVal eq 72))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/$count ge 2)"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/$count ge 2)  and complexList/any(c:c/nestedComplexArray/any())"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/any(n:n/numberVal ge 70 and n/stringVal eq 'matchAll')) and complexList/any(c:c/nestedComplexArray/any())"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6")),
+        Arguments.of(
+            List.of("complexList/all(c:c/primitiveStringList/all(n:startswith(n,'item1')))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/primitiveStringList/all(n:startswith(n,'item1'))) and complexList/any(c:c/primitiveStringList/any())"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6")),
+        Arguments.of(
+            List.of("complexList/all(c:c/primitiveNumberList/all(n:n gt 10))"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/primitiveNumberList/all(n:n gt 10)) and complexList/any(c:c/primitiveStringList/any())"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/numberVal eq c/someNumber))  and complexList/any(c:c/nestedComplexArray/any())"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:c/someNumber eq n/numberVal))  and complexList/any(c:c/nestedComplexArray/any())"),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:not c/nestedComplexArray/all(n:c/someNumber eq n/numberVal))  and complexList/any(c:c/nestedComplexArray/any())"),
+            prepareResponseForQueryWithPlainStringProperties("Doc6")));
+  }
+
+  @ParameterizedTest
+  @MethodSource({"provideShouldReturnResponseStringBasedOnNestedComplexArrayFilters"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_1.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_2.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_3.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_4.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_6.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
+            collection = "examples")
+      })
+  public void shouldReturnResponseStringBasedOnNestedComplexArrayFilters(
+      List<String> filters, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+        given()
+            .when()
+            .queryParams(Map.of("$filter", filters))
+            .get("/examples2/simple-query")
+            .then()
+            .statusCode(200)
+            .extract();
+
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
+
+  @Disabled
   @ParameterizedTest
   @MethodSource({"provideShouldReturnResponseStringBasedOnPipelines"})
   @MongoSetup(
