@@ -5,6 +5,8 @@ import com.mongodb.client.model.Filters;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+
+import jakarta.ws.rs.PUT;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.*;
@@ -1126,6 +1128,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       boolean isLambdaAllContext,
       String parentLambdaVariable,
       boolean isRootContext) {
+
+    public String parentLambdaVariable() {
+      return lambdaVariableAliases == null || lambdaVariableAliases.size() < 2 ? null : lambdaVariableAliases.entrySet().stream().skip(lambdaVariableAliases.size() - 2).map(Map.Entry::getKey).findFirst().get();
+    }
 
 
     public boolean isElementMatchContext() {
