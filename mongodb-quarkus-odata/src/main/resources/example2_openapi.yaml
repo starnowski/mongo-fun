@@ -65,11 +65,6 @@ components:
           items:
             type: number        # -> java.util.List<BigDecimal>
 
-        primitiveStringList:
-          type: array
-          items:
-            type: string
-
         # ---- object ----
 #        metadata:
 #          type: object          # -> java.util.Map<String, Object>
@@ -98,6 +93,10 @@ components:
               someDateTime:
                 type: string
                 format: date-time
+              primitiveStringList:
+                type: array
+                items:
+                  type: string
 #                TODO Add complex object
               someDate:
                 type: string
