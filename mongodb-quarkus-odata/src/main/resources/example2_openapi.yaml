@@ -97,6 +97,10 @@ components:
                 type: array
                 items:
                   type: string
+              primitiveNumberList:
+                type: array
+                items:
+                  type: number
 #                TODO Add complex object
               someDate:
                 type: string
