@@ -853,7 +853,11 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
         Arguments.of(
             List.of(
                 "complexList/all(c:c/primitiveNumberList/all(n:n gt 10)) and complexList/any(c:c/primitiveStringList/any())"),
-            prepareResponseForQueryWithPlainStringProperties("Doc6"))
+            prepareResponseForQueryWithPlainStringProperties("Doc6")),
+            Arguments.of(
+                    List.of(
+                            "complexList/all(c:c/nestedComplexArray/all(n:n/numberVal eq c/someNumber))  and complexList/any(c:c/nestedComplexArray/any())"),
+                    prepareResponseForQueryWithPlainStringProperties("Doc6"))
         // TODO nestedComplexArray where there is reference to parent lambda like
         // c:(nestedComplexArray/all(n:n/stringVal eq c) .... and more cases
         );
