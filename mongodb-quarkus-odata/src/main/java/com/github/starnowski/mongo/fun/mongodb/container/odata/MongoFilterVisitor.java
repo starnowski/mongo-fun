@@ -169,8 +169,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               all,
               field,
               !this.context.isExprMode(),
-              this.context.isExprMode(),
-              variable.getVariableName());
+              this.context.isExprMode());
         } else if (last instanceof UriResourceCount) {
           return prepareCollectionSize(
               "$$" + variable.getVariableName() + "." + field, this.context.isExprMode());
@@ -235,8 +234,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       UriResourceLambdaAll all,
       String field,
       boolean rethrowExprRequireException,
-      boolean expressionOperantRequiredExceptionThrown,
-      String parentLambdaVariable) {
+      boolean expressionOperantRequiredExceptionThrown) {
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
     boolean nestedExpression = expressionOperantRequiredExceptionThrown;
@@ -347,7 +345,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson getBsonForUriResourceLambdaAll(UriResourceLambdaAll all, String field) {
-    return getBsonForUriResourceLambdaAll(all, field, false, false, null);
+    return getBsonForUriResourceLambdaAll(all, field, false, false);
   }
 
   private Bson getBsonForUriResourceLambdaAny(UriResourceLambdaAny any, String field) {
