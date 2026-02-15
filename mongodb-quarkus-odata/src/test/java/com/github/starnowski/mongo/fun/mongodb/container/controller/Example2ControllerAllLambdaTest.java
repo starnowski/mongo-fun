@@ -932,4 +932,86 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     // THEN
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
   }
+
+
+  public static Stream<Arguments> provideShouldReturnResponseBasedOnPipelinesForComplexArrays() {
+    return Stream.of(
+            Arguments.of(
+                    """
+                                    {
+                                        "pipeline": [
+                                                   {
+                                               	"$match": {
+                                               		"$and": [
+                                               			{
+                                               				"complexList": {
+                                               					"$elemMatch": {
+                                               						"$and": [
+                                               						{
+                                               							"nestedComplexArray": {
+                                               								"$elemMatch": {
+                                               									"numberVal": 71
+                                               								}
+                                               							}
+                                               						}
+                                               						,
+                                               						{
+                                               							"nestedComplexArray": {
+                                               								"$elemMatch": {
+                                               									"numberVal": 72
+                                               								}
+                                               							}
+                                               						}
+                                               						]
+                            
+                                               					}
+                            
+                                               				}
+                                               			}
+                                               			]
+                                               	}
+                                               }
+                                                 ]
+                                    }
+                                """,
+                    prepareResponseForQueryWithPlainStringProperties(
+                            "Doc6"))
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource({"provideShouldReturnResponseBasedOnPipelinesForComplexArrays"})
+  @MongoSetup(
+          mongoDocuments = {
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_complex_1.json",
+                          collection = "examples"),
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_complex_2.json",
+                          collection = "examples"),
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_complex_3.json",
+                          collection = "examples"),
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_complex_4.json",
+                          collection = "examples"),
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_complex_5.json",
+                          collection = "examples"),
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_complex_6.json",
+                          collection = "examples"),
+                  @MongoDocument(
+                          bsonFilePath = "examples/query/example2_only_id.json",
+                          collection = "examples")
+          })
+  public void shouldReturnResponseBasedOnPipelinesForComplexArrays(
+          String json, String expectedResponse) throws IOException, JSONException {
+    // WHEN
+    ExtractableResponse<Response> getResponse =
+            given().when().body(json).post("/examples2/simple-query").then().statusCode(200).extract();
+
+    // THEN
+    JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
+  }
 }
