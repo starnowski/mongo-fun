@@ -399,6 +399,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                               LambdaType.ANY,
                               null))
                       .isLambdaAnyContext(true)
+                          .isExprMode(nestedExpression)
                       .build());
           return innerMongoFilterVisitor.visitLambdaExpression(
               "ANY", any.getLambdaVariable(), any.getExpression());
@@ -470,7 +471,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               Bson innerObject =
                   innerMongoFilterVisitor.visitLambdaExpression(
                       "ANY", any.getLambdaVariable(), any.getExpression());
-              return prepareElementMatchDocumentForAnyLambda(innerObject, field);
+              return innerMongoFilterVisitor.prepareElementMatchDocumentForAnyLambda(innerObject, field);
             };
       } catch (MultipleElementMatchOperantRequiredException ex) {
         multipleElementMatchOperantRequiredExceptionThrown = true;
