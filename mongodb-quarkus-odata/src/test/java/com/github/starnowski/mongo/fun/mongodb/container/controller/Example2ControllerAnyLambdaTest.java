@@ -108,7 +108,8 @@ class Example2ControllerAnyLambdaTest extends AbstractExample2ControllerTest {
                 "eOMtThyhVNLWUZNRcBaQKxI", "Some text")),
         Arguments.of(
             List.of("tags/any(t:length(t) eq 9)"),
-            prepareResponseForQueryWithPlainStringProperties("Some text", "Poem", "Mario", "Oleksa")),
+            prepareResponseForQueryWithPlainStringProperties(
+                "Some text", "Poem", "Mario", "Oleksa")),
         Arguments.of(
             List.of("numericArray/any(n:n gt 5)"),
             prepareResponseForQueryWithPlainStringProperties(

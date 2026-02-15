@@ -910,6 +910,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       default:
         throw new UnsupportedOperationException("Method not supported: " + methodCall);
     }
+    if (!this.context.isExprMode()
+        && this.context.isLambdaAnyContext()
+        && !this.context.isElementMatchContext()
+        && !this.context.isNestedLambdaAllContext()) {
+      field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
+    }
     return this.context.isExprMode()
         ? prepareRegexMatchExpr(
             field == null ? parameters.get(0) : field, Pattern.compile(pattern).pattern())
@@ -1016,8 +1022,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       }
     }
     if (this.context.isLambdaAnyContext()
-            && !this.context.isElementMatchContext()
-            && !this.context.isNestedLambdaAllContext()) {
+        && !this.context.isElementMatchContext()
+        && !this.context.isNestedLambdaAllContext()) {
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
     Bson result = fn.apply(field, value);
