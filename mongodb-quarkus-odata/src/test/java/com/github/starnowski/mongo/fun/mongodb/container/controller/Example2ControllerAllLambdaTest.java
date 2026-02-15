@@ -975,6 +975,28 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                     }
                                 """,
                     prepareResponseForQueryWithPlainStringProperties(
+                            "Doc6")),
+            Arguments.of(
+                    """
+                                    {
+                                        "pipeline": [
+                                                   {
+                                               	"$match": {
+                                               		"$and": [
+                                               			 {
+                                               			  "complexList.nestedComplexArray.numberVal": 71
+                                               			 }
+                                               			 ,
+                                               			 {
+                                               			  "complexList.nestedComplexArray.numberVal": 72
+                                               			 }
+                                               			]
+                                               	}
+                                               }
+                                                 ]
+                                    }
+                                """,
+                    prepareResponseForQueryWithPlainStringProperties(
                             "Doc6"))
     );
   }
