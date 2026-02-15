@@ -1027,6 +1027,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     if (this.context.isExprMode()) {
       return new Document("$eq", Arrays.asList(field, rightOperant));
     }
+    if (this.context.isLambdaAnyContext() && isLambdaMemberReference(left)
+      && this.context.isElementMatchContext()
+    ) {
+      return new Document("$eq", rightOperant);
+    }
     if (this.context.isLambdaAnyContext()
         && !this.context.isElementMatchContext()
         && !this.context.isNestedLambdaAllContext()) {
@@ -1065,7 +1070,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
     Bson result = fn.apply(field, value);
-    if (this.context.isLambdaAllContext()) {
+    if (this.context.isLambdaAllContext()
+//            || (this.context.isLambdaAnyContext() && isLambdaMemberReference(left))
+    ) {
       if (!this.context.isElementMatchContext()) {
         throw new ElementMatchOperantRequiredException(
             "Required element match for the ALL lambda, left [%s], right [%s]"
@@ -1173,8 +1180,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           return new Document("$in", Arrays.asList(field, values));
         }
         if (isLambdaMemberReference(left) && this.context.isElementMatchContext()) {
-          //          throw new ElementMatchOperantRequiredException("IN required $elementMatch for
-          // lambda reference");
           return new Document("$in", values);
         }
         return Filters.in(field, values);
