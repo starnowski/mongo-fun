@@ -1015,6 +1015,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
       }
     }
+    if (this.context.isLambdaAnyContext()
+            && !this.context.isElementMatchContext()
+            && !this.context.isNestedLambdaAllContext()) {
+      field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
+    }
     Bson result = fn.apply(field, value);
     if (this.context.isLambdaAllContext()) {
       if (!this.context.isElementMatchContext()) {
