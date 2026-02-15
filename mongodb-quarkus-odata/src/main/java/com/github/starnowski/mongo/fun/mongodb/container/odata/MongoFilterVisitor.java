@@ -1072,7 +1072,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
     Bson result = fn.apply(field, value);
     if (this.context.isLambdaAllContext()
-//            || (this.context.isLambdaAnyContext() && isLambdaMemberReference(left))
+            || (this.context.isLambdaAnyContext() && isLambdaMemberReference(left) && this.context.isElementMatchContext())
     ) {
       if (!this.context.isElementMatchContext()) {
         throw new ElementMatchOperantRequiredException(
