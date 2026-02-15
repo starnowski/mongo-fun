@@ -23,6 +23,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String ODATA_MEMBER_TYPE_PROPERTY = "$odata.member.type";
   public static final String ODATA_MEMBER_LAMBDA_ROOT_PROPERTY =
       "$odata.member.lambda.root.property";
+  public static final String ODATA_MEMBER_IS_LAMBDA_PROPERTY =
+          "$odata.member.lambda.is.lambda";
   private final Edm edm;
   private final MongoFilterVisitorContext context;
 
@@ -112,7 +114,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           if (this.context.isExprMode()) {
             return prepareMemberDocument("$$" + variable.getVariableName(), variable.getType());
           }
-          return this.context.lambdaVariableAliases().get(variable.getVariableName()).bson();
+          return prepareWrappedMemberDocumentForLambda(this.context.lambdaVariableAliases().get(variable.getVariableName()).bson());
         }
         return prepareMemberDocument(field, variable.getType());
       } else {
@@ -563,7 +565,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson prepareElementMatchDocumentForAnyLambda(Bson innerPart, String field) {
-    //TODO
     if (this.context.isLambdaAnyContext() &&  !this.context.isNestedElementMatchContext() && !this.context.isNestedLambdaAllContext() && !this.context.isExprMode()) {
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
@@ -660,6 +661,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private Document prepareMemberDocument(String field, EdmType edmType) {
     Document result = new Document(ODATA_MEMBER_PROPERTY, field);
     result.append(ODATA_MEMBER_TYPE_PROPERTY, edmType.getFullQualifiedName().toString());
+    return result;
+  }
+
+  private Document prepareWrappedMemberDocumentForLambda(Bson bson) {
+    Document result = new Document(bson.toBsonDocument());
+    result.append(ODATA_MEMBER_IS_LAMBDA_PROPERTY, true);
     return result;
   }
 
@@ -1141,10 +1148,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (this.context.isExprMode()) {
           return new Document("$in", Arrays.asList(field, values));
         }
+        if (isLambdaMemberReference(left)) {
+//          throw new ElementMatchOperantRequiredException("IN required $elementMatch for lambda reference");
+//          return new Document("$in", values);
+        }
         return Filters.in(field, values);
       default:
         throw new UnsupportedOperationException("Operator not supported: " + operator);
     }
+  }
+
+  private boolean isLambdaMemberReference(Bson bson) {
+    BsonDocument bsonDocument = bson.toBsonDocument();
+    if (bsonDocument.containsKey(ODATA_MEMBER_IS_LAMBDA_PROPERTY)) {
+      return bsonDocument.get(ODATA_MEMBER_IS_LAMBDA_PROPERTY).asBoolean().getValue();
+    }
+    return false;
   }
 
   public record ElementMatchContext(String property, boolean multipleElemMatch) {}
