@@ -740,6 +740,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   throw new MultipleElementMatchOperantRequiredException(
                       "Multiple elemMatch required");
                 }
+
                 if (this.context.isLambdaAllContext()
                     && this.context.elementMatchContext().multipleElemMatch()) {
                   BsonDocument leftDoc = left.toBsonDocument();
@@ -761,19 +762,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 }
                 BsonDocument leftDoc = left.toBsonDocument();
                 BsonDocument rightDoc = right.toBsonDocument();
-                Document finalDOcument = new Document();
                 Document leftPartDocument = new Document();
-                Document partPartDocument = new Document();
+                Document rightPartDocument = new Document();
                 enrichDocumentWithQueryDocumentValues(leftDoc, leftPartDocument);
-                enrichDocumentWithQueryDocumentValues(rightDoc, partPartDocument);
-
+                enrichDocumentWithQueryDocumentValues(rightDoc, rightPartDocument);
                 // Checking keys conflict
-                if (leftPartDocument.keySet().stream().anyMatch(partPartDocument::containsKey)) {
+                if (leftPartDocument.keySet().stream().anyMatch(rightPartDocument::containsKey)) {
+//                  if (this.context.isLambdaAnyContext() && !this.context.isExprMode() &&
+//                          !this.context.isNestedLambdaAllContext() && !this.context.elementMatchContext().multipleElemMatch()) {
+//                    throw new MultipleElementMatchOperantRequiredException(
+//                            "Multiple elemMatch required for ANY lambda");
+//                  }
                   throw new ExpressionOperantRequiredException("Operators duplicated!");
                 }
-
+                Document finalDOcument = new Document();
                 finalDOcument.putAll(leftPartDocument);
-                finalDOcument.putAll(partPartDocument);
+                finalDOcument.putAll(rightPartDocument);
                 return finalDOcument;
               }
               return Filters.and(left, right);
@@ -1250,6 +1254,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   .filter(entry -> entry.getValue().elementMatchContext() != null)
                   .count()
               > 1;
+    }
+
+    public boolean isAtLeastOneElementMatchContextOnBranch() {
+      return lambdaVariableAliases != null
+              && !lambdaVariableAliases.isEmpty()
+              && lambdaVariableAliases.entrySet().stream()
+              .anyMatch(entry -> entry.getValue().elementMatchContext() != null);
     }
 
     public String enrichFieldPathWithRootPathIfNecessary(String field) {
