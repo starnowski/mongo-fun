@@ -51,7 +51,8 @@ public class IntegerSortedCollectionTest {
 
     @BeforeAll
     public void setUp() {
-        sortable = mongoClient.getDatabase("test").getCollection("integerSortedCollection").withWriteConcern(WriteConcern.W1);
+        sortable = mongoClient.getDatabase("test").getCollection("integerSortedCollection");
+        sortable.deleteMany(new Document());
         List<Document> documents = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             documents.add(new Document(INTEGER_COLUMN, i));
