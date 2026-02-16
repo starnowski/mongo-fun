@@ -1,0 +1,27 @@
+name: Run tests for mongodb-quarkus-changestream
+
+on:
+  push:
+    paths:
+    - '.github/workflows/mongodb-quarkus-changestream.yml'
+    - 'mongodb-quarkus-changestream/**'
+
+## The action created based on the description from https://github.com/marketplace/actions/mongodb-in-github-actions
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: cd mongodb-quarkus-changestream && mvn clean install
