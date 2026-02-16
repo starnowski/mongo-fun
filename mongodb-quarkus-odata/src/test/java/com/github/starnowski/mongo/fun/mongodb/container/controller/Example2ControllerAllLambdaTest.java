@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.json.JSONException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -357,267 +356,282 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                         """,
             prepareResponseForQueryWithPlainStringProperties(
                 "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
-//            ,
-//        Arguments.of(
-//            """
-//                                    {
-//                                     "pipeline": [
-//                                               {
-//                                           	"$match": {
-//                                           		"$and": [
-//                                           			{
-//                                           				"$expr": {
-//                                           					"$eq": [
-//                                           						{
-//                                           							"$size": {
-//                                           								"$filter": {
-//                                           									"input": "$complexList",
-//                                           									"as": "c",
-//                                           									"cond": {
-//                                           										"$eq": [
-//                                           											{
-//                                           												"$size": {
-//                                           													"$filter": {
-//                                           														"input": "$nestedComplexArray",
-//                                           														"as": "n",
-//                                           														"cond": {
-//                                           															"$or": [
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"test1"
-//                                           																	]
-//                                           																},
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"val1"
-//                                           																	]
-//                                           																}
-//                                           															]
-//                                           														}
-//                                           													}
-//                                           												}
-//                                           											},
-//                                           											{
-//                                           												"$size": "$nestedComplexArray"
-//                                           											}
-//                                           										]
-//                                           									}
-//                                           								}
-//                                           							}
-//                                           						},
-//                                           						{
-//                                           							"$size": "$complexList"
-//                                           						}
-//                                           					]
-//                                           				}
-//                                           			}
-//                                           		]
-//                                           	}
-//                                           }
-//                                             ]
-//                                }
-//                                """,
-//            prepareResponseForQueryWithPlainStringProperties(
-//                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
-//        Arguments.of(
-//            """
-//                                    {
-//                                     "pipeline": [
-//                                               {
-//                                           	"$match": {
-//                                           		"$and": [
-//                                           			{
-//                                           				"$expr": {
-//                                           					"$eq": [
-//                                           						{
-//                                           							"$size": {
-//                                           								"$filter": {
-//                                           									"input": { "$ifNull": ["$complexList", []] },
-//                                           									"as": "c",
-//                                           									"cond": {
-//                                           										"$eq": [
-//                                           											{
-//                                           												"$size": {
-//                                           													"$filter": {
-//                                           														"input": { "$ifNull": ["$nestedComplexArray", []] },
-//                                           														"as": "n",
-//                                           														"cond": {
-//                                           															"$or": [
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"test1"
-//                                           																	]
-//                                           																},
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"val1"
-//                                           																	]
-//                                           																}
-//                                           															]
-//                                           														}
-//                                           													}
-//                                           												}
-//                                           											},
-//                                           											{
-//                                           												"$size": { "$ifNull": ["$nestedComplexArray", []] }
-//                                           											}
-//                                           										]
-//                                           									}
-//                                           								}
-//                                           							}
-//                                           						},
-//                                           						{
-//                                           							"$size": { "$ifNull": ["$complexList", []] }
-//                                           						}
-//                                           					]
-//                                           				}
-//                                           			}
-//                                           		]
-//                                           	}
-//                                           }
-//                                             ]
-//                                }
-//                                """,
-//            prepareResponseForQueryWithPlainStringProperties(
-//                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
-//        Arguments.of(
-//            """
-//                                    {
-//                                     "pipeline": [
-//                                               {
-//                                           	"$match": {
-//                                           		"$and": [
-//                                           			{
-//                                           				"$expr": {
-//                                           					"$eq": [
-//                                           						{
-//                                           							"$size": {
-//                                           								"$filter": {
-//                                           									"input": { "$ifNull": ["$complexList", []] },
-//                                           									"as": "c",
-//                                           									"cond": {
-//                                           										"$eq": [
-//                                           											{
-//                                           												"$size": {
-//                                           													"$filter": {
-//                                           														"input": { "$ifNull": ["$nestedComplexArray", []] },
-//                                           														"as": "n",
-//                                           														"cond": {
-//                                           															"$or": [
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"test1"
-//                                           																	]
-//                                           																},
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"val1"
-//                                           																	]
-//                                           																}
-//                                           															]
-//                                           														}
-//                                           													}
-//                                           												}
-//                                           											},
-//                                           											{
-//                                           												"$size": { "$ifNull": ["$nestedComplexArray", []] }
-//                                           											}
-//                                           										]
-//                                           									}
-//                                           								}
-//                                           							}
-//                                           						},
-//                                           						{
-//                                           							"$size": { "$ifNull": ["$complexList", []] }
-//                                           						}
-//                                           					]
-//                                           				}
-//                                           			}
-//                                           		]
-//                                           	}
-//                                           }
-//                                             ]
-//                                }
-//                                """,
-//            prepareResponseForQueryWithPlainStringProperties(
-//                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
-//        Arguments.of(
-//            """
-//                                    {
-//                                     "pipeline": [
-//                                               {
-//                                           	"$match": {
-//                                           		"$and": [
-//                                           			{
-//                                           				"$expr": {
-//                                           					"$eq": [
-//                                           						{
-//                                           							"$size": {
-//                                           								"$filter": {
-//                                           									"input": { "$ifNull": ["$complexList", []] },
-//                                           									"as": "c",
-//                                           									"cond": {
-//                                           										"$eq": [
-//                                           											{
-//                                           												"$size": {
-//                                           													"$filter": {
-//                                           														"input": { "$ifNull": ["$nestedComplexArray", []] },
-//                                           														"as": "n",
-//                                           														"cond": {
-//                                           															"$or": [
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"test1"
-//                                           																	]
-//                                           																},
-//                                           																{
-//                                           																	"$eq": [
-//                                           																		"$$n.stringVal",
-//                                           																		"val1"
-//                                           																	]
-//                                           																}
-//                                           															]
-//                                           														}
-//                                           													}
-//                                           												}
-//                                           											},
-//                                           											{
-//                                           												"$cond": [
-//                                                                                          { "$eq": [{ "$type": "$nestedComplexArray" }, "array"] },
-//                                                                                          { "$size": "$nestedComplexArray" },
-//                                                                                          -1
-//                                                                                        ]
-//                                           											}
-//                                           										]
-//                                           									}
-//                                           								}
-//                                           							}
-//                                           						},
-//                                           						{
-//                                           							"$cond": [
-//                                                                      { "$eq": [{ "$type": "$complexList" }, "array"] },
-//                                                                      { "$size": "$complexList" },
-//                                                                      -1
-//                                                                    ]
-//                                           						}
-//                                           					]
-//                                           				}
-//                                           			}
-//                                           		]
-//                                           	}
-//                                           }
-//                                             ]
-//                                }
-//                                """,
-//            prepareResponseForQueryWithPlainStringProperties(
-//                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
+        //            ,
+        //        Arguments.of(
+        //            """
+        //                                    {
+        //                                     "pipeline": [
+        //                                               {
+        //                                           	"$match": {
+        //                                           		"$and": [
+        //                                           			{
+        //                                           				"$expr": {
+        //                                           					"$eq": [
+        //                                           						{
+        //                                           							"$size": {
+        //                                           								"$filter": {
+        //                                           									"input": "$complexList",
+        //                                           									"as": "c",
+        //                                           									"cond": {
+        //                                           										"$eq": [
+        //                                           											{
+        //                                           												"$size": {
+        //                                           													"$filter": {
+        //                                           														"input": "$nestedComplexArray",
+        //                                           														"as": "n",
+        //                                           														"cond": {
+        //                                           															"$or": [
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"test1"
+        //                                           																	]
+        //                                           																},
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"val1"
+        //                                           																	]
+        //                                           																}
+        //                                           															]
+        //                                           														}
+        //                                           													}
+        //                                           												}
+        //                                           											},
+        //                                           											{
+        //                                           												"$size": "$nestedComplexArray"
+        //                                           											}
+        //                                           										]
+        //                                           									}
+        //                                           								}
+        //                                           							}
+        //                                           						},
+        //                                           						{
+        //                                           							"$size": "$complexList"
+        //                                           						}
+        //                                           					]
+        //                                           				}
+        //                                           			}
+        //                                           		]
+        //                                           	}
+        //                                           }
+        //                                             ]
+        //                                }
+        //                                """,
+        //            prepareResponseForQueryWithPlainStringProperties(
+        //                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        //        Arguments.of(
+        //            """
+        //                                    {
+        //                                     "pipeline": [
+        //                                               {
+        //                                           	"$match": {
+        //                                           		"$and": [
+        //                                           			{
+        //                                           				"$expr": {
+        //                                           					"$eq": [
+        //                                           						{
+        //                                           							"$size": {
+        //                                           								"$filter": {
+        //                                           									"input": { "$ifNull": ["$complexList",
+        // []] },
+        //                                           									"as": "c",
+        //                                           									"cond": {
+        //                                           										"$eq": [
+        //                                           											{
+        //                                           												"$size": {
+        //                                           													"$filter": {
+        //                                           														"input": { "$ifNull":
+        // ["$nestedComplexArray", []] },
+        //                                           														"as": "n",
+        //                                           														"cond": {
+        //                                           															"$or": [
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"test1"
+        //                                           																	]
+        //                                           																},
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"val1"
+        //                                           																	]
+        //                                           																}
+        //                                           															]
+        //                                           														}
+        //                                           													}
+        //                                           												}
+        //                                           											},
+        //                                           											{
+        //                                           												"$size": { "$ifNull":
+        // ["$nestedComplexArray", []] }
+        //                                           											}
+        //                                           										]
+        //                                           									}
+        //                                           								}
+        //                                           							}
+        //                                           						},
+        //                                           						{
+        //                                           							"$size": { "$ifNull": ["$complexList",
+        // []] }
+        //                                           						}
+        //                                           					]
+        //                                           				}
+        //                                           			}
+        //                                           		]
+        //                                           	}
+        //                                           }
+        //                                             ]
+        //                                }
+        //                                """,
+        //            prepareResponseForQueryWithPlainStringProperties(
+        //                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        //        Arguments.of(
+        //            """
+        //                                    {
+        //                                     "pipeline": [
+        //                                               {
+        //                                           	"$match": {
+        //                                           		"$and": [
+        //                                           			{
+        //                                           				"$expr": {
+        //                                           					"$eq": [
+        //                                           						{
+        //                                           							"$size": {
+        //                                           								"$filter": {
+        //                                           									"input": { "$ifNull": ["$complexList",
+        // []] },
+        //                                           									"as": "c",
+        //                                           									"cond": {
+        //                                           										"$eq": [
+        //                                           											{
+        //                                           												"$size": {
+        //                                           													"$filter": {
+        //                                           														"input": { "$ifNull":
+        // ["$nestedComplexArray", []] },
+        //                                           														"as": "n",
+        //                                           														"cond": {
+        //                                           															"$or": [
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"test1"
+        //                                           																	]
+        //                                           																},
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"val1"
+        //                                           																	]
+        //                                           																}
+        //                                           															]
+        //                                           														}
+        //                                           													}
+        //                                           												}
+        //                                           											},
+        //                                           											{
+        //                                           												"$size": { "$ifNull":
+        // ["$nestedComplexArray", []] }
+        //                                           											}
+        //                                           										]
+        //                                           									}
+        //                                           								}
+        //                                           							}
+        //                                           						},
+        //                                           						{
+        //                                           							"$size": { "$ifNull": ["$complexList",
+        // []] }
+        //                                           						}
+        //                                           					]
+        //                                           				}
+        //                                           			}
+        //                                           		]
+        //                                           	}
+        //                                           }
+        //                                             ]
+        //                                }
+        //                                """,
+        //            prepareResponseForQueryWithPlainStringProperties(
+        //                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario")),
+        //        Arguments.of(
+        //            """
+        //                                    {
+        //                                     "pipeline": [
+        //                                               {
+        //                                           	"$match": {
+        //                                           		"$and": [
+        //                                           			{
+        //                                           				"$expr": {
+        //                                           					"$eq": [
+        //                                           						{
+        //                                           							"$size": {
+        //                                           								"$filter": {
+        //                                           									"input": { "$ifNull": ["$complexList",
+        // []] },
+        //                                           									"as": "c",
+        //                                           									"cond": {
+        //                                           										"$eq": [
+        //                                           											{
+        //                                           												"$size": {
+        //                                           													"$filter": {
+        //                                           														"input": { "$ifNull":
+        // ["$nestedComplexArray", []] },
+        //                                           														"as": "n",
+        //                                           														"cond": {
+        //                                           															"$or": [
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"test1"
+        //                                           																	]
+        //                                           																},
+        //                                           																{
+        //                                           																	"$eq": [
+        //                                           																		"$$n.stringVal",
+        //                                           																		"val1"
+        //                                           																	]
+        //                                           																}
+        //                                           															]
+        //                                           														}
+        //                                           													}
+        //                                           												}
+        //                                           											},
+        //                                           											{
+        //                                           												"$cond": [
+        //
+        // { "$eq": [{ "$type": "$nestedComplexArray" }, "array"] },
+        //
+        // { "$size": "$nestedComplexArray" },
+        //
+        // -1
+        //                                                                                        ]
+        //                                           											}
+        //                                           										]
+        //                                           									}
+        //                                           								}
+        //                                           							}
+        //                                           						},
+        //                                           						{
+        //                                           							"$cond": [
+        //                                                                      { "$eq": [{ "$type":
+        // "$complexList" }, "array"] },
+        //                                                                      { "$size":
+        // "$complexList" },
+        //                                                                      -1
+        //                                                                    ]
+        //                                           						}
+        //                                           					]
+        //                                           				}
+        //                                           			}
+        //                                           		]
+        //                                           	}
+        //                                           }
+        //                                             ]
+        //                                }
+        //                                """,
+        //            prepareResponseForQueryWithPlainStringProperties(
+        //                "eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario"))
 
         //                ,
         //
@@ -933,11 +947,10 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
   }
 
-
   public static Stream<Arguments> provideShouldReturnResponseBasedOnPipelinesForComplexArrays() {
     return Stream.of(
-            Arguments.of(
-                    """
+        Arguments.of(
+            """
                                     {
                                         "pipeline": [
                                                    {
@@ -963,9 +976,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                                							}
                                                						}
                                                						]
-                            
+
                                                					}
-                            
+
                                                				}
                                                			}
                                                			]
@@ -974,10 +987,9 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                                  ]
                                     }
                                 """,
-                    prepareResponseForQueryWithPlainStringProperties(
-                            "Doc6")),
-            Arguments.of(
-                    """
+            prepareResponseForQueryWithPlainStringProperties("Doc6")),
+        Arguments.of(
+            """
                                     {
                                         "pipeline": [
                                                    {
@@ -996,42 +1008,40 @@ class Example2ControllerAllLambdaTest extends AbstractExample2ControllerTest {
                                                  ]
                                     }
                                 """,
-                    prepareResponseForQueryWithPlainStringProperties(
-                            "Doc6"))
-    );
+            prepareResponseForQueryWithPlainStringProperties("Doc6")));
   }
 
   @ParameterizedTest
   @MethodSource({"provideShouldReturnResponseBasedOnPipelinesForComplexArrays"})
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_complex_1.json",
-                          collection = "examples"),
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_complex_2.json",
-                          collection = "examples"),
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_complex_3.json",
-                          collection = "examples"),
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_complex_4.json",
-                          collection = "examples"),
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_complex_5.json",
-                          collection = "examples"),
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_complex_6.json",
-                          collection = "examples"),
-                  @MongoDocument(
-                          bsonFilePath = "examples/query/example2_only_id.json",
-                          collection = "examples")
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_1.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_2.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_3.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_4.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_5.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_complex_6.json",
+            collection = "examples"),
+        @MongoDocument(
+            bsonFilePath = "examples/query/example2_only_id.json",
+            collection = "examples")
+      })
   public void shouldReturnResponseBasedOnPipelinesForComplexArrays(
-          String json, String expectedResponse) throws IOException, JSONException {
+      String json, String expectedResponse) throws IOException, JSONException {
     // WHEN
     ExtractableResponse<Response> getResponse =
-            given().when().body(json).post("/examples2/simple-query").then().statusCode(200).extract();
+        given().when().body(json).post("/examples2/simple-query").then().statusCode(200).extract();
 
     // THEN
     JSONAssert.assertEquals(expectedResponse, getResponse.asString(), false);
