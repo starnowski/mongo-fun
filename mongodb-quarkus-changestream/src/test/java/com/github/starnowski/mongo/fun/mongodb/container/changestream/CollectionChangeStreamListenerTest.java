@@ -26,12 +26,12 @@ public class CollectionChangeStreamListenerTest extends AbstractITTest {
     @org.junit.jupiter.api.BeforeEach
     public void initReplicaSet() {
         System.out.println("Initializing replica set...");
-        try {
-            mongoClient.getDatabase("admin").runCommand(new Document("replSetInitiate", new Document("_id", "rs0").append("members", java.util.List.of(new Document("_id", 0).append("host", "localhost:27018")))));
-            System.out.println("Replica set initialized.");
-        } catch (Exception e) {
-            System.out.println("Replica set initialization failed or already initialized: " + e.getMessage());
-        }
+//        try {
+//            mongoClient.getDatabase("admin").runCommand(new Document("replSetInitiate", new Document("_id", "rs0").append("members", java.util.List.of(new Document("_id", 0).append("host", "localhost:27018")))));
+//            System.out.println("Replica set initialized.");
+//        } catch (Exception e) {
+//            System.out.println("Replica set initialization failed or already initialized: " + e.getMessage());
+//        }
     }
 
     @Test
