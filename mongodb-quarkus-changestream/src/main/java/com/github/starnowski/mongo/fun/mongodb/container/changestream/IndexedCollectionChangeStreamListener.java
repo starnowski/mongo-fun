@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import jakarta.annotation.PreDestroy;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.jboss.logging.Logger;
 
@@ -37,7 +38,8 @@ public class IndexedCollectionChangeStreamListener {
             LOGGER.infof("Started listening to change stream for collection: %s", collection.getNamespace().getFullName());
             try {
                 LOGGER.info("Attempting to watch collection...");
-                try (MongoCursor<ChangeStreamDocument<Document>> cursor = collection.watch().iterator()) {
+                try (MongoCursor<ChangeStreamDocument<Document>> cursor = resumeToken == null ? collection.watch().iterator()
+                        : collection.watch().resumeAfter(fromString(resumeToken)).iterator()) {
                     LOGGER.info("Watching collection successfully.");
                     while (running && cursor.hasNext()) {
                         ChangeStreamDocument<Document> event = cursor.next();
@@ -51,6 +53,10 @@ public class IndexedCollectionChangeStreamListener {
                 }
             }
         });
+    }
+
+    public BsonDocument fromString(String tokenJson) {
+        return BsonDocument.parse(tokenJson);
     }
 
     @PreDestroy

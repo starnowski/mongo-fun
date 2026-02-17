@@ -97,17 +97,19 @@ public class IndexedCollectionChangeStreamListenerTest extends AbstractITTest {
         Assertions.assertEquals(0, events.size()); // No more events processed
 
         BsonDocument lastResumeToken = result1.counter == 1L ? result1.event.getResumeToken() : result2.event.getResumeToken();
-
+        String lastToken = lastResumeToken.toJson();
         // Running listener again to process the last two MongoDB documents
 
         listener = new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
 
         // WHEN
-        listener.startListening((event, counter) -> events.add(new EventWithCounter(event, counter)));
+        listener.startListening((event, counter) -> events.add(new EventWithCounter(event, counter)), lastToken);
 
         Thread.sleep(2000); // Wait for listener to start
         result1 = events.poll(20, TimeUnit.SECONDS);
         result2 = events.poll(20, TimeUnit.SECONDS);
+        Assertions.assertNotNull(result1, "Should have received first event");
+        Assertions.assertNotNull(result2, "Should have received second event");
         Assertions.assertEquals(Set.of(0L, 1L), Set.of(result1.counter, result2.counter));
         listener.stop();
         Assertions.assertEquals(0, events.size()); // No more events processed
