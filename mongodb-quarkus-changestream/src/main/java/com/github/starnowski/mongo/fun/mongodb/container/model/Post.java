@@ -2,107 +2,104 @@ package com.github.starnowski.mongo.fun.mongodb.container.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
+import java.util.List;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.types.ObjectId;
 
-import java.util.Date;
-import java.util.List;
-
 public class Post {
-    @JsonProperty("_id")
-    @BsonIgnore
-    private String id;
+  @JsonProperty("_id")
+  @BsonIgnore
+  private String id;
 
-    @BsonId
-    @JsonIgnore
-    private ObjectId oid;
+  @BsonId @JsonIgnore private ObjectId oid;
 
-    private String text;
+  private String text;
 
-    private Date date;
+  private Date date;
 
-    private String email;
+  private String email;
 
-    @JsonIgnore
-    private List<Comment> comments;
+  @JsonIgnore private List<Comment> comments;
 
-    public Post withText(String text) {
-        this.text = text;
-        return this;
-    }
+  public Post withText(String text) {
+    this.text = text;
+    return this;
+  }
 
-    public Post withDate(Date date) {
-        this.date = date;
-        return this;
-    }
+  public Post withDate(Date date) {
+    this.date = date;
+    return this;
+  }
 
-    public Post withEmail(String email) {
-        this.email = email;
-        return this;
-    }
+  public Post withEmail(String email) {
+    this.email = email;
+    return this;
+  }
 
-    public Post withComments(List<Comment> comments) {
-        this.comments = comments;
-        return this;
-    }
-    public String getId() {
-        return id;
-    }
+  public Post withComments(List<Comment> comments) {
+    this.comments = comments;
+    return this;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-        this.oid = new ObjectId(id);
-    }
+  public String getId() {
+    return id;
+  }
 
-    public ObjectId getOid() {
-        return oid;
-    }
+  public void setId(String id) {
+    this.id = id;
+    this.oid = new ObjectId(id);
+  }
 
-    public void setOid(ObjectId oid) {
-        this.oid = oid;
-        this.id = oid.toHexString();
-    }
+  public ObjectId getOid() {
+    return oid;
+  }
 
-    public Post withId(String id) {
-        this.setId(id);
-        return this;
-    }
+  public void setOid(ObjectId oid) {
+    this.oid = oid;
+    this.id = oid.toHexString();
+  }
 
-    public Post withOid(ObjectId oid) {
-        this.setOid(oid);
-        return this;
-    }
+  public Post withId(String id) {
+    this.setId(id);
+    return this;
+  }
 
-    public String getText() {
-        return text;
-    }
+  public Post withOid(ObjectId oid) {
+    this.setOid(oid);
+    return this;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
+  public String getText() {
+    return text;
+  }
 
-    public Date getDate() {
-        return date;
-    }
+  public void setText(String text) {
+    this.text = text;
+  }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+  public Date getDate() {
+    return date;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public void setDate(Date date) {
+    this.date = date;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public List<Comment> getComments() {
-        return comments;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
+  public List<Comment> getComments() {
+    return comments;
+  }
+
+  public void setComments(List<Comment> comments) {
+    this.comments = comments;
+  }
 }

@@ -6,13 +6,13 @@ import org.bson.Document;
 @ApplicationScoped
 public class ExampleDao extends AbstractDao<Document> {
 
-    @Override
-    protected String getCollectionName() {
-        return "examples";
-    }
+  @Override
+  protected String getCollectionName() {
+    return "examples";
+  }
 
-    @Override
-    protected Class<Document> getDocumentClass() {
-        return Document.class;
-    }
+  @Override
+  protected Class<Document> getDocumentClass() {
+    return Document.class;
+  }
 }
