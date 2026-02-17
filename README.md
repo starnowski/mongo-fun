@@ -6,6 +6,7 @@
 [![Run tests with embedded mongodb for quarkus](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded-quarkus.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-embedded-quarkus.yml)
 [![Javascript tests for Node 22](https://github.com/starnowski/mongo-fun/actions/workflows/mongo-js-node-22.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongo-js-node-22.yml)
 [![Run tests with mongodb for quarkus and OData](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-quarkus-odata.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-quarkus-odata.yml)
+[![Run tests for mongodb-quarkus-changestream](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-quarkus-changestream.yml/badge.svg)](https://github.com/starnowski/mongo-fun/actions/workflows/mongodb-quarkus-changestream.yml)
 
 ### Performance
 https://www.mongodb.com/blog/post/performance-best-practices-indexing
