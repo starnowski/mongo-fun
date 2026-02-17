@@ -24,10 +24,14 @@ public class IndexedCollectionChangeStreamListener {
     public IndexedCollectionChangeStreamListener(MongoClient mongoClient, String databaseName, String collectionName) {
         this.mongoClient = mongoClient;
         this.collection = mongoClient.getDatabase(databaseName).getCollection(collectionName);
-        this.executorService = Executors.newSingleThreadExecutor();
+        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     public void startListening(BiConsumer<ChangeStreamDocument<Document>, Long> consumer) {
+        startListening(consumer, null);
+    }
+
+    public void startListening(BiConsumer<ChangeStreamDocument<Document>, Long> consumer, String resumeToken) {
         executorService.submit(() -> {
             long counter = 0;
             LOGGER.infof("Started listening to change stream for collection: %s", collection.getNamespace().getFullName());
