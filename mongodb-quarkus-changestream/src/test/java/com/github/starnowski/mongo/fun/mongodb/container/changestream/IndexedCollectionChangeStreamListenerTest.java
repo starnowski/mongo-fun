@@ -171,6 +171,71 @@ public class IndexedCollectionChangeStreamListenerTest extends AbstractITTest {
     Assertions.assertEquals(0, events.size()); // No more events processed
   }
 
+  @Test
+  public void
+  testShouldListenToChangeStreamWithCounterAndListenAgainAndStartAfterPassedResumeTokenWithUsingCASComponent()
+          throws InterruptedException {
+    // GIVEN
+    ResumeTokenCas resumeTokenCas = new ResumeTokenCas();
+    String databaseName = "test";
+    IndexedCollectionChangeStreamListener listener =
+            new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
+    BlockingQueue<EventWithCounter> events = new ArrayBlockingQueue<>(4);
+
+    // WHEN
+    listener.startListening((event, counter) ->
+            {
+              events.add(new EventWithCounter(event, counter));
+              resumeTokenCas.compareAndSet(new ResumeTokenInfo(event.getResumeToken().toJson(), counter));
+            }
+
+    );
+
+    Thread.sleep(2000); // Wait for listener to start
+
+    // Perform operations
+
+    extracted(2);
+
+    // THEN
+    EventWithCounter result1 = events.poll(20, TimeUnit.SECONDS);
+    Assertions.assertNotNull(result1, "Should have received first event");
+    Assertions.assertEquals(OperationType.INSERT, result1.event.getOperationType());
+
+    EventWithCounter result2 = events.poll(20, TimeUnit.SECONDS);
+    Assertions.assertNotNull(result2, "Should have received second event");
+    Assertions.assertEquals(OperationType.INSERT, result2.event.getOperationType());
+    Assertions.assertEquals(Set.of(0L, 1L), Set.of(result1.counter, result2.counter));
+    listener.stop();
+    Assertions.assertEquals(0, events.size()); // No more events processed
+
+    // Adding new MongoDB documents when listener is not listening
+    extracted(2);
+
+    String lastToken = resumeTokenCas.get().resumeTokenJson();
+    // Running listener again to process the last two MongoDB documents
+
+    listener =
+            new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
+
+    // WHEN
+    listener.startListening(
+            (event, counter) -> {
+              events.add(new EventWithCounter(event, counter));
+              resumeTokenCas.compareAndSet(new ResumeTokenInfo(event.getResumeToken().toJson(), counter));
+            }
+            , lastToken);
+
+    Thread.sleep(2000); // Wait for listener to start
+    result1 = events.poll(20, TimeUnit.SECONDS);
+    result2 = events.poll(20, TimeUnit.SECONDS);
+    Assertions.assertNotNull(result1, "Should have received first event");
+    Assertions.assertNotNull(result2, "Should have received second event");
+    Assertions.assertEquals(Set.of(0L, 1L), Set.of(result1.counter, result2.counter));
+    listener.stop();
+    Assertions.assertEquals(0, events.size()); // No more events processed
+  }
+
   private void extracted(int amountOfDocuments) {
     for (int i = 0; i < amountOfDocuments; i++) {
       Post post = new Post();
