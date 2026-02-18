@@ -1,9 +1,7 @@
 package com.github.starnowski.mongo.fun.mongodb.container.changestream;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.concurrent.atomic.AtomicReference;
 
-@ApplicationScoped
 public class ResumeTokenCas {
 
   private final AtomicReference<ResumeTokenInfo> reference = new AtomicReference<>();
@@ -26,4 +24,3 @@ public class ResumeTokenCas {
     return reference.get();
   }
 }
-

@@ -173,23 +173,22 @@ public class IndexedCollectionChangeStreamListenerTest extends AbstractITTest {
 
   @Test
   public void
-  testShouldListenToChangeStreamWithCounterAndListenAgainAndStartAfterPassedResumeTokenWithUsingCASComponent()
+      testShouldListenToChangeStreamWithCounterAndListenAgainAndStartAfterPassedResumeTokenWithUsingCASComponent()
           throws InterruptedException {
     // GIVEN
     ResumeTokenCas resumeTokenCas = new ResumeTokenCas();
     String databaseName = "test";
     IndexedCollectionChangeStreamListener listener =
-            new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
+        new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
     BlockingQueue<EventWithCounter> events = new ArrayBlockingQueue<>(4);
 
     // WHEN
-    listener.startListening((event, counter) ->
-            {
-              events.add(new EventWithCounter(event, counter));
-              resumeTokenCas.compareAndSet(new ResumeTokenInfo(event.getResumeToken().toJson(), counter));
-            }
-
-    );
+    listener.startListening(
+        (event, counter) -> {
+          events.add(new EventWithCounter(event, counter));
+          resumeTokenCas.compareAndSet(
+              new ResumeTokenInfo(event.getResumeToken().toJson(), counter));
+        });
 
     Thread.sleep(2000); // Wait for listener to start
 
@@ -216,15 +215,16 @@ public class IndexedCollectionChangeStreamListenerTest extends AbstractITTest {
     // Running listener again to process the last two MongoDB documents
 
     listener =
-            new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
+        new IndexedCollectionChangeStreamListener(mongoClient, databaseName, POSTS_COLLECTION_NAME);
 
     // WHEN
     listener.startListening(
-            (event, counter) -> {
-              events.add(new EventWithCounter(event, counter));
-              resumeTokenCas.compareAndSet(new ResumeTokenInfo(event.getResumeToken().toJson(), counter));
-            }
-            , lastToken);
+        (event, counter) -> {
+          events.add(new EventWithCounter(event, counter));
+          resumeTokenCas.compareAndSet(
+              new ResumeTokenInfo(event.getResumeToken().toJson(), counter));
+        },
+        lastToken);
 
     Thread.sleep(2000); // Wait for listener to start
     result1 = events.poll(20, TimeUnit.SECONDS);
