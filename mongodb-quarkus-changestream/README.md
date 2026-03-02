@@ -46,4 +46,38 @@ If /data/rs1 doesn’t exist:
 mkdir -p /data/rs1
 ```
 
-//TODO
+Step 2 — Connect using mongosh
+
+In another terminal:
+
+```shell
+mongosh --port 27017
+```
+
+
+Step 3 — Initialize the Replica Set
+
+Inside mongosh, run:
+
+```javascript
+rs.initiate()
+```
+
+That’s it for a single-node setup.
+
+You should see something like:
+
+```javascript
+{
+ok: 1
+}
+```
+
+
+javascript
+Step 4 — Verify Replica Set Status
+
+```javascript
+rs.status()
+```
+
