@@ -152,12 +152,12 @@
             <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openjdk.jcstress</groupId>
-            <artifactId>jcstress-core</artifactId>
-            <version>0.16</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.openjdk.jcstress</groupId>-->
+<!--            <artifactId>jcstress-core</artifactId>-->
+<!--            <version>0.16</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
