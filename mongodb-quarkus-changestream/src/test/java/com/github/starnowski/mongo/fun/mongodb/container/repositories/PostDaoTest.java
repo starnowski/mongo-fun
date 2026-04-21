@@ -5,6 +5,7 @@ import static com.mongodb.client.model.Sorts.descending;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.starnowski.mongo.fun.mongodb.container.AbstractITTest;
+import com.github.starnowski.mongo.fun.mongodb.container.model.Comment;
 import com.github.starnowski.mongo.fun.mongodb.container.model.Post;
 import com.github.starnowski.mongo.fun.mongodb.container.model.PostAuthor;
 import com.mongodb.MongoBulkWriteException;
@@ -34,6 +35,31 @@ import org.junit.jupiter.params.provider.ValueSource;
 class PostDaoTest extends AbstractITTest {
 
   @Inject PostDao postDao;
+  @Inject CommentDao commentDao;
+
+  @Test
+  public void shouldSavePostWithCommentsInTransaction() {
+    // GIVEN
+    String postText = "Post with comments";
+    Post post = new Post().withText(postText).withEmail("author@test.com");
+    Comment comment1 = new Comment().withText("Comment 1").withEmail("commenter1@test.com");
+    Comment comment2 = new Comment().withText("Comment 2").withEmail("commenter2@test.com");
+    post.setComments(Arrays.asList(comment1, comment2));
+
+    // WHEN
+    Post savedPost = postDao.saveWithComments(post);
+
+    // THEN
+    assertNotNull(savedPost.getOid());
+    Post foundPost = postDao.findAndFetchComments(savedPost.getOid());
+    assertNotNull(foundPost);
+    assertEquals(postText, foundPost.getText());
+    assertNotNull(foundPost.getComments());
+    assertEquals(2, foundPost.getComments().size());
+    assertTrue(foundPost.getComments().stream().anyMatch(c -> c.getText().equals("Comment 1")));
+    assertTrue(foundPost.getComments().stream().anyMatch(c -> c.getText().equals("Comment 2")));
+    foundPost.getComments().forEach(c -> assertEquals(savedPost.getOid(), c.getPostObjectId()));
+  }
 
   private static Post postForAuthor(String author) {
     return new Post().withText("test").withEmail(author);
