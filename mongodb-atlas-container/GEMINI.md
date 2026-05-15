@@ -36,6 +36,12 @@ This project is a Spring Boot demonstration of **MongoDB Atlas Search** function
 
 ## Development Conventions
 
+### Code Formatting (Spotless)
+*   The project uses the **Spotless Maven Plugin** to enforce a consistent coding style.
+*   **Style:** Google Java Style.
+*   **Check style:** `mvnw spotless:check`
+*   **Apply formatting:** `mvnw spotless:apply` (automatically run during the `compile` phase).
+
 ### Testing Strategy
 *   Integration tests are located in `src/test/java`.
 *   `MongoDbContainer.java` defines the custom Testcontainer for MongoDB Atlas. It requires significant memory (4GB) and SHM size (2GB) as per Atlas Local requirements.
