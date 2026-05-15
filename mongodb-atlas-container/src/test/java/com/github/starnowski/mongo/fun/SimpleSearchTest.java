@@ -112,7 +112,7 @@ public class SimpleSearchTest {
                         { "$search": { "index": "atlas_search_index", "queryString": { "query": "search", "defaultPath": "plainString" }}}
                         """, Set.of("database search", "only search")),
                 Arguments.of("""
-                        { "$search": { "index": "atlas_search_index", "queryString": { "query": "database OR \"only search\"", "defaultPath": "plainString" }}}
+                        {"$search":{"index":"atlas_search_index","queryString":{"query":"database OR \\"only search\\"","defaultPath":"plainString"}}}
                         """, Set.of("database search", "only search")));
 
 
