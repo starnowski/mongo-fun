@@ -106,13 +106,13 @@ public class SimpleSearchTest {
     private static java.util.stream.Stream<Arguments> provideSearchTests() {
         return java.util.stream.Stream.of(
                 Arguments.of("""
-                        { "$search": { "index": "default", "queryString": { "query": "database AND search", "path": ["name","description"] }}}
+                        { "$search": { "index": "atlas_search_index", "queryString": { "query": "database AND search", "defaultPath": "plainString" }}}
                         """, Set.of("database search")),
                 Arguments.of("""
-                        { "$search": { "index": "default", "queryString": { "query": "search", "path": ["name","description"] }}}
+                        { "$search": { "index": "atlas_search_index", "queryString": { "query": "search", "defaultPath": "plainString" }}}
                         """, Set.of("database search", "only search")),
                 Arguments.of("""
-                        { "$search": { "index": "default", "queryString": { "query": "database OR \"only search\"", "path": ["name","description"] }}}
+                        { "$search": { "index": "atlas_search_index", "queryString": { "query": "database OR \"only search\"", "defaultPath": "plainString" }}}
                         """, Set.of("database search", "only search")));
 
 
