@@ -31,19 +31,13 @@ public class MongoAtlasResource {
         String.format(
             "mongodb://%s:%d/?directConnection=true",
             mongoAtlasContainer.getHost(), mongoAtlasContainer.getMappedPort(27017));
-    return mongoAtlasContainer;
-  }
-
-  @PostConstruct
-  public void mongoDbInitializer()
-  {
-    MongoDbContainer mongoDbContainer = getMongoDbContainer();
     TestPropertyValues values = TestPropertyValues.of(
             "spring.data.mongodb.uri=" + String.format(
                     "mongodb://%s:%d/?directConnection=true",
-                    mongoDbContainer.getHost(), mongoDbContainer.getMappedPort(27017))
+                    mongoAtlasContainer.getHost(), mongoAtlasContainer.getMappedPort(27017))
 
     );
     values.applyTo(configurableApplicationContext);
+    return mongoAtlasContainer;
   }
 }
