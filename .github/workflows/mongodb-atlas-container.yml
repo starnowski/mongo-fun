@@ -24,4 +24,4 @@ jobs:
         cache: maven
 
     - name: Build with Maven
-      run: cd mongodb-atlas-container && chmod +x mvnw && mvnw clean install
+      run: cd mongodb-atlas-container && chmod +x mvnw && ./mvnw clean install
