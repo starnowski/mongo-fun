@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(
-    classes = {SearchDemoApplication.class},
-    properties = {"spring.data.mongodb.uri=mongodb://localhost:27017/demos"})
+@SpringBootTest(classes = {SearchDemoApplication.class})
 @AutoConfigureMockMvc
 @ExtendWith(SpringMongoDataLoaderExtension.class)
 public class SimpleSearchTest {
