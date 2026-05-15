@@ -1,28 +1,24 @@
 package com.github.starnowski.mongo.fun;
 
-import org.testcontainers.containers.GenericContainer;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Map;
 
+@Configuration
 public class MongoAtlasResource {
 
-  private GenericContainer<?> mongoAtlasContainer;
+  @Autowired
+  private ConfigurableApplicationContext configurableApplicationContext;
 
-  public Map<String, String> start() {
-    mongoAtlasContainer =
-        new GenericContainer<>("mongodb/mongodb-atlas-local:7.0.11")
-            .withPrivilegedMode(true)
-            .withCreateContainerCmdModifier(
-                cmd -> {
-                  cmd.getHostConfig().withMemory(4 * 1024 * 1024 * 1024L);
-                  cmd.getHostConfig().withShmSize(2 * 1024 * 1024 * 1024L);
-                })
-            .withExposedPorts(27017, 27027)
-            .withEnv("MONGOT_LOG_FILE", "/dev/stdout")
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5)));
+  @Bean
+  public MongoDbContainer getMongoDbContainer() {
+    MongoDbContainer mongoAtlasContainer = new MongoDbContainer();
 
     mongoAtlasContainer.start();
     Wait.forLogMessage(".*Starting TCP server.*", 2)
@@ -35,12 +31,19 @@ public class MongoAtlasResource {
         String.format(
             "mongodb://%s:%d/?directConnection=true",
             mongoAtlasContainer.getHost(), mongoAtlasContainer.getMappedPort(27017));
-    return Collections.singletonMap("quarkus.mongodb.connection-string", connectionString);
+    return mongoAtlasContainer;
   }
 
-  public void stop() {
-    if (mongoAtlasContainer != null) {
-      mongoAtlasContainer.stop();
-    }
+  @PostConstruct
+  public void mongoDbInitializer()
+  {
+    MongoDbContainer mongoDbContainer = getMongoDbContainer();
+    TestPropertyValues values = TestPropertyValues.of(
+            "spring.data.mongodb.uri=" + String.format(
+                    "mongodb://%s:%d/?directConnection=true",
+                    mongoDbContainer.getHost(), mongoDbContainer.getMappedPort(27017))
+
+    );
+    values.applyTo(configurableApplicationContext);
   }
 }
