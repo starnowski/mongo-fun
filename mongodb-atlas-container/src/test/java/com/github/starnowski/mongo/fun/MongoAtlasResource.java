@@ -1,6 +1,5 @@
 package com.github.starnowski.mongo.fun;
 
-import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
