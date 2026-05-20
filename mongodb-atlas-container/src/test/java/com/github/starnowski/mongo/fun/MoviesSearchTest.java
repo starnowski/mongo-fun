@@ -30,7 +30,15 @@ public class MoviesSearchTest {
         @MongoDocument(
             database = "testdb",
             collection = "movies",
-            bsonFilePath = "bson/search/movies.json")
+            bsonFilePath = "bson/search/movie1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies",
+            bsonFilePath = "bson/search/movie2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies",
+            bsonFilePath = "bson/search/movie3.json")
       })
   public void shouldReturnLionKingMovieByTitle() throws InterruptedException {
     // GIVEN
