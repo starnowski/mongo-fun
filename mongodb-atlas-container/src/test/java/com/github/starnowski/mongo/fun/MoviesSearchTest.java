@@ -52,7 +52,7 @@ public class MoviesSearchTest {
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("movies");
     ensureSearchIndex(collection);
-    waitForSearchIndexSync(collection, "plot_title_idx", 3);
+    waitForSearchIndexSync(collection, "plot_title_idx");
 
     List<Bson> pipeline =
         List.of(
@@ -88,7 +88,14 @@ public class MoviesSearchTest {
 
     // WHEN
     List<Document> results = new ArrayList<>();
-    collection.aggregate(pipeline).into(results);
+    for (int i = 0; i < 5; i++) {
+      results.clear();
+      collection.aggregate(pipeline).into(results);
+      if (!results.isEmpty()) {
+        break;
+      }
+      Thread.sleep(1000);
+    }
 
     // THEN
     Assertions.assertFalse(results.isEmpty(), "Expected to find " + expectedTitle);
@@ -97,8 +104,7 @@ public class MoviesSearchTest {
     Assertions.assertEquals(expectedYear, movie.getInteger("year"));
   }
 
-  private void waitForSearchIndexSync(
-      MongoCollection<Document> collection, String indexName, int expectedDocumentNumber)
+  private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
       throws InterruptedException {
     long collectionCount = collection.countDocuments();
     while (true) {
@@ -125,9 +131,7 @@ public class MoviesSearchTest {
 
       if (!results.isEmpty()) {
         Document countDoc = results.get(0).get("count", Document.class);
-        if (countDoc != null
-            && countDoc.getLong("total") == collectionCount
-            && collectionCount == expectedDocumentNumber) {
+        if (countDoc != null && countDoc.getLong("total") == collectionCount) {
           break;
         }
       }
