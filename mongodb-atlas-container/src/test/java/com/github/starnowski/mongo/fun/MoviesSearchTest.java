@@ -1,5 +1,8 @@
 package com.github.starnowski.mongo.fun;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension;
@@ -88,32 +91,36 @@ public class MoviesSearchTest {
 
     // WHEN
     List<Document> results = new ArrayList<>();
-    for (int i = 0; i < 5; i++) {
-      results.clear();
-      collection.aggregate(pipeline).into(results);
-      if (!results.isEmpty()) {
-        break;
-      }
-      Thread.sleep(1000);
-    }
-
-    // THEN
-    Assertions.assertFalse(results.isEmpty(), "Expected to find " + expectedTitle);
-    Document movie = results.get(0);
-    Assertions.assertEquals(expectedTitle, movie.getString("title"));
-    Assertions.assertEquals(expectedYear, movie.getInteger("year"));
+    await()
+        .atMost(5, SECONDS)
+        .pollInterval(1, SECONDS)
+        .until(
+            () -> {
+              // THEN
+              results.clear();
+              collection.aggregate(pipeline).into(results);
+              Assertions.assertFalse(results.isEmpty(), "Expected to find " + expectedTitle);
+              Document movie = results.get(0);
+              Assertions.assertEquals(expectedTitle, movie.getString("title"));
+              Assertions.assertEquals(expectedYear, movie.getInteger("year"));
+              return !results.isEmpty();
+            });
   }
 
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
       throws InterruptedException {
     long collectionCount = collection.countDocuments();
-    while (true) {
-      List<Document> results = new ArrayList<>();
-      collection
-          .aggregate(
-              List.of(
-                  Document.parse(
-                      """
+    await()
+        .atMost(30, SECONDS)
+        .pollInterval(1, SECONDS)
+        .until(
+            () -> {
+              List<Document> results = new ArrayList<>();
+              collection
+                  .aggregate(
+                      List.of(
+                          Document.parse(
+                              """
                   {
                     "$searchMeta": {
                       "index": "%s",
@@ -126,17 +133,15 @@ public class MoviesSearchTest {
                     }
                   }
                   """
-                          .formatted(indexName))))
-          .into(results);
+                                  .formatted(indexName))))
+                  .into(results);
 
-      if (!results.isEmpty()) {
-        Document countDoc = results.get(0).get("count", Document.class);
-        if (countDoc != null && countDoc.getLong("total") == collectionCount) {
-          break;
-        }
-      }
-      Thread.sleep(1000);
-    }
+              if (!results.isEmpty()) {
+                Document countDoc = results.get(0).get("count", Document.class);
+                return countDoc != null && countDoc.getLong("total") == collectionCount;
+              }
+              return false;
+            });
   }
 
   private void ensureSearchIndex(MongoCollection<Document> collection) {
@@ -156,19 +161,21 @@ public class MoviesSearchTest {
           }
           """);
       collection.createSearchIndex(indexName, indexDefinition);
+
       // Wait for index to be ready
-      while (true) {
-        boolean ready = false;
-        for (Document index : collection.listSearchIndexes()) {
-          if (indexName.equals(index.getString("name"))
-              && "READY".equals(index.getString("status"))) {
-            ready = true;
-            break;
-          }
-        }
-        if (ready) break;
-        Thread.sleep(1000);
-      }
+      await()
+          .atMost(30, SECONDS)
+          .pollInterval(1, SECONDS)
+          .until(
+              () -> {
+                for (Document index : collection.listSearchIndexes()) {
+                  if (indexName.equals(index.getString("name"))
+                      && "READY".equals(index.getString("status"))) {
+                    return true;
+                  }
+                }
+                return false;
+              });
     } catch (Exception e) {
       // Index might already exist
     }

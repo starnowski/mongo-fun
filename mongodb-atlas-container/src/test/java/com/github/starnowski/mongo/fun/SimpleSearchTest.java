@@ -1,5 +1,8 @@
 package com.github.starnowski.mongo.fun;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension;
@@ -56,14 +59,15 @@ public class SimpleSearchTest {
 
     // THEN
     List<Document> results = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      results.clear();
-      collection.aggregate(pipeline).into(results);
-      if (results.size() == expectedPlainStrings.size()) {
-        break;
-      }
-      Thread.sleep(500);
-    }
+    await()
+        .atMost(5, SECONDS)
+        .pollInterval(1, SECONDS)
+        .until(
+            () -> {
+              results.clear();
+              collection.aggregate(pipeline).into(results);
+              return results.size() == expectedPlainStrings.size();
+            });
 
     Assertions.assertEquals(expectedPlainStrings.size(), results.size());
     Set<String> actual =
@@ -80,18 +84,19 @@ public class SimpleSearchTest {
       collection.createSearchIndex(
           "atlas_search_index", new Document("mappings", new Document("dynamic", true)));
       // Wait for index to be ready
-      while (true) {
-        boolean ready = false;
-        for (Document index : collection.listSearchIndexes()) {
-          if ("atlas_search_index".equals(index.getString("name"))
-              && "READY".equals(index.getString("status"))) {
-            ready = true;
-            break;
-          }
-        }
-        if (ready) break;
-        Thread.sleep(500);
-      }
+      await()
+          .atMost(30, SECONDS)
+          .pollInterval(1, SECONDS)
+          .until(
+              () -> {
+                for (Document index : collection.listSearchIndexes()) {
+                  if ("atlas_search_index".equals(index.getString("name"))
+                      && "READY".equals(index.getString("status"))) {
+                    return true;
+                  }
+                }
+                return false;
+              });
     } catch (Exception e) {
       // Index might already exist
     }
