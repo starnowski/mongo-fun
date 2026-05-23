@@ -91,20 +91,17 @@ public class MoviesSearchTest {
 
     // WHEN
     List<Document> results = new ArrayList<>();
-    await()
-        .atMost(5, SECONDS)
-        .pollInterval(1, SECONDS)
-        .until(
-            () -> {
-              // THEN
-              results.clear();
-              collection.aggregate(pipeline).into(results);
-              Assertions.assertFalse(results.isEmpty(), "Expected to find " + expectedTitle);
-              Document movie = results.get(0);
-              Assertions.assertEquals(expectedTitle, movie.getString("title"));
-              Assertions.assertEquals(expectedYear, movie.getInteger("year"));
-              return !results.isEmpty();
-            });
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          Assertions.assertFalse(results.isEmpty(), "Expected to find " + expectedTitle);
+          Document movie = results.get(0);
+          Assertions.assertEquals(expectedTitle, movie.getString("title"));
+          Assertions.assertEquals(expectedYear, movie.getInteger("year"));
+        });
   }
 
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
