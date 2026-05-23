@@ -24,10 +24,6 @@ public class MongoAtlasResource {
     Wait.forLogMessage(".*Starting message server.*", 2)
         .withStartupTimeout(Duration.ofSeconds(30))
         .waitUntilReady(mongoAtlasContainer);
-    String connectionString =
-        String.format(
-            "mongodb://%s:%d/?directConnection=true",
-            mongoAtlasContainer.getHost(), mongoAtlasContainer.getMappedPort(27017));
     TestPropertyValues values =
         TestPropertyValues.of(
             "spring.data.mongodb.uri="
