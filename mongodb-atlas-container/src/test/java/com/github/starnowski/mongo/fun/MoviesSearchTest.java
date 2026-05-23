@@ -11,8 +11,9 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +25,12 @@ public class MoviesSearchTest {
 
   @Autowired protected MongoClient mongoClient;
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({
+    "The Lion King, The Lion King, 1994",
+    "Godfather, The Godfather, 1972",
+    "Pulp Fiction, Pulp Fiction, 1994"
+  })
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
@@ -40,7 +46,8 @@ public class MoviesSearchTest {
             collection = "movies",
             bsonFilePath = "bson/search/movie3.json")
       })
-  public void shouldReturnLionKingMovieByTitle() throws InterruptedException {
+  public void shouldReturnMovieByTitle(String searchQuery, String expectedTitle, int expectedYear)
+      throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("movies");
@@ -54,12 +61,13 @@ public class MoviesSearchTest {
               "$search": {
                 "index": "plot_title_idx",
                 "text": {
-                  "query": "The Lion King",
+                  "query": "%s",
                   "path": "title"
                 }
               }
             }
-            """),
+            """
+                    .formatted(searchQuery)),
             Document.parse(
                 """
             {
@@ -82,10 +90,10 @@ public class MoviesSearchTest {
     collection.aggregate(pipeline).into(results);
 
     // THEN
-    Assertions.assertFalse(results.isEmpty(), "Expected to find The Lion King");
+    Assertions.assertFalse(results.isEmpty(), "Expected to find " + expectedTitle);
     Document movie = results.get(0);
-    Assertions.assertEquals("The Lion King", movie.getString("title"));
-    Assertions.assertEquals(1994, movie.getInteger("year"));
+    Assertions.assertEquals(expectedTitle, movie.getString("title"));
+    Assertions.assertEquals(expectedYear, movie.getInteger("year"));
   }
 
   private void ensureSearchIndex(MongoCollection<Document> collection) {
