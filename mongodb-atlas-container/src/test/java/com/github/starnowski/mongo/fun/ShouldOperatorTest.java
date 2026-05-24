@@ -185,6 +185,78 @@ public class ShouldOperatorTest {
             collection = COLLECTION_NAME,
             bsonFilePath = "bson/search/should_movie_both.json")
       })
+  public void shouldReturnMoviesWithExplicitMinimumShouldMatchTwoWithZeroScore()
+      throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchIndex(collection);
+    waitForSearchIndexSync(collection, INDEX_NAME);
+
+    List<Bson> pipeline =
+        List.of(
+            Document.parse(
+                """
+                            {
+                              "$search": {
+                                "index": "%s",
+                                "compound": {
+                                  "should": [
+                                    {"text":{ "query":"poet", "path":"plot" , "score": { "constant": { "value": 0 } } }},
+                                    {"text":{ "query":"Elizabeth", "path":"plot" , "score": { "constant": { "value": 0 } } }}
+                                  ],
+                                  "minimumShouldMatch": 2
+                                }
+                              }
+                            }
+                            """
+                    .formatted(INDEX_NAME)),
+            Document.parse(
+                """
+                            {
+                              "$project": {
+                                "_id": 0,
+                                "score": { "$meta": "searchScore" },
+                                "title": "$title",
+                                "plot": "$plot"
+                              }
+                            }
+                            """));
+
+    // WHEN
+    List<Document> results = new ArrayList<>();
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          // THEN
+          // Should return only 1 movie: "Elizabeth the Poet"
+          Assertions.assertEquals(
+              1, results.size(), "Expected exactly 1 movie, but found " + results.size());
+          Assertions.assertEquals("Elizabeth the Poet", results.get(0).getString("title"));
+          Assertions.assertEquals(
+              0, Double.compare(Double.valueOf(0.0), results.get(0).getDouble("score")));
+        });
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/should_movie_poet.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/should_movie_elizabeth.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/should_movie_both.json")
+      })
   public void shouldThrowErrorWhenMinimumShouldMatchExceedsConditions()
       throws InterruptedException {
     // GIVEN
