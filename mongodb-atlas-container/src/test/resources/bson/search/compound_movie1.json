@@ -1,0 +1,7 @@
+{
+  "title": "Star Wars",
+  "year": 1977,
+  "plot": "Space opera set in a galaxy far, far away.",
+  "genres": ["Action", "Sci-Fi"],
+  "cast": ["Mark Hamill", "Harrison Ford"]
+}
