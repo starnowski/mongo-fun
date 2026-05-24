@@ -165,6 +165,7 @@ public class ShouldOperatorTest {
           Assertions.assertEquals(
               1, results.size(), "Expected exactly 1 movie, but found " + results.size());
           Assertions.assertEquals("Elizabeth the Poet", results.get(0).getString("title"));
+          Assertions.assertTrue(results.get(0).getDouble("score") > 0);
         });
   }
 
