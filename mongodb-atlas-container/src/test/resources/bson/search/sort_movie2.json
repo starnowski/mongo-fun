@@ -1,0 +1,5 @@
+{
+  "title": "B Poet's Life",
+  "released": { "$date": "2010-01-01T00:00:00Z" },
+  "plot": "A poet travels the world"
+}
