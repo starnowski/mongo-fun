@@ -33,7 +33,8 @@ public class TokenFilterSearchTest {
 
     @ParameterizedTest
     @CsvSource({
-            "Pokemon The First Movie, Pokèmon: The First Movie - Mewtwo Strikes Back"
+            "Pokemon The First Movie, Pokèmon: The First Movie - Mewtwo Strikes Back",
+            "Pokèmon, Pokèmon: The First Movie - Mewtwo Strikes Back"
     })
   @MongoSetup(
       mongoDocuments = {
