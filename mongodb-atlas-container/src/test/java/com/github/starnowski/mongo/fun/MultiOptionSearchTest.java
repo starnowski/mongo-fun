@@ -32,6 +32,7 @@ public class MultiOptionSearchTest {
 
   @ParameterizedTest
   @CsvSource({
+    "Pokemon, Pokèmon: The First Movie - Mewtwo Strikes Back",
     "Pokemon The First Movie, Pokèmon: The First Movie - Mewtwo Strikes Back",
     "Pokèmon, Pokèmon: The First Movie - Mewtwo Strikes Back"
   })
@@ -109,6 +110,88 @@ public class MultiOptionSearchTest {
               results.stream().anyMatch(doc -> doc.getString("title").equals(expectedString));
           Assertions.assertTrue(
               found, "Expected to find '%s' in results: ".formatted(expectedString) + results);
+        });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"Pokemon, false", "Pokèmon, true"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies_token",
+            bsonFilePath = "bson/search/token_movie_pokemon1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies_token",
+            bsonFilePath = "bson/search/token_movie_pokemon2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies_token",
+            bsonFilePath = "bson/search/token_movie_the_first_movie.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies_token",
+            bsonFilePath = "bson/search/token_movie_movie_movie.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies_token",
+            bsonFilePath = "bson/search/token_movie_the_forty_first.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "movies_token",
+            bsonFilePath = "bson/search/token_movie_the_first_grader.json")
+      })
+  public void shouldTryToFindMoviesByTitleWithoutUsingAlternativeAnalyzerForField(
+      String query, boolean expectToFindWithFolding) throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("movies_token");
+    ensureSearchIndex(collection);
+    waitForSearchIndexSync(collection, INDEX_NAME);
+    String expectedString = "Pokèmon: The First Movie - Mewtwo Strikes Back";
+
+    List<Bson> pipeline =
+        List.of(
+            Document.parse(
+                """
+                                            {
+                                              "$search": {
+                                                "index": "%s",
+                                                "text": {
+                                                  "query": "%s",
+                                                  "path": { "value": "title"}
+                                                }
+                                              }
+                                            }
+                                            """
+                    .formatted(INDEX_NAME, query)),
+            Document.parse(
+                """
+                                            {
+                                              "$project": {
+                                                "_id": 0,
+                                                "title": 1
+                                              }
+                                            }
+                                            """));
+
+    // WHEN
+    List<Document> results = new ArrayList<>();
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          boolean found =
+              results.stream().anyMatch(doc -> doc.getString("title").equals(expectedString));
+          Assertions.assertEquals(
+              expectToFindWithFolding,
+              found,
+              "Expected to find  (%b) '%s' in results: "
+                      .formatted(expectToFindWithFolding, expectedString)
+                  + results);
         });
   }
 
