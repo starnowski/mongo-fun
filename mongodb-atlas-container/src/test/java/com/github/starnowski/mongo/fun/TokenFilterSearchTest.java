@@ -16,6 +16,8 @@ import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +31,10 @@ public class TokenFilterSearchTest {
 
   private static final String INDEX_NAME = "title_folding_index";
 
-  @Test
+    @ParameterizedTest
+    @CsvSource({
+            "Pokemon The First Movie, Pokèmon: The First Movie - Mewtwo Strikes Back"
+    })
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
@@ -57,7 +62,7 @@ public class TokenFilterSearchTest {
             collection = "movies_token",
             bsonFilePath = "bson/search/token_movie_the_first_grader.json")
       })
-  public void shouldFindMoviesByTitleWithFolding() throws InterruptedException {
+  public void shouldFindMoviesByTitleWithFolding(String query, String expectedString) throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("movies_token");
@@ -72,13 +77,13 @@ public class TokenFilterSearchTest {
               "$search": {
                 "index": "%s",
                 "text": {
-                  "query": "Pokemon The First Movie",
+                  "query": "%s",
                   "path": "title"
                 }
               }
             }
             """
-                    .formatted(INDEX_NAME)),
+                    .formatted(INDEX_NAME, query)),
             Document.parse(
                 """
             {
@@ -105,7 +110,7 @@ public class TokenFilterSearchTest {
                   .anyMatch(
                       doc ->
                           doc.getString("title")
-                              .equals("Pokèmon: The First Movie - Mewtwo Strikes Back"));
+                              .equals(expectedString));
           Assertions.assertTrue(
               found,
               "Expected to find 'Pokèmon: The First Movie - Mewtwo Strikes Back' in results: "
