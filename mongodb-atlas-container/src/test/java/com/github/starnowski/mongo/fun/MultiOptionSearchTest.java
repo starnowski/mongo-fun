@@ -28,7 +28,7 @@ public class MultiOptionSearchTest {
 
   @Autowired protected MongoClient mongoClient;
 
-  private static final String INDEX_NAME = "title_folding_index";
+  private static final String INDEX_NAME = "multi_title_folding_index";
 
   @ParameterizedTest
   @CsvSource({
@@ -79,7 +79,7 @@ public class MultiOptionSearchTest {
                                 "index": "%s",
                                 "text": {
                                   "query": "%s",
-                                  "path": "title"
+                                  "path": { "value": "title", "multi": "foldingAnalyzer"}
                                 }
                               }
                             }
@@ -155,8 +155,6 @@ public class MultiOptionSearchTest {
           Document.parse(
               """
           {
-            "analyzer": "diacriticFolder",
-            "searchAnalyzer": "diacriticFolder",
             "analyzers": [
               {
                 "name": "diacriticFolder",
@@ -175,7 +173,14 @@ public class MultiOptionSearchTest {
               "dynamic": false,
               "fields": {
                 "title": {
-                  "type": "string"
+                  "type": "string",
+                  "analyzer": "lucene.standard",
+                  "multi": {
+                     "foldingAnalyzer": {
+                        "type": "string",
+                        "analyzer": "diacriticFolder"
+                     }
+                  }
                 }
               }
             }
