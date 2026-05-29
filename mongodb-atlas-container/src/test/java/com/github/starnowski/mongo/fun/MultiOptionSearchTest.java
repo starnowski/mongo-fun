@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = {SearchDemoApplication.class})
 @AutoConfigureMockMvc
 @ExtendWith(SpringMongoDataLoaderExtension.class)
-public class TokenFilterSearchTest {
+public class MultiOptionSearchTest {
 
   @Autowired protected MongoClient mongoClient;
 
@@ -62,8 +62,8 @@ public class TokenFilterSearchTest {
             collection = "movies_token",
             bsonFilePath = "bson/search/token_movie_the_first_grader.json")
       })
-  public void shouldFindMoviesByTitleWithFolding(String query, String expectedString)
-      throws InterruptedException {
+  public void shouldFindMoviesByTitleWithFoldingByUsingAlternativeAnalyzerForField(
+      String query, String expectedString) throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("movies_token");
@@ -74,26 +74,26 @@ public class TokenFilterSearchTest {
         List.of(
             Document.parse(
                 """
-            {
-              "$search": {
-                "index": "%s",
-                "text": {
-                  "query": "%s",
-                  "path": "title"
-                }
-              }
-            }
-            """
+                            {
+                              "$search": {
+                                "index": "%s",
+                                "text": {
+                                  "query": "%s",
+                                  "path": "title"
+                                }
+                              }
+                            }
+                            """
                     .formatted(INDEX_NAME, query)),
             Document.parse(
                 """
-            {
-              "$project": {
-                "_id": 0,
-                "title": 1
-              }
-            }
-            """));
+                            {
+                              "$project": {
+                                "_id": 0,
+                                "title": 1
+                              }
+                            }
+                            """));
 
     // WHEN
     List<Document> results = new ArrayList<>();
