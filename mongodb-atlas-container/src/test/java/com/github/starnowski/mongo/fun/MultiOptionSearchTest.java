@@ -24,6 +24,33 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = {SearchDemoApplication.class})
 @AutoConfigureMockMvc
 @ExtendWith(SpringMongoDataLoaderExtension.class)
+@MongoSetup(
+    mongoDocuments = {
+      @MongoDocument(
+          database = "testdb",
+          collection = "movies_token",
+          bsonFilePath = "bson/search/token_movie_pokemon1.json"),
+      @MongoDocument(
+          database = "testdb",
+          collection = "movies_token",
+          bsonFilePath = "bson/search/token_movie_pokemon2.json"),
+      @MongoDocument(
+          database = "testdb",
+          collection = "movies_token",
+          bsonFilePath = "bson/search/token_movie_the_first_movie.json"),
+      @MongoDocument(
+          database = "testdb",
+          collection = "movies_token",
+          bsonFilePath = "bson/search/token_movie_movie_movie.json"),
+      @MongoDocument(
+          database = "testdb",
+          collection = "movies_token",
+          bsonFilePath = "bson/search/token_movie_the_forty_first.json"),
+      @MongoDocument(
+          database = "testdb",
+          collection = "movies_token",
+          bsonFilePath = "bson/search/token_movie_the_first_grader.json")
+    })
 public class MultiOptionSearchTest {
 
   @Autowired protected MongoClient mongoClient;
@@ -36,33 +63,6 @@ public class MultiOptionSearchTest {
     "Pokemon The First Movie, Pokèmon: The First Movie - Mewtwo Strikes Back",
     "Pokèmon, Pokèmon: The First Movie - Mewtwo Strikes Back"
   })
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_pokemon1.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_pokemon2.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_the_first_movie.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_movie_movie.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_the_forty_first.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_the_first_grader.json")
-      })
   public void shouldFindMoviesByTitleWithFoldingByUsingAlternativeAnalyzerForField(
       String query, String expectedString) throws InterruptedException {
     // GIVEN
@@ -115,33 +115,6 @@ public class MultiOptionSearchTest {
 
   @ParameterizedTest
   @CsvSource({"Pokemon, false", "Pokèmon, true"})
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_pokemon1.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_pokemon2.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_the_first_movie.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_movie_movie.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_the_forty_first.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "movies_token",
-            bsonFilePath = "bson/search/token_movie_the_first_grader.json")
-      })
   public void shouldTryToFindMoviesByTitleWithoutUsingAlternativeAnalyzerForField(
       String query, boolean expectToFindWithFolding) throws InterruptedException {
     // GIVEN
