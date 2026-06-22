@@ -77,6 +77,19 @@ public class StringSearchBoostFunTest {
                 }
               }
             }
+            """),
+                Arguments.of(
+                        """
+            {
+              "$search": {
+                "index": "%s",
+                "compound": {
+                  "should": [
+                    {"autocomplete":{ "query":"XXX000", "path":"title" }}
+                  ]
+                }
+              }
+            }
             """)
         );
     }
@@ -184,8 +197,8 @@ public class StringSearchBoostFunTest {
                               },
                               {
                                 "type": "autocomplete",
-                                "minGrams": 2,
-                                "maxGrams": 20,
+                                "minGrams": 3,
+                                "maxGrams": 10,
                                 "tokenization": "edgeGram"
                               }
                             ]
