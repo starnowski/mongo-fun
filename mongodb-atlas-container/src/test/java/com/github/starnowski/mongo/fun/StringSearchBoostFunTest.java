@@ -1,15 +1,19 @@
 package com.github.starnowski.mongo.fun;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,14 +21,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(classes = {SearchDemoApplication.class})
 @AutoConfigureMockMvc
@@ -37,10 +33,10 @@ public class StringSearchBoostFunTest {
   private static final String COLLECTION_NAME = "products";
   private static final String INDEX_NAME = "string_search_boots";
 
-    private static java.util.stream.Stream<Arguments> provideSearchTests() {
-        return java.util.stream.Stream.of(
-                Arguments.of(
-                        """
+  private static java.util.stream.Stream<Arguments> provideSearchTests() {
+    return java.util.stream.Stream.of(
+        Arguments.of(
+            """
             {
               "$search": {
                 "index": "%s",
@@ -52,8 +48,8 @@ public class StringSearchBoostFunTest {
               }
             }
             """),
-                Arguments.of(
-                        """
+        Arguments.of(
+            """
             {
               "$search": {
                 "index": "%s",
@@ -65,8 +61,8 @@ public class StringSearchBoostFunTest {
               }
             }
             """),
-                Arguments.of(
-                        """
+        Arguments.of(
+            """
             {
               "$search": {
                 "index": "%s",
@@ -78,24 +74,23 @@ public class StringSearchBoostFunTest {
               }
             }
             """),
-                Arguments.of(
-                        """
+        Arguments.of(
+            """
             {
               "$search": {
                 "index": "%s",
                 "compound": {
                   "should": [
-                    {"autocomplete":{ "query":"XXX000", "path":"title" }}
+                    {"text":{ "query":"XXX000", "path":"title" }}
                   ]
                 }
               }
             }
-            """)
-        );
-    }
+            """));
+  }
 
-    @ParameterizedTest
-    @MethodSource("provideSearchTests")
+  @ParameterizedTest
+  @MethodSource("provideSearchTests")
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
@@ -112,9 +107,7 @@ public class StringSearchBoostFunTest {
 
     List<Bson> pipeline =
         List.of(
-            Document.parse(
-                    query
-                    .formatted(INDEX_NAME)),
+            Document.parse(query.formatted(INDEX_NAME)),
             Document.parse(
                 """
             {
@@ -193,7 +186,7 @@ public class StringSearchBoostFunTest {
                             "title": [
                               {
                                 "type": "string",
-                                "analyzer": "lucene.standard"
+                                "analyzer": "custom_ngram"
                               },
                               {
                                 "type": "autocomplete",
@@ -203,7 +196,17 @@ public class StringSearchBoostFunTest {
                               }
                             ]
                           }
-                        }
+                        },
+                        "analyzers": [
+                                        {
+                                          "name": "custom_ngram",
+                                          "tokenizer": {
+                                            "type": "nGram",
+                                            "minGram": 3,
+                                            "maxGram": 10
+                                          }
+                                        }
+                                      ]
                       }
           """);
       collection.createSearchIndex(INDEX_NAME, indexDefinition);
@@ -224,7 +227,7 @@ public class StringSearchBoostFunTest {
               });
     } catch (Exception e) {
       // Index might already exist
-        e.printStackTrace();
+      e.printStackTrace();
     }
   }
 }
