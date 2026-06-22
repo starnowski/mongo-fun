@@ -32,6 +32,7 @@ public class StringArraySearchBoostFunTest {
   private static final String DATABASE_NAME = "testdb_should";
   private static final String COLLECTION_NAME = "documents_with_string_array";
   private static final String INDEX_NAME = "string_array_search_boots";
+  private static final String EDGE_INDEX_NAME = "string_array_search_edge";
 
   private static java.util.stream.Stream<Arguments> provideSearchTests() {
     return java.util.stream.Stream.of(
@@ -63,19 +64,6 @@ public class StringArraySearchBoostFunTest {
             """),
         Arguments.of(
             """
-            {
-              "$search": {
-                "index": "%s",
-                "compound": {
-                  "should": [
-                    {"autocomplete":{ "query":"F16", "path":"array" }}
-                  ]
-                }
-              }
-            }
-            """),
-        Arguments.of(
-            """
                     {
                       "$search": {
                         "index": "%s",
@@ -86,39 +74,64 @@ public class StringArraySearchBoostFunTest {
                         }
                       }
                     }
-                    """),
-        // Contains
-        Arguments.of(
-            """
-            {
-              "$search": {
-                "index": "%s",
-                "compound": {
-                  "should": [
-                    {"text":{ "query":"XXX000", "path":"array" }}
-                  ]
-                }
-              }
-            }
-            """),
-        // Contains with lower case value
-        Arguments.of(
-            """
-                    {
-                      "$search": {
-                        "index": "%s",
-                        "compound": {
-                          "should": [
-                            {"text":{ "query":"xxx000", "path":"array" }}
-                          ]
-                        }
-                      }
-                    }
                     """));
   }
 
+  private static java.util.stream.Stream<Arguments> provideSearchWithAutoCompleteTests() {
+    return java.util.stream.Stream.of(
+        Arguments.of(
+            """
+                        {
+                          "$search": {
+                            "index": "%s",
+                            "compound": {
+                              "should": [
+                                {"autocomplete":{ "query":"F16", "path":"array" }}
+                              ]
+                            }
+                          }
+                        }
+                        """));
+  }
+
+  private static java.util.stream.Stream<Arguments> provideSearchWithContainsTests() {
+    return java.util.stream.Stream.of(
+        // Contains
+        Arguments.of(
+            """
+                        {
+                          "$search": {
+                            "index": "%s",
+                            "compound": {
+                              "should": [
+                                {"text":{ "query":"XXX000", "path":"array" }}
+                              ]
+                            }
+                          }
+                        }
+                        """),
+        // Contains with lower case value
+        Arguments.of(
+            """
+                                {
+                                  "$search": {
+                                    "index": "%s",
+                                    "compound": {
+                                      "should": [
+                                        {"text":{ "query":"xxx000", "path":"array" }}
+                                      ]
+                                    }
+                                  }
+                                }
+                                """));
+  }
+
   @ParameterizedTest
-  @MethodSource("provideSearchTests")
+  @MethodSource({
+    "provideSearchTests",
+    "provideSearchWithAutoCompleteTests",
+    "provideSearchWithContainsTests"
+  })
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
@@ -147,6 +160,55 @@ public class StringArraySearchBoostFunTest {
               }
             }
             """));
+
+    // WHEN
+    List<Document> results = new ArrayList<>();
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          // THEN
+          // Should return only 1 document: "F16XXX0001FIGHTER"
+          Assertions.assertEquals(
+              1, results.size(), "Expected exactly 1 document, but found " + results.size());
+          Assertions.assertEquals("F16XXX0001FIGHTER", results.get(0).getString("title"));
+          Assertions.assertTrue(results.get(0).getDouble("score") > 0);
+        });
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideSearchTests")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/string_array_search_1.json")
+      })
+  public void shouldReturnDocumentBasedOnQueryForEdgeGram(String query)
+      throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchEdgeIndex(collection);
+    waitForSearchIndexSync(collection, EDGE_INDEX_NAME);
+
+    List<Bson> pipeline =
+        List.of(
+            Document.parse(query.formatted(EDGE_INDEX_NAME)),
+            Document.parse(
+                """
+                            {
+                              "$project": {
+                                "_id": 0,
+                                "score": { "$meta": "searchScore" },
+                                "title": "$title",
+                                "plot": "$plot"
+                              }
+                            }
+                            """));
 
     // WHEN
     List<Document> results = new ArrayList<>();
@@ -247,6 +309,57 @@ public class StringArraySearchBoostFunTest {
               () -> {
                 for (Document index : collection.listSearchIndexes()) {
                   if (INDEX_NAME.equals(index.getString("name"))
+                      && "READY".equals(index.getString("status"))) {
+                    return true;
+                  }
+                }
+                return false;
+              });
+    } catch (Exception e) {
+      // Index might already exist
+      e.printStackTrace();
+    }
+  }
+
+  private void ensureSearchEdgeIndex(MongoCollection<Document> collection) {
+    try {
+      Document indexDefinition =
+          Document.parse(
+              """
+                                    {
+                                      "mappings": {
+                                        "dynamic": false,
+                                        "fields": {
+                                          "array": [
+                                            {
+                                              "type": "string",
+                                              "analyzer": "custom_edge_gram"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "analyzers": [
+                                                      {
+                                                        "name": "custom_edge_gram",
+                                                        "tokenizer": {
+                                                          "type": "edgeGram",
+                                                          "minGram": 3,
+                                                          "maxGram": 10
+                                                        }
+                                                      }
+                                                    ]
+                                    }
+                        """);
+      collection.createSearchIndex(EDGE_INDEX_NAME, indexDefinition);
+
+      // Wait for index to be ready
+      await()
+          .atMost(30, SECONDS)
+          .pollInterval(1, SECONDS)
+          .until(
+              () -> {
+                for (Document index : collection.listSearchIndexes()) {
+                  if (EDGE_INDEX_NAME.equals(index.getString("name"))
                       && "READY".equals(index.getString("status"))) {
                     return true;
                   }
