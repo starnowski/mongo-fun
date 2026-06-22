@@ -51,6 +51,19 @@ public class StringSearchBoostFunTest {
                 }
               }
             }
+            """),
+                Arguments.of(
+                        """
+            {
+              "$search": {
+                "index": "%s",
+                "compound": {
+                  "should": [
+                    {"autocomplete":{ "query":"F16", "path":"title" }}
+                  ]
+                }
+              }
+            }
             """)
         );
     }
@@ -154,7 +167,7 @@ public class StringSearchBoostFunTest {
                             "title": [
                               {
                                 "type": "string",
-                                "analyzer": "lucene.keyword"
+                                "analyzer": "lucene.standard"
                               },
                               {
                                 "type": "autocomplete",
