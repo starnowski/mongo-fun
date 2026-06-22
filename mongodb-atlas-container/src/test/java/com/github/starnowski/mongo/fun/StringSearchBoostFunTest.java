@@ -64,7 +64,7 @@ public class StringSearchBoostFunTest {
             collection = COLLECTION_NAME,
             bsonFilePath = "bson/search/string_search_1.json")
       })
-  public void shouldReturnDocumentBasedOnQuery() throws InterruptedException {
+  public void shouldReturnDocumentBasedOnQuery(String query) throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
@@ -74,19 +74,7 @@ public class StringSearchBoostFunTest {
     List<Bson> pipeline =
         List.of(
             Document.parse(
-                """
-            {
-              "$search": {
-                "index": "%s",
-                "compound": {
-                  "should": [
-                    {"text":{ "query":"poet", "path":"plot" }},
-                    {"text":{ "query":"Elizabeth", "path":"plot" }}
-                  ]
-                }
-              }
-            }
-            """
+                    query
                     .formatted(INDEX_NAME)),
             Document.parse(
                 """
@@ -135,7 +123,7 @@ public class StringSearchBoostFunTest {
                     "$searchMeta": {
                       "index": "%s",
                       "exists": {
-                        "path": "plot"
+                        "path": "title"
                       },
                       "count": {
                         "type": "total"
@@ -159,15 +147,25 @@ public class StringSearchBoostFunTest {
       Document indexDefinition =
           Document.parse(
               """
-          {
-            "mappings": {
-              "dynamic": false,
-              "fields": {
-                "plot": { "type": "string" },
-                "title": { "type": "string" }
-              }
-            }
-          }
+                      {
+                        "mappings": {
+                          "dynamic": false,
+                          "fields": {
+                            "title": [
+                              {
+                                "type": "string",
+                                "analyzer": "lucene.keyword"
+                              },
+                              {
+                                "type": "autocomplete",
+                                "minGrams": 2,
+                                "maxGrams": 20,
+                                "tokenization": "edgeGram"
+                              }
+                            ]
+                          }
+                        }
+                      }
           """);
       collection.createSearchIndex(INDEX_NAME, indexDefinition);
 
@@ -187,6 +185,7 @@ public class StringSearchBoostFunTest {
               });
     } catch (Exception e) {
       // Index might already exist
+        e.printStackTrace();
     }
   }
 }
