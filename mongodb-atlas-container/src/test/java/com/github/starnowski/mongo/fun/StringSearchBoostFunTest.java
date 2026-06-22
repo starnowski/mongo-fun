@@ -76,6 +76,19 @@ public class StringSearchBoostFunTest {
             """),
         Arguments.of(
             """
+                    {
+                      "$search": {
+                        "index": "%s",
+                        "compound": {
+                          "should": [
+                            {"text":{ "query":"F16", "path":"title" }}
+                          ]
+                        }
+                      }
+                    }
+                    """),
+        Arguments.of(
+            """
             {
               "$search": {
                 "index": "%s",
