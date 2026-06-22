@@ -59,6 +59,19 @@ public class StringSearchBoostFunTest {
                 "index": "%s",
                 "compound": {
                   "should": [
+                    {"phrase":{ "query":"F16XXX0001FIGHTER", "path":"title" }}
+                  ]
+                }
+              }
+            }
+            """),
+                Arguments.of(
+                        """
+            {
+              "$search": {
+                "index": "%s",
+                "compound": {
+                  "should": [
                     {"autocomplete":{ "query":"F16", "path":"title" }}
                   ]
                 }
