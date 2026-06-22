@@ -87,6 +87,7 @@ public class StringArraySearchBoostFunTest {
                       }
                     }
                     """),
+        // Contains
         Arguments.of(
             """
             {
@@ -99,7 +100,21 @@ public class StringArraySearchBoostFunTest {
                 }
               }
             }
-            """));
+            """),
+        // Contains with lower case value
+        Arguments.of(
+            """
+                    {
+                      "$search": {
+                        "index": "%s",
+                        "compound": {
+                          "should": [
+                            {"text":{ "query":"xxx000", "path":"array" }}
+                          ]
+                        }
+                      }
+                    }
+                    """));
   }
 
   @ParameterizedTest
