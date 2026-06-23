@@ -29,6 +29,7 @@ public class FilterStringPhraseTest {
   @Autowired protected MongoClient mongoClient;
 
   private static final String INDEX_NAME = "filter_phrase_idx";
+  private static final String KEYWORD_INDEX_NAME = "filter_phrase_keyword_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -173,6 +174,78 @@ public class FilterStringPhraseTest {
               found2, "Expected to find 'filterStringPhraseTest_2' in results: " + results);
         });
   }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Groccery", "GROCCERY", "groccery"})
+    @MongoSetup(
+            mongoDocuments = {
+                    @MongoDocument(
+                            database = DATABASE_NAME,
+                            collection = COLLECTION_NAME,
+                            bsonFilePath = "bson/search/filter_phrase_1.json"),
+                    @MongoDocument(
+                            database = DATABASE_NAME,
+                            collection = COLLECTION_NAME,
+                            bsonFilePath = "bson/search/filter_phrase_2.json")
+            })
+    public void shouldReturnBothDocumentsWhenSearchingByTypeUsingTextOperatorForKeywordAnalyzer(String searchQuery)
+            throws InterruptedException {
+        // GIVEN
+        //TODO
+        MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+        MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+        ensureSearchIndexWithKeyword(collection);
+        waitForSearchIndexSync(collection, KEYWORD_INDEX_NAME);
+
+        List<Bson> pipeline =
+                List.of(
+                        Document.parse(
+                                """
+                                            {
+                                              "$search": {
+                                                "index": "%s",
+                                                "text": {
+                                                  "query": "%s",
+                                                  "path": "type"
+                                                }
+                                              }
+                                            }
+                                            """
+                                        .formatted(KEYWORD_INDEX_NAME, searchQuery)),
+                        Document.parse(
+                                """
+                                            {
+                                              "$project": {
+                                                "_id": 1,
+                                                "type": 1
+                                              }
+                                            }
+                                            """));
+
+        // WHEN
+        List<Document> results = new ArrayList<>();
+        TestHelper.runAssertion(
+                20,
+                1,
+                () -> {
+                    results.clear();
+                    collection.aggregate(pipeline).into(results);
+                    // THEN
+                    Assertions.assertEquals(
+                            2, results.size(), "Expected to find 2 documents for query: " + searchQuery);
+
+                    boolean found1 =
+                            results.stream()
+                                    .anyMatch(doc -> "filterStringPhraseTest_1".equals(doc.getString("_id")));
+                    boolean found2 =
+                            results.stream()
+                                    .anyMatch(doc -> "filterStringPhraseTest_2".equals(doc.getString("_id")));
+                    Assertions.assertTrue(
+                            found1, "Expected to find 'filterStringPhraseTest_1' in results: " + results);
+                    Assertions.assertTrue(
+                            found2, "Expected to find 'filterStringPhraseTest_2' in results: " + results);
+                });
+    }
 
   @ParameterizedTest
   @ValueSource(strings = {"Groccery", "GROCCERY", "groccery"})
@@ -322,4 +395,39 @@ public class FilterStringPhraseTest {
       // Index might already exist
     }
   }
+
+    private void ensureSearchIndexWithKeyword(MongoCollection<Document> collection) {
+        try {
+            Document indexDefinition =
+                    Document.parse(
+                            """
+                        {
+                          "mappings": {
+                            "dynamic": false,
+                            "fields": {
+                              "type": { "type": "string", "analyzer": "lucene.keyword" }
+                            }
+                          }
+                        }
+                        """);
+            collection.createSearchIndex(KEYWORD_INDEX_NAME, indexDefinition);
+
+            // Wait for index to be ready
+            await()
+                    .atMost(30, SECONDS)
+                    .pollInterval(1, SECONDS)
+                    .until(
+                            () -> {
+                                for (Document index : collection.listSearchIndexes()) {
+                                    if (KEYWORD_INDEX_NAME.equals(index.getString("name"))
+                                            && "READY".equals(index.getString("status"))) {
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            });
+        } catch (Exception e) {
+            // Index might already exist
+        }
+    }
 }
