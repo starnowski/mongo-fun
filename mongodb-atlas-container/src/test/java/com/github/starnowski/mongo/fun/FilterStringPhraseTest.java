@@ -116,6 +116,77 @@ public class FilterStringPhraseTest {
             collection = COLLECTION_NAME,
             bsonFilePath = "bson/search/filter_phrase_2.json")
       })
+  public void shouldReturnBothDocumentsWhenSearchingByTypeUsingTextOperator(String searchQuery)
+      throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchIndex(collection);
+    waitForSearchIndexSync(collection, INDEX_NAME);
+
+    List<Bson> pipeline =
+        List.of(
+            Document.parse(
+                """
+                            {
+                              "$search": {
+                                "index": "%s",
+                                "text": {
+                                  "query": "%s",
+                                  "path": "type"
+                                }
+                              }
+                            }
+                            """
+                    .formatted(INDEX_NAME, searchQuery)),
+            Document.parse(
+                """
+                            {
+                              "$project": {
+                                "_id": 1,
+                                "type": 1
+                              }
+                            }
+                            """));
+
+    // WHEN
+    List<Document> results = new ArrayList<>();
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          // THEN
+          Assertions.assertEquals(
+              2, results.size(), "Expected to find 2 documents for query: " + searchQuery);
+
+          boolean found1 =
+              results.stream()
+                  .anyMatch(doc -> "filterStringPhraseTest_1".equals(doc.getString("_id")));
+          boolean found2 =
+              results.stream()
+                  .anyMatch(doc -> "filterStringPhraseTest_2".equals(doc.getString("_id")));
+          Assertions.assertTrue(
+              found1, "Expected to find 'filterStringPhraseTest_1' in results: " + results);
+          Assertions.assertTrue(
+              found2, "Expected to find 'filterStringPhraseTest_2' in results: " + results);
+        });
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"Groccery", "GROCCERY", "groccery"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/filter_phrase_1.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/filter_phrase_2.json")
+      })
   public void shouldReturnBothDocumentsWhenSearchingByTypeUsingCompoundFilter(String searchQuery)
       throws InterruptedException {
     // GIVEN
