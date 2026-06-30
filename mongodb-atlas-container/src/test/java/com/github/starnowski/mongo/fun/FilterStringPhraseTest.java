@@ -33,6 +33,19 @@ public class FilterStringPhraseTest {
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
+  private static final String PHRASE_OPERATOR_TYPE_FIELD_QUERY =
+      """
+            {
+              "$search": {
+                "index": "%s",
+                "phrase": {
+                  "query": "%s",
+                  "path": "type"
+                }
+              }
+            }
+            """;
+
   @ParameterizedTest
   @ValueSource(strings = {"Groccery", "GROCCERY", "groccery"})
   @MongoSetup(
@@ -56,19 +69,7 @@ public class FilterStringPhraseTest {
 
     List<Bson> pipeline =
         List.of(
-            Document.parse(
-                """
-            {
-              "$search": {
-                "index": "%s",
-                "phrase": {
-                  "query": "%s",
-                  "path": "type"
-                }
-              }
-            }
-            """
-                    .formatted(INDEX_NAME, searchQuery)),
+            Document.parse(PHRASE_OPERATOR_TYPE_FIELD_QUERY.formatted(INDEX_NAME, searchQuery)),
             Document.parse(
                 """
             {
@@ -127,19 +128,7 @@ public class FilterStringPhraseTest {
 
     List<Bson> pipeline =
         List.of(
-            Document.parse(
-                """
-                            {
-                              "$search": {
-                                "index": "%s",
-                                "text": {
-                                  "query": "%s",
-                                  "path": "type"
-                                }
-                              }
-                            }
-                            """
-                    .formatted(INDEX_NAME, searchQuery)),
+            Document.parse(PHRASE_OPERATOR_TYPE_FIELD_QUERY.formatted(INDEX_NAME, searchQuery)),
             Document.parse(
                 """
                             {
