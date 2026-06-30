@@ -16,6 +16,7 @@ import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -310,6 +311,66 @@ public class FilterStringPhraseTest {
               found1, "Expected to find 'filterStringPhraseTest_1' in results: " + results);
           Assertions.assertTrue(
               found2, "Expected to find 'filterStringPhraseTest_2' in results: " + results);
+        });
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "x-groccery,filterStringPhraseTest_3",
+    "X-GROCCERY,filterStringPhraseTest_3",
+    "X-grocCERY,filterStringPhraseTest_3",
+    "x-groccery-2,filterStringPhraseTest_4",
+    "x-GROCCERY-2,filterStringPhraseTest_4"
+  })
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/filter_phrase_3.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/filter_phrase_4.json")
+      })
+  public void shouldReturnExpectedFirstDocumentWhenSearchingByTypeUsingPhrase(
+      String searchQuery, String expectedDocumentId) throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchIndex(collection);
+    waitForSearchIndexSync(collection, INDEX_NAME);
+
+    List<Bson> pipeline =
+        List.of(
+            Document.parse(PHRASE_OPERATOR_TYPE_FIELD_QUERY.formatted(INDEX_NAME, searchQuery)),
+            Document.parse(
+                """
+                            {
+                              "$project": {
+                                "_id": 1,
+                                "type": 1
+                              }
+                            }
+                            """));
+
+    // WHEN
+    List<Document> results = new ArrayList<>();
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          // THEN
+          Assertions.assertFalse(
+              results.isEmpty(),
+              "Expected to find at least one documents for query: " + searchQuery);
+
+          Assertions.assertEquals(
+              expectedDocumentId,
+              results.getFirst().getString("_id"),
+              "Expected to find as first document : " + expectedDocumentId);
         });
   }
 
