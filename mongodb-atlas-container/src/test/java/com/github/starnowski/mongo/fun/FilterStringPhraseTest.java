@@ -320,7 +320,10 @@ public class FilterStringPhraseTest {
     "X-GROCCERY,filterStringPhraseTest_3",
     "X-grocCERY,filterStringPhraseTest_3",
     "x-groccery-2,filterStringPhraseTest_4",
-    "x-GROCCERY-2,filterStringPhraseTest_4"
+    "x-GROCCERY-2,filterStringPhraseTest_4",
+    //    "x'GROCCERY'2,filterStringPhraseTest_4", // fails
+    "x GROCCERY 2,filterStringPhraseTest_4",
+    "x groccery,filterStringPhraseTest_3",
   })
   @MongoSetup(
       mongoDocuments = {
