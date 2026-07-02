@@ -5,8 +5,6 @@ import static org.awaitility.Awaitility.await;
 
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
-import com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
@@ -14,20 +12,11 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = {SearchDemoApplication.class})
-@AutoConfigureMockMvc
-@ExtendWith(SpringMongoDataLoaderExtension.class)
-public class FilterStringPhraseTest {
-
-  @Autowired protected MongoClient mongoClient;
+public class FilterStringPhraseTest extends AbstractItTest {
 
   private static final String INDEX_NAME = "filter_phrase_idx";
   private static final String KEYWORD_INDEX_NAME = "filter_phrase_keyword_idx";
@@ -415,10 +404,9 @@ public class FilterStringPhraseTest {
   }
 
   private void ensureSearchIndex(MongoCollection<Document> collection) {
-    try {
-      Document indexDefinition =
-          Document.parse(
-              """
+    ensureSearchIndexReady(
+        INDEX_NAME,
+        """
           {
             "mappings": {
               "dynamic": false,
@@ -427,33 +415,14 @@ public class FilterStringPhraseTest {
               }
             }
           }
-          """);
-      collection.createSearchIndex(INDEX_NAME, indexDefinition);
-
-      // Wait for index to be ready
-      await()
-          .atMost(30, SECONDS)
-          .pollInterval(1, SECONDS)
-          .until(
-              () -> {
-                for (Document index : collection.listSearchIndexes()) {
-                  if (INDEX_NAME.equals(index.getString("name"))
-                      && "READY".equals(index.getString("status"))) {
-                    return true;
-                  }
-                }
-                return false;
-              });
-    } catch (Exception e) {
-      // Index might already exist
-    }
+          """,
+        collection);
   }
 
   private void ensureSearchIndexWithKeyword(MongoCollection<Document> collection) {
-    try {
-      Document indexDefinition =
-          Document.parse(
-              """
+    ensureSearchIndexReady(
+        KEYWORD_INDEX_NAME,
+        """
                         {
                           "mappings": {
                             "dynamic": false,
@@ -472,25 +441,7 @@ public class FilterStringPhraseTest {
                                           }
                                         ]
                         }
-                        """);
-      collection.createSearchIndex(KEYWORD_INDEX_NAME, indexDefinition);
-
-      // Wait for index to be ready
-      await()
-          .atMost(30, SECONDS)
-          .pollInterval(1, SECONDS)
-          .until(
-              () -> {
-                for (Document index : collection.listSearchIndexes()) {
-                  if (KEYWORD_INDEX_NAME.equals(index.getString("name"))
-                      && "READY".equals(index.getString("status"))) {
-                    return true;
-                  }
-                }
-                return false;
-              });
-    } catch (Exception e) {
-      // Index might already exist
-    }
+                        """,
+        collection);
   }
 }
