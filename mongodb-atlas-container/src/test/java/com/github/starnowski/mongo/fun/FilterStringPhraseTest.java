@@ -170,7 +170,6 @@ public class FilterStringPhraseTest extends AbstractItTest {
   public void shouldReturnBothDocumentsWhenSearchingByTypeUsingTextOperatorForKeywordAnalyzer(
       String searchQuery) throws InterruptedException {
     // GIVEN
-    // TODO
     MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
     ensureSearchIndexWithKeyword(collection);
@@ -363,6 +362,58 @@ public class FilterStringPhraseTest extends AbstractItTest {
               expectedDocumentId,
               results.getFirst().getString("_id"),
               "Expected to find as first document : " + expectedDocumentId);
+        });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"x'GROCCERY'2,filterStringPhraseTest_4"})
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/filter_phrase_3.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/filter_phrase_4.json")
+      })
+  public void shouldNotReturnExpectedFirstDocumentWhenSearchingByTypeUsingPhrase(
+      String searchQuery, String expectedDocumentId) throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchIndex(collection);
+    waitForSearchIndexSync(collection, INDEX_NAME);
+
+    List<Bson> pipeline =
+        List.of(
+            Document.parse(PHRASE_OPERATOR_TYPE_FIELD_QUERY.formatted(INDEX_NAME, searchQuery)),
+            Document.parse(
+                """
+                                            {
+                                              "$project": {
+                                                "_id": 1,
+                                                "type": 1
+                                              }
+                                            }
+                                            """));
+
+    // WHEN
+    List<Document> results = new ArrayList<>();
+    TestHelper.runAssertion(
+        20,
+        1,
+        () -> {
+          results.clear();
+          collection.aggregate(pipeline).into(results);
+          // THEN
+          if (!results.isEmpty()) {
+            Assertions.assertNotEquals(
+                expectedDocumentId,
+                results.getFirst().getString("_id"),
+                "Not expected to find as first document : " + expectedDocumentId);
+          }
         });
   }
 
