@@ -6,6 +6,8 @@ import static org.awaitility.Awaitility.await;
 import com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.Document;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +44,43 @@ public class AbstractItTest {
     } catch (Exception e) {
       // Index might already exist
     }
+  }
+
+  public void waitForSearchIndexSync(
+      MongoCollection<Document> collection, String indexName, String path)
+      throws InterruptedException {
+    long collectionCount = collection.countDocuments();
+    await()
+        .atMost(30, SECONDS)
+        .pollInterval(1, SECONDS)
+        .until(
+            () -> {
+              List<Document> results = new ArrayList<>();
+              collection
+                  .aggregate(
+                      List.of(
+                          Document.parse(
+                              """
+                                                {
+                                                  "$searchMeta": {
+                                                    "index": "%s",
+                                                    "exists": {
+                                                      "path": "%s"
+                                                    },
+                                                    "count": {
+                                                      "type": "total"
+                                                    }
+                                                  }
+                                                }
+                                                """
+                                  .formatted(indexName, path))))
+                  .into(results);
+
+              if (!results.isEmpty()) {
+                Document countDoc = results.get(0).get("count", Document.class);
+                return countDoc != null && countDoc.getLong("total") == collectionCount;
+              }
+              return false;
+            });
   }
 }
