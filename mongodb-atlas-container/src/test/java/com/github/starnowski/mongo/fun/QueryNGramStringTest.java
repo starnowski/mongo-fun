@@ -66,17 +66,19 @@ public class QueryNGramStringTest extends AbstractItTest {
                       "phrase": {
                         "query": "%2$s",
                         "path": "field1",
-                        "score": { "boost": 10 }
+                        "score": { "boost": { "value" : 10 }  }
                       }
                     },
                     {
                       "phrase": {
                         "query": "%2$s",
                         "path": "field2",
-                        "score": { "boost": 1 }
+                        "score": { "boost": { "value" : 1 }  }
                       }
                     }
                   ]
+                  ,
+                  "minimumShouldMatch": 1
                 }
               }
             }
@@ -113,7 +115,10 @@ public class QueryNGramStringTest extends AbstractItTest {
             List.of("QueryNGramStringTest_2")),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "sta"), List.of("QueryNGramStringTest_2")),
-        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start"), List.of()));
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start"), List.of()),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(INDEX_NAME, "123"),
+            List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")));
   }
 
   @ParameterizedTest
