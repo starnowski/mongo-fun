@@ -19,6 +19,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class QueryNGramStringTest extends AbstractItTest {
 
   private static final String INDEX_NAME = "QueryNGramStringTest_ngram_idx";
+  private static final String STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME =
+      "QueryNGramStringTest_standard_with_ngram_token_filter_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -54,6 +56,48 @@ public class QueryNGramStringTest extends AbstractItTest {
                                       ]
                       }
           """;
+
+  private static final String STANDARD_WITH_NGRAM_TOKEN_FILTER_INDEX_DEF =
+      """
+                            {
+                              "mappings": {
+                                "dynamic": false,
+                                "fields": {
+                                  "field1": [
+                                    {
+                                      "type": "string",
+                                      "analyzer": "custom_ngram"
+                                    }
+                                  ],
+                                  "field2": [
+                                    {
+                                      "type": "string",
+                                      "analyzer": "custom_ngram"
+                                    }
+                                  ]
+                                }
+                              },
+                              "analyzers": [
+                                              {
+                                                "name": "custom_ngram",
+                                                "charFilters": []
+                                                "tokenizer": {
+                                                  "type": "standard"
+                                                },
+                                                "tokenFilters": [
+                                                    {
+                                                        "type": "lowercase"
+                                                    },
+                                                    {
+                                                        "type": "nGram",
+                                                        "minGram": 3,
+                                                        "maxGram": 10
+                                                     }
+                                                ]
+                                              }
+                                            ]
+                            }
+                """;
 
   private static final String PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1 =
       """
@@ -148,17 +192,23 @@ public class QueryNGramStringTest extends AbstractItTest {
     ensureSearchIndex(collection);
     waitForSearchIndexSync(collection, INDEX_NAME);
 
+    runTest(searchQuery, expectedIds, collection);
+  }
+
+  private void runTest(
+      String searchQuery, List<String> expectedIds, MongoCollection<Document> collection) {
+
     List<Bson> pipeline =
         List.of(
             Document.parse(searchQuery),
             Document.parse(
                 """
-            {
-              "$set": {
-                "score": { "$meta": "searchScore" }
-              }
-            }
-            """));
+                          {
+                            "$set": {
+                              "score": { "$meta": "searchScore" }
+                            }
+                          }
+                          """));
 
     // WHEN
     List<Document> results = new ArrayList<>();
@@ -194,5 +244,13 @@ public class QueryNGramStringTest extends AbstractItTest {
 
   private void ensureSearchIndex(MongoCollection<Document> collection) {
     ensureSearchIndexReady(INDEX_NAME, NGRAM_INDEX_DEF, collection);
+  }
+
+  private void ensureSearchStandardWithNGramTokenFiltersIndex(
+      MongoCollection<Document> collection) {
+    ensureSearchIndexReady(
+        STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME,
+        STANDARD_WITH_NGRAM_TOKEN_FILTER_INDEX_DEF,
+        collection);
   }
 }
