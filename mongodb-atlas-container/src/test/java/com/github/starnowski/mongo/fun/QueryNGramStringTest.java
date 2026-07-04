@@ -172,16 +172,16 @@ public class QueryNGramStringTest extends AbstractItTest {
     return java.util.stream.Stream.of(
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "123"),
-            List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")),
+            List.of("QueryNGramStringTest_3", "QueryNGramStringTest_2", "QueryNGramStringTest_1")),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start123"),
-            List.of("QueryNGramStringTest_2")),
+            List.of("QueryNGramStringTest_2", "QueryNGramStringTest_1", "QueryNGramStringTest_3")),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "sta"),
             List.of("QueryNGramStringTest_2")),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start"),
-            List.of()),
+            List.of("QueryNGramStringTest_2")),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(
                 STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "123"),
@@ -189,7 +189,7 @@ public class QueryNGramStringTest extends AbstractItTest {
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(
                 STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start"),
-            List.of()));
+            List.of("QueryNGramStringTest_2")));
   }
 
   @ParameterizedTest
