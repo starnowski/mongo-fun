@@ -118,7 +118,9 @@ public class QueryNGramStringTest extends AbstractItTest {
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start"), List.of()),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(INDEX_NAME, "123"),
-            List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")));
+            List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(INDEX_NAME, "start"), List.of()));
   }
 
   @ParameterizedTest
