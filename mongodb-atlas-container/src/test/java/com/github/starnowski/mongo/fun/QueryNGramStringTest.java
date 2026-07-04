@@ -1,5 +1,7 @@
 package com.github.starnowski.mongo.fun;
 
+import static com.mongodb.ExplainVerbosity.QUERY_PLANNER;
+
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoCollection;
@@ -160,6 +162,10 @@ public class QueryNGramStringTest extends AbstractItTest {
           results.clear();
           collection.aggregate(pipeline).into(results);
           System.out.println("Results ->" + results + "<-");
+          System.out.println(
+              "Query explain QUERY_PLANNER ->"
+                  + collection.aggregate(pipeline).explain(QUERY_PLANNER).toJson()
+                  + "<-");
           // THEN
           Assertions.assertEquals(
               expectedIds,
