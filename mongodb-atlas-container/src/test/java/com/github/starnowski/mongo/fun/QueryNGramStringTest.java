@@ -167,6 +167,25 @@ public class QueryNGramStringTest extends AbstractItTest {
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(INDEX_NAME, "start"), List.of()));
   }
 
+    private static java.util.stream.Stream<Arguments>
+    provideShouldReturnExpectedDocumentsWithCorrectOrderForSecondIndex() {
+        return java.util.stream.Stream.of(
+                Arguments.of(
+                        PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "123"),
+                        List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")),
+                Arguments.of(
+                        PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start123"),
+                        List.of("QueryNGramStringTest_2")),
+                Arguments.of(
+                        PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "sta"), List.of("QueryNGramStringTest_2")),
+                Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start"), List.of()),
+                Arguments.of(
+                        PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "123"),
+                        List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")),
+                Arguments.of(
+                        PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start"), List.of()));
+    }
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrder")
   @MongoSetup(
@@ -194,6 +213,34 @@ public class QueryNGramStringTest extends AbstractItTest {
 
     runTest(searchQuery, expectedIds, collection);
   }
+
+    @ParameterizedTest
+    @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSecondIndex")
+    @MongoSetup(
+            mongoDocuments = {
+                    @MongoDocument(
+                            database = DATABASE_NAME,
+                            collection = COLLECTION_NAME,
+                            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+                    @MongoDocument(
+                            database = DATABASE_NAME,
+                            collection = COLLECTION_NAME,
+                            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+                    @MongoDocument(
+                            database = DATABASE_NAME,
+                            collection = COLLECTION_NAME,
+                            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+            })
+    public void shouldReturnExpectedDocumentsWithCorrectOrderForStandardIndex(
+            String searchQuery, List<String> expectedIds) throws InterruptedException {
+        // GIVEN
+        MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+        MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+        ensureSearchStandardWithNGramTokenFiltersIndex(collection);
+        waitForSearchIndexSync(collection, STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME);
+
+        runTest(searchQuery, expectedIds, collection);
+    }
 
   private void runTest(
       String searchQuery, List<String> expectedIds, MongoCollection<Document> collection) {
