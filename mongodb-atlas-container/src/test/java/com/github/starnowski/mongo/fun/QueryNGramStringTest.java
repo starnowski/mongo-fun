@@ -60,7 +60,7 @@ public class QueryNGramStringTest extends AbstractItTest {
             {
               "$search": {
                 "index": "%1$s",
-                "compund": {
+                "compound": {
                   "should": [
                     {
                       "phrase": {
@@ -112,8 +112,8 @@ public class QueryNGramStringTest extends AbstractItTest {
             PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start123"),
             List.of("QueryNGramStringTest_2")),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "sta"),
-            List.of("QueryNGramStringTest_2")));
+            PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "sta"), List.of("QueryNGramStringTest_2")),
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start"), List.of()));
   }
 
   @ParameterizedTest
