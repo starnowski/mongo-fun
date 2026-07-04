@@ -283,12 +283,6 @@ public class QueryNGramStringTest extends AbstractItTest {
         });
   }
 
-  // TODO
-  // Parameters
-  // query, expected results in correct order
-
-  // TODO
-
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
       throws InterruptedException {
     waitForSearchIndexSync(collection, indexName, "field1");
