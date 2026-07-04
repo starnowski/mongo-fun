@@ -31,6 +31,12 @@ public class QueryNGramStringTest extends AbstractItTest {
                                 "type": "string",
                                 "analyzer": "custom_ngram"
                               }
+                            ],
+                            "field2": [
+                              {
+                                "type": "string",
+                                "analyzer": "custom_ngram"
+                              }
                             ]
                           }
                         },
@@ -102,6 +108,9 @@ public class QueryNGramStringTest extends AbstractItTest {
             List.of("QueryNGramStringTest_1", "QueryNGramStringTest_2", "QueryNGramStringTest_3")),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start123"),
+            List.of("QueryNGramStringTest_2")),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "sta"),
             List.of("QueryNGramStringTest_2")));
   }
 
