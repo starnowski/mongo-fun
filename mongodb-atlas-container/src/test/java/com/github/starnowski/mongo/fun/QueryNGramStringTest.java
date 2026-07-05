@@ -2,12 +2,12 @@ package com.github.starnowski.mongo.fun;
 
 import static com.mongodb.ExplainVerbosity.QUERY_PLANNER;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.impl.async.H2AsyncMainClientExec;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -155,16 +155,29 @@ public class QueryNGramStringTest extends AbstractItTest {
     return java.util.stream.Stream.of(
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "123"),
-            Map.of("QueryNGramStringTest_1", 0, "QueryNGramStringTest_2", 1, "QueryNGramStringTest_3", 2)),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start123"),
-                Map.of("QueryNGramStringTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "sta"), Map.of("QueryNGramStringTest_2", 0)),
+            PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "sta"),
+            Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(INDEX_NAME, "start"), Map.of()),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(INDEX_NAME, "123"),
-                Map.of("QueryNGramStringTest_1", 0, "QueryNGramStringTest_2", 0, "QueryNGramStringTest_3", 0)),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(INDEX_NAME, "start"), Map.of()));
   }
@@ -174,10 +187,22 @@ public class QueryNGramStringTest extends AbstractItTest {
     return java.util.stream.Stream.of(
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "123"),
-            Map.of("QueryNGramStringTest_1", 0, "QueryNGramStringTest_2", 0, "QueryNGramStringTest_3", 0)),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                0)),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start123"),
-            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStringTest_1", 0, "QueryNGramStringTest_3", 0)),
+            Map.of(
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_1",
+                1,
+                "QueryNGramStringTest_3",
+                1)),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "sta"),
             Map.of("QueryNGramStringTest_2", 0)),
@@ -187,7 +212,13 @@ public class QueryNGramStringTest extends AbstractItTest {
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(
                 STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "123"),
-            Map.of("QueryNGramStringTest_1", 0, "QueryNGramStringTest_2", 0, "QueryNGramStringTest_3", 0)),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                0)),
         Arguments.of(
             PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(
                 STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME, "start"),
@@ -212,7 +243,8 @@ public class QueryNGramStringTest extends AbstractItTest {
             bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrder(
-      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex) throws InterruptedException {
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
@@ -240,7 +272,8 @@ public class QueryNGramStringTest extends AbstractItTest {
             bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForStandardIndex(
-      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex) throws InterruptedException {
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
@@ -251,7 +284,9 @@ public class QueryNGramStringTest extends AbstractItTest {
   }
 
   private void runTest(
-      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex, MongoCollection<Document> collection) {
+      String searchQuery,
+      Map<String, Integer> expectedIdsWithScoreIndex,
+      MongoCollection<Document> collection) {
 
     List<Bson> pipeline =
         List.of(
@@ -279,15 +314,22 @@ public class QueryNGramStringTest extends AbstractItTest {
           System.out.println("<-");
           // THEN
           Assertions.assertEquals(
-                  expectedIdsWithScoreIndex,
-                  convertResultsToDocumentAndScoreIndex(results),
+              expectedIdsWithScoreIndex,
+              convertResultsToDocumentAndScoreIndex(results),
               "Expected to find documents with expected order for query: " + searchQuery);
         });
   }
 
   private Map<String, Integer> convertResultsToDocumentAndScoreIndex(List<Document> results) {
-      List<Double> scores = results.stream().map(d -> d.getDouble("score")).distinct().sorted().toList();
-      return results.stream().collect(Collectors.toMap(d -> d.getString("_id"), d -> scores.indexOf(d.getDouble("score")) ));
+    List<Double> scores =
+        results.stream()
+            .map(d -> d.getDouble("score"))
+            .distinct()
+            .sorted(Comparator.reverseOrder())
+            .toList();
+    return results.stream()
+        .collect(
+            Collectors.toMap(d -> d.getString("_id"), d -> scores.indexOf(d.getDouble("score"))));
   }
 
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
