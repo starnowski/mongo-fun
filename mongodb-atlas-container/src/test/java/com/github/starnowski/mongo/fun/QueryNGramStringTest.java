@@ -23,6 +23,8 @@ public class QueryNGramStringTest extends AbstractItTest {
   private static final String INDEX_NAME = "QueryNGramStringTest_ngram_idx";
   private static final String STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME =
       "QueryNGramStringTest_standard_with_ngram_token_filter_idx";
+
+  private static final String KEYWORD_INDEX_NAME = "QueryNGramStringTest_keyword_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -100,6 +102,41 @@ public class QueryNGramStringTest extends AbstractItTest {
                                             ]
                             }
                 """;
+
+  private static final String KEYWORD_INDEX_DEF = """
+          {
+          	"mappings": {
+          		"dynamic": false,
+          		"fields": {
+          			"field1": [
+          				{
+          					"type": "string",
+          					"analyzer": "keyword_lowercase"
+          				}
+          			],
+          			"field2": [
+          				{
+          					"type": "string",
+          					"analyzer": "keyword_lowercase"
+          				}
+          			]
+          		}
+          	},
+          	"analyzers": [
+          		{
+          			"name": "keyword_lowercase",
+          			"tokenizer": {
+          				"type": "keyword"
+          			},
+          			"tokenFilters": [
+          				{
+          					"type": "lowercase"
+          				}
+          			]
+          		}
+          	]
+          }
+          """;
 
   private static final String PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1 =
       """
@@ -283,6 +320,38 @@ public class QueryNGramStringTest extends AbstractItTest {
     runTest(searchQuery, expectedIdsWithScoreIndex, collection);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSecondIndex")
+  @MongoSetup(
+          mongoDocuments = {
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+          })
+  public void shouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex(
+          String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+          throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchKeyWordIndex(collection);
+    waitForSearchIndexSync(collection, KEYWORD_INDEX_NAME);
+
+    runTest(searchQuery, expectedIdsWithScoreIndex, collection);
+  }
+
+  // TODO Add keyword index
+    // TODO Add tests with keyword index and exact match
+
   private void runTest(
       String searchQuery,
       Map<String, Integer> expectedIdsWithScoreIndex,
@@ -347,5 +416,13 @@ public class QueryNGramStringTest extends AbstractItTest {
         STANDARD_WITH_NGRAM_TOKEN_FILTER_NAME,
         STANDARD_WITH_NGRAM_TOKEN_FILTER_INDEX_DEF,
         collection);
+  }
+
+  private void ensureSearchKeyWordIndex(
+          MongoCollection<Document> collection) {
+    ensureSearchIndexReady(
+            KEYWORD_INDEX_NAME,
+            KEYWORD_INDEX_DEF,
+            collection);
   }
 }
