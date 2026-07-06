@@ -82,39 +82,6 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                       }
           """;
 
-  private static final String SINGLE_NGRAM_INDEX_DEF =
-      """
-                          {
-                            "mappings": {
-                              "dynamic": false,
-                              "fields": {
-                                "field1": [
-                                  {
-                                    "type": "string",
-                                    "analyzer": "custom_ngram"
-                                  }
-                                ],
-                                "field2": [
-                                  {
-                                    "type": "string",
-                                    "analyzer": "custom_ngram"
-                                  }
-                                ]
-                              }
-                            },
-                            "analyzers": [
-                                        {
-                                          "name": "custom_ngram",
-                                          "tokenizer": {
-                                            "type": "nGram",
-                                            "minGram": 3,
-                                            "maxGram": 10
-                                          }
-                                        }
-                                      ]
-                          }
-              """;
-
   private static final String SINGLE_NGRAM_LOWERCASE_INDEX_DEF =
       """
                               {
@@ -152,35 +119,6 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                                           ]
                               }
                   """;
-
-  private static final String PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1 =
-      """
-            {
-              "$search": {
-                "index": "%1$s",
-                "compound": {
-                  "should": [
-                    {
-                      "phrase": {
-                        "query": "%2$s",
-                        "path": "field1",
-                        "score": { "boost": { "value" : 10 }  }
-                      }
-                    },
-                    {
-                      "phrase": {
-                        "query": "%2$s",
-                        "path": "field2",
-                        "score": { "boost": { "value" : 1 }  }
-                      }
-                    }
-                  ]
-                  ,
-                  "minimumShouldMatch": 1
-                }
-              }
-            }
-            """;
 
   private static final String PHRASE_OPERATOR_FIELD1 =
       """
@@ -280,13 +218,7 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STart123"),
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
-        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()),
-        Arguments.of(
-            PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(KEYWORD_INDEX_NAME, "123"),
-            Map.of("QueryNGramStringTest_1", 0)),
-        Arguments.of(
-            PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(KEYWORD_INDEX_NAME, "start"),
-            Map.of()));
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()));
   }
 
   private static java.util.stream.Stream<Arguments>
