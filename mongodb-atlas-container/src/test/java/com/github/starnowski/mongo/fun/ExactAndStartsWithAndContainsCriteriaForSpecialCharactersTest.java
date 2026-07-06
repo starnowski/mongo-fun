@@ -4,12 +4,11 @@ import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.Map;
 import org.bson.Document;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.Map;
 
 public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest extends AbstractItTest {
 
@@ -36,11 +35,13 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
                               }
                           },
                           {
-                              "type": "autocomplete",
-                              "minGrams": 3,
-                              "maxGrams": 10,
-                              "tokenization": "edgeGram"
-                          }
+                                "type": "autocomplete",
+                                "minGrams": 3,
+                                "maxGrams": 10,
+                                "tokenization": "edgeGram",
+                                "analyzer": "lucene.whitespace",
+                                "foldDiacritics": true
+                              }
                       ],
                       "field2": [
                           {
@@ -54,11 +55,13 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
                               }
                           },
                           {
-                              "type": "autocomplete",
-                              "minGrams": 3,
-                              "maxGrams": 10,
-                              "tokenization": "edgeGram"
-                          }
+                                "type": "autocomplete",
+                                "minGrams": 3,
+                                "maxGrams": 10,
+                                "tokenization": "edgeGram",
+                                "analyzer": "lucene.whitespace",
+                                "foldDiacritics": true
+                              }
                       ]
                   }
               },
@@ -102,7 +105,8 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
                         {
                               "autocomplete": {
                                 "query": "%2$s",
-                                "path": "field1"
+                                "path": "field1",
+                                "tokenOrder": "sequential"
                               }
                         },
                         {
@@ -132,6 +136,16 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
                 "QueryNGramStringTest_3",
                 2)),
         Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "4-5"),
+            Map.of(
+                "QueryNGramStingWithSpecialCharactersTest_1",
+                0,
+                "QueryNGramStingWithSpecialCharactersTest_2",
+                1,
+                "QueryNGramStingWithSpecialCharactersTest_3",
+                2)),
+        Arguments.of(DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "4_5"), Map.of()),
+        Arguments.of(
             DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start123"),
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
@@ -148,46 +162,49 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStringTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 1)),
         Arguments.of(
             DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start"),
-            Map.of("QueryNGramStringTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 1)),
         Arguments.of(
             DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "contains"),
-            Map.of("QueryNGramStringTest_3", 0)));
+            Map.of("QueryNGramStringTest_3", 0, "QueryNGramStingWithSpecialCharactersTest_3", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "s4-5c"),
+            Map.of("QueryNGramStingWithSpecialCharactersTest_3", 0)));
   }
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrder")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath =
-                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath =
-                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
+      })
   public void shouldReturnExpectedDocumentsWithCorrectOrder(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
       throws InterruptedException {
