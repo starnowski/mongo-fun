@@ -12,8 +12,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
 
-  private static final String KEYWORD_INDEX_NAME = "QueryNGramStingWithSpecialCharactersTest_keyword_idx";
-  private static final String AUTOCOMPLETE_INDEX_NAME = "QueryNGramStingWithSpecialCharactersTest_autocomplete_idx";
+  private static final String KEYWORD_INDEX_NAME =
+      "QueryNGramStingWithSpecialCharactersTest_keyword_idx";
+  private static final String AUTOCOMPLETE_INDEX_NAME =
+      "QueryNGramStingWithSpecialCharactersTest_autocomplete_idx";
   private static final String SINGLE_NGRAM_LOWERCASE_INDEX_NAME =
       "QueryNGramStingWithSpecialCharactersTest_single_ngram_lowercase_idx";
   private static final String DATABASE_NAME = "testdb";
@@ -329,7 +331,21 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
