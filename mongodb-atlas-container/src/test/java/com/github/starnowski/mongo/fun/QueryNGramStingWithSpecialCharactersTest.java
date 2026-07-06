@@ -221,9 +221,9 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()),
-            Arguments.of(
-                    PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "4-5"),
-                    Map.of("QueryNGramStingWithSpecialCharactersTest_1", 0)));
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "4-5"),
+            Map.of("QueryNGramStingWithSpecialCharactersTest_1", 0)));
   }
 
   private static java.util.stream.Stream<Arguments>
@@ -247,9 +247,9 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start"),
             Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
-            Arguments.of(
-                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start_"),
-                    Map.of("QueryNGramStingWithSpecialCharactersTest_2", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start_"),
+            Map.of("QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
             Map.of("QueryNGramStringTest_3", 1, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
@@ -268,6 +268,15 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                 "QueryNGramStringTest_3",
                 2)),
         Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4-5"),
+            Map.of(
+                "QueryNGramStingWithSpecialCharactersTest_1",
+                0,
+                "QueryNGramStingWithSpecialCharactersTest_2",
+                1,
+                "QueryNGramStingWithSpecialCharactersTest_3",
+                2)),
+        Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "123"),
             Map.of(
@@ -278,6 +287,16 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                 "QueryNGramStringTest_3",
                 2)),
         Arguments.of(
+            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4-5"),
+            Map.of(
+                "QueryNGramStingWithSpecialCharactersTest_1",
+                0,
+                "QueryNGramStingWithSpecialCharactersTest_2",
+                1,
+                "QueryNGramStingWithSpecialCharactersTest_3",
+                2)),
+        Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start123"),
             Map.of(
                 "QueryNGramStringTest_1",
@@ -286,32 +305,32 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                 0,
                 "QueryNGramStringTest_3",
                 3,
-                    "QueryNGramStingWithSpecialCharactersTest_2",
-                    1)),
+                "QueryNGramStingWithSpecialCharactersTest_2",
+                1)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "START123"),
             // Incorrect case-sensitive
-                Map.of(
-                        "QueryNGramStringTest_1",
-                        2,
-                        "QueryNGramStringTest_2",
-                        0,
-                        "QueryNGramStringTest_3",
-                        3,
-                        "QueryNGramStingWithSpecialCharactersTest_2",
-                        1)),
+            Map.of(
+                "QueryNGramStringTest_1",
+                2,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                3,
+                "QueryNGramStingWithSpecialCharactersTest_2",
+                1)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stART123"),
             // Incorrect case-sensitive
-                Map.of(
-                        "QueryNGramStringTest_1",
-                        2,
-                        "QueryNGramStringTest_2",
-                        0,
-                        "QueryNGramStringTest_3",
-                        3,
-                        "QueryNGramStingWithSpecialCharactersTest_2",
-                        1)),
+            Map.of(
+                "QueryNGramStringTest_1",
+                2,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                3,
+                "QueryNGramStingWithSpecialCharactersTest_2",
+                1)),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stART123"),
@@ -319,16 +338,14 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2",
-                    1)),
+            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 1)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start"),
-            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2",
-                    1)),
+            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 1)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "contains"),
             // Both documents has the same number of characters
-                //contains123contains and contains4-5contains, that is why both the same score
+            // contains123contains and contains4-5contains, that is why both the same score
             Map.of("QueryNGramStringTest_3", 0, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
   }
 
@@ -379,34 +396,34 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath =
-                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath =
-                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
+      })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
       throws InterruptedException {
@@ -422,34 +439,34 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramLowercaseIndex")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath =
-                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath =
-                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
+      })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForTextNgramLowercaseIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
       throws InterruptedException {
