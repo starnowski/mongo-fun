@@ -320,13 +320,15 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sta"),
             Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2",
-                    0)),
+                    1)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start"),
             Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2",
-                    0)),
+                    1)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "contains"),
+            // Both documents has the same number of characters
+                //contains123contains and contains4-5contains, that is why both the same score
             Map.of("QueryNGramStringTest_3", 0, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
   }
 
