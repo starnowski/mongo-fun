@@ -303,6 +303,12 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                 1,
                 "QueryNGramStringTest_3",
                 2)),
+            Arguments.of(
+                    TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
+                            SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "s123c"),
+                    Map.of(
+                            "QueryNGramStringTest_3",
+                            0)),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4-5"),
@@ -313,6 +319,12 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                 1,
                 "QueryNGramStingWithSpecialCharactersTest_3",
                 2)),
+            Arguments.of(
+                    TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
+                            SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "s4-5c"),
+                    Map.of(
+                            "QueryNGramStingWithSpecialCharactersTest_3",
+                            0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start123"),
             Map.of(
