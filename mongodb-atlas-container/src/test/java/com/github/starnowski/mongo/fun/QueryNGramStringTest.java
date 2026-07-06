@@ -262,6 +262,26 @@ public class QueryNGramStringTest extends AbstractItTest {
                     }
                     """;
 
+  private static final String TEXT_OPERATOR_FIELD1 =
+          """
+                        {
+                          "$search": {
+                            "index": "%1$s",
+                            "compound": {
+                              "should": [
+                                {
+                                  "text": {
+                                    "query": "%2$s",
+                                    "path": "field1"
+                                  }
+                                }
+                              ],
+                              "minimumShouldMatch": 1
+                            }
+                          }
+                        }
+                        """;
+
   private static java.util.stream.Stream<Arguments>
       provideShouldReturnExpectedDocumentsWithCorrectOrder() {
     return java.util.stream.Stream.of(
@@ -371,6 +391,12 @@ public class QueryNGramStringTest extends AbstractItTest {
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start123"),
             Map.of("QueryNGramStringTest_2", 0)),
+            Arguments.of(
+                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "START123"),
+                    Map.of("QueryNGramStringTest_2", 0)),
+            Arguments.of(
+                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "stART123"),
+                    Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
             Map.of("QueryNGramStringTest_2", 0)),
