@@ -243,16 +243,16 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start"),
-            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
             Arguments.of(
                     AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start_"),
                     Map.of("QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
-            Map.of("QueryNGramStringTest_3", 0, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
+            Map.of("QueryNGramStringTest_3", 1, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
   }
 
   private static java.util.stream.Stream<Arguments>
