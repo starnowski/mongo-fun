@@ -68,7 +68,8 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                                 "type": "autocomplete",
                                 "minGrams": 3,
                                 "maxGrams": 10,
-                                "tokenization": "edgeGram"
+                                "tokenization": "edgeGram",
+                                "foldDiacritics": false
                               }
                             ],
                             "field2": [
@@ -76,7 +77,8 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                                 "type": "autocomplete",
                                 "minGrams": 3,
                                 "maxGrams": 10,
-                                "tokenization": "edgeGram"
+                                "tokenization": "edgeGram",
+                                "foldDiacritics": false
                               }
                             ]
                           }
@@ -244,12 +246,21 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
             Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
+            Arguments.of(
+                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "star"),
+                    Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start"),
             Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
+            Arguments.of(
+                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sTARt"),
+                    Map.of("QueryNGramStringTest_2", 1, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start_"),
             Map.of("QueryNGramStingWithSpecialCharactersTest_2", 0)),
+            Arguments.of(
+                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start-"),
+                    Map.of()),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
             Map.of("QueryNGramStringTest_3", 1, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
@@ -276,6 +287,12 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
                 1,
                 "QueryNGramStingWithSpecialCharactersTest_3",
                 2)),
+            Arguments.of(
+                    TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4_5"),
+                    Map.of()),
+            Arguments.of(
+                    TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4_5"),
+                    Map.of()),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "123"),
