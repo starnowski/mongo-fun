@@ -171,7 +171,10 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
             Map.of("QueryNGramStringTest_3", 0, "QueryNGramStingWithSpecialCharactersTest_3", 0)),
         Arguments.of(
             DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "s4-5c"),
-            Map.of("QueryNGramStingWithSpecialCharactersTest_3", 0)));
+            Map.of("QueryNGramStingWithSpecialCharactersTest_3", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "s123c"),
+            Map.of("QueryNGramStringTest_3", 0)));
   }
 
   @ParameterizedTest
