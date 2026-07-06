@@ -312,6 +312,12 @@ public class QueryNGramStringTest extends AbstractItTest {
         Arguments.of(
             PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start123"),
             Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "START123"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STart123"),
+            Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()),
         Arguments.of(
