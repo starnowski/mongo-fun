@@ -263,7 +263,7 @@ public class QueryNGramStringTest extends AbstractItTest {
                     """;
 
   private static final String TEXT_OPERATOR_FIELD1 =
-          """
+      """
                         {
                           "$search": {
                             "index": "%1$s",
@@ -391,12 +391,12 @@ public class QueryNGramStringTest extends AbstractItTest {
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start123"),
             Map.of("QueryNGramStringTest_2", 0)),
-            Arguments.of(
-                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "START123"),
-                    Map.of("QueryNGramStringTest_2", 0)),
-            Arguments.of(
-                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "stART123"),
-                    Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "START123"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "stART123"),
+            Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
             Map.of("QueryNGramStringTest_2", 0)),
@@ -405,6 +405,58 @@ public class QueryNGramStringTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
+            Map.of("QueryNGramStringTest_3", 0)));
+  }
+
+  private static java.util.stream.Stream<Arguments>
+      provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramIndex() {
+    return java.util.stream.Stream.of(
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "start123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                1,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "START123"),
+            // Incorrect case-sensitive
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "stART123"),
+            // Incorrect case-sensitive
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "sta"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "start"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_INDEX_NAME, "contains"),
             Map.of("QueryNGramStringTest_3", 0)));
   }
 
@@ -521,6 +573,35 @@ public class QueryNGramStringTest extends AbstractItTest {
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
     ensureSearchAutocompleteIndex(collection);
     waitForSearchIndexSync(collection, AUTOCOMPLETE_INDEX_NAME);
+
+    runTest(searchQuery, expectedIdsWithScoreIndex, collection);
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramIndex")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+      })
+  public void shouldReturnExpectedDocumentsWithCorrectOrderForTextNgramIndex(
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchSingleNgramIndex(collection);
+    waitForSearchIndexSync(collection, SINGLE_NGRAM_INDEX_NAME);
 
     runTest(searchQuery, expectedIdsWithScoreIndex, collection);
   }
