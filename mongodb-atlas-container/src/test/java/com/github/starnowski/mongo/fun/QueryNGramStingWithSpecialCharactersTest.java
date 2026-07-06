@@ -220,7 +220,10 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STart123"),
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
-        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()));
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()),
+            Arguments.of(
+                    PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "4-5"),
+                    Map.of("QueryNGramStingWithSpecialCharactersTest_1", 0)));
   }
 
   private static java.util.stream.Stream<Arguments>
