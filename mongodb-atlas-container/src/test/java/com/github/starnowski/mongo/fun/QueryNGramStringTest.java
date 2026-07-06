@@ -17,6 +17,7 @@ public class QueryNGramStringTest extends AbstractItTest {
       "QueryNGramStringTest_standard_with_ngram_token_filter_idx";
 
   private static final String KEYWORD_INDEX_NAME = "QueryNGramStringTest_keyword_idx";
+  private static final String AUTOCOMPLETE_INDEX_NAME = "QueryNGramStringTest_autocomplete_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -131,6 +132,33 @@ public class QueryNGramStringTest extends AbstractItTest {
           }
           """;
 
+  private static final String AUTOCOMPLETE_INDEX_DEF =
+      """
+                      {
+                        "mappings": {
+                          "dynamic": false,
+                          "fields": {
+                            "field1": [
+                              {
+                                "type": "autocomplete",
+                                "minGrams": 3,
+                                "maxGrams": 10,
+                                "tokenization": "edgeGram"
+                              }
+                            ],
+                            "field2": [
+                              {
+                                "type": "autocomplete",
+                                "minGrams": 3,
+                                "maxGrams": 10,
+                                "tokenization": "edgeGram"
+                              }
+                            ]
+                          }
+                        }
+                      }
+          """;
+
   private static final String PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1 =
       """
             {
@@ -179,6 +207,26 @@ public class QueryNGramStringTest extends AbstractItTest {
                   }
                 }
                 """;
+
+  private static final String AUTOCOMPLETE_OPERATOR_FIELD1 =
+      """
+                    {
+                      "$search": {
+                        "index": "%1$s",
+                        "compound": {
+                          "should": [
+                            {
+                              "autocomplete": {
+                                "query": "%2$s",
+                                "path": "field1"
+                              }
+                            }
+                          ],
+                          "minimumShouldMatch": 1
+                        }
+                      }
+                    }
+                    """;
 
   private static java.util.stream.Stream<Arguments>
       provideShouldReturnExpectedDocumentsWithCorrectOrder() {
@@ -274,6 +322,26 @@ public class QueryNGramStringTest extends AbstractItTest {
             Map.of()));
   }
 
+  private static java.util.stream.Stream<Arguments>
+      provideShouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex() {
+    return java.util.stream.Stream.of(
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "123"),
+            Map.of("QueryNGramStringTest_1", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start123"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
+            Map.of("QueryNGramStringTest_3", 0)));
+  }
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrder")
   @MongoSetup(
@@ -362,6 +430,35 @@ public class QueryNGramStringTest extends AbstractItTest {
     runTest(searchQuery, expectedIdsWithScoreIndex, collection);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+      })
+  public void shouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex(
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchAutocompleteIndex(collection);
+    waitForSearchIndexSync(collection, AUTOCOMPLETE_INDEX_NAME);
+
+    runTest(searchQuery, expectedIdsWithScoreIndex, collection);
+  }
+
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
       throws InterruptedException {
     waitForSearchIndexSync(collection, indexName, "field1");
@@ -381,5 +478,9 @@ public class QueryNGramStringTest extends AbstractItTest {
 
   private void ensureSearchKeyWordIndex(MongoCollection<Document> collection) {
     ensureSearchIndexReady(KEYWORD_INDEX_NAME, KEYWORD_INDEX_DEF, collection);
+  }
+
+  private void ensureSearchAutocompleteIndex(MongoCollection<Document> collection) {
+    ensureSearchIndexReady(AUTOCOMPLETE_INDEX_NAME, AUTOCOMPLETE_INDEX_DEF, collection);
   }
 }
