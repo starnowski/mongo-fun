@@ -121,33 +121,69 @@ public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
   private static java.util.stream.Stream<Arguments>
       provideShouldReturnExpectedDocumentsWithCorrectOrder() {
     return java.util.stream.Stream.of(
-        Arguments.of(
-                DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
-            Map.of(
-                "QueryNGramStringTest_1",
-                0,
-                "QueryNGramStringTest_2",
-                1,
-                "QueryNGramStringTest_3",
-                2)),
-        Arguments.of(
-                DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start123"),
-            Map.of("QueryNGramStringTest_2", 0)),
-        Arguments.of(
-                DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStringTest_2", 0)),
-        Arguments.of(DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start"), Map.of()),
-        Arguments.of(
-                DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
-            Map.of(
-                "QueryNGramStringTest_1",
-                0,
-                "QueryNGramStringTest_2",
-                1,
-                "QueryNGramStringTest_3",
-                2)),
-        Arguments.of(
-                DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start"), Map.of()));
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
+                    Map.of(
+                            "QueryNGramStringTest_1",
+                            0,
+                            "QueryNGramStringTest_2",
+                            1,
+                            "QueryNGramStringTest_3",
+                            2)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(
+                            DEFAULT_INDEX_NAME, "123"),
+                    Map.of(
+                            "QueryNGramStringTest_1",
+                            0,
+                            "QueryNGramStringTest_2",
+                            1,
+                            "QueryNGramStringTest_3",
+                            2)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start123"),
+                    Map.of(
+                            "QueryNGramStringTest_1",
+                            1,
+                            "QueryNGramStringTest_2",
+                            0,
+                            "QueryNGramStringTest_3",
+                            2)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "START123"),
+                    // Incorrect case-sensitive
+                    Map.of(
+                            "QueryNGramStringTest_1",
+                            1,
+                            "QueryNGramStringTest_2",
+                            0,
+                            "QueryNGramStringTest_3",
+                            2)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "stART123"),
+                    // Incorrect case-sensitive
+                    Map.of(
+                            "QueryNGramStringTest_1",
+                            1,
+                            "QueryNGramStringTest_2",
+                            0,
+                            "QueryNGramStringTest_3",
+                            2)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(
+                            DEFAULT_INDEX_NAME, "stART123"),
+                    // Correct case for CONTAINS !!!!!
+                    Map.of("QueryNGramStringTest_2", 0)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "sta"),
+                    Map.of("QueryNGramStringTest_2", 0)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start"),
+                    Map.of("QueryNGramStringTest_2", 0)),
+            Arguments.of(
+                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "contains"),
+                    Map.of("QueryNGramStringTest_3", 0))
+    );
   }
 
   @ParameterizedTest
