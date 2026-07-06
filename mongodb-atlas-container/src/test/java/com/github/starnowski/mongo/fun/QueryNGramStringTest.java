@@ -19,6 +19,8 @@ public class QueryNGramStringTest extends AbstractItTest {
   private static final String KEYWORD_INDEX_NAME = "QueryNGramStringTest_keyword_idx";
   private static final String AUTOCOMPLETE_INDEX_NAME = "QueryNGramStringTest_autocomplete_idx";
   private static final String SINGLE_NGRAM_INDEX_NAME = "QueryNGramStringTest_single_ngram_idx";
+  private static final String SINGLE_NGRAM_LOWERCASE_INDEX_NAME =
+      "QueryNGramStringTest_single_ngram_lowercase_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -192,6 +194,44 @@ public class QueryNGramStringTest extends AbstractItTest {
                                       ]
                           }
               """;
+
+  private static final String SINGLE_NGRAM_LOWERCASE_INDEX_DEF =
+      """
+                              {
+                                "mappings": {
+                                  "dynamic": false,
+                                  "fields": {
+                                    "field1": [
+                                      {
+                                        "type": "string",
+                                        "analyzer": "custom_ngram"
+                                      }
+                                    ],
+                                    "field2": [
+                                      {
+                                        "type": "string",
+                                        "analyzer": "custom_ngram"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "analyzers": [
+                                            {
+                                              "name": "custom_ngram",
+                                              "tokenizer": {
+                                                "type": "nGram",
+                                                "minGram": 3,
+                                                "maxGram": 10
+                                              },
+                                              "tokenFilters": [
+                                                    {
+                                                        "type": "lowercase"
+                                                    }
+                                                ]
+                                            }
+                                          ]
+                              }
+                  """;
 
   private static final String PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1 =
       """
@@ -460,6 +500,58 @@ public class QueryNGramStringTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_3", 0)));
   }
 
+  private static java.util.stream.Stream<Arguments>
+      provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramLowercaseIndex() {
+    return java.util.stream.Stream.of(
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                1,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "START123"),
+            // Incorrect case-sensitive
+            Map.of(
+                "QueryNGramStringTest_1",
+                1,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stART123"),
+            // Incorrect case-sensitive
+            Map.of(
+                "QueryNGramStringTest_1",
+                1,
+                "QueryNGramStringTest_2",
+                0,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sta"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "contains"),
+            Map.of("QueryNGramStringTest_3", 0)));
+  }
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrder")
   @MongoSetup(
@@ -606,6 +698,35 @@ public class QueryNGramStringTest extends AbstractItTest {
     runTest(searchQuery, expectedIdsWithScoreIndex, collection);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramLowercaseIndex")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+      })
+  public void shouldReturnExpectedDocumentsWithCorrectOrderForTextNgramLowercaseIndex(
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+    MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
+    ensureSearchSingleNgramLowercaseIndex(collection);
+    waitForSearchIndexSync(collection, SINGLE_NGRAM_LOWERCASE_INDEX_NAME);
+
+    runTest(searchQuery, expectedIdsWithScoreIndex, collection);
+  }
+
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
       throws InterruptedException {
     waitForSearchIndexSync(collection, indexName, "field1");
@@ -633,5 +754,10 @@ public class QueryNGramStringTest extends AbstractItTest {
 
   private void ensureSearchSingleNgramIndex(MongoCollection<Document> collection) {
     ensureSearchIndexReady(SINGLE_NGRAM_INDEX_NAME, SINGLE_NGRAM_INDEX_DEF, collection);
+  }
+
+  private void ensureSearchSingleNgramLowercaseIndex(MongoCollection<Document> collection) {
+    ensureSearchIndexReady(
+        SINGLE_NGRAM_LOWERCASE_INDEX_NAME, SINGLE_NGRAM_LOWERCASE_INDEX_DEF, collection);
   }
 }
