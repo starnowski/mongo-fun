@@ -322,6 +322,28 @@ public class QueryNGramStringTest extends AbstractItTest {
                         }
                         """;
 
+  /** Correct case for CONTAINS query !!!!! */
+  private static final String TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1 =
+      """
+                            {
+                              "$search": {
+                                "index": "%1$s",
+                                "compound": {
+                                  "should": [
+                                    {
+                                      "text": {
+                                        "query": "%2$s",
+                                        "path": "field1",
+                                        "matchCriteria": "all"
+                                      }
+                                    }
+                                  ],
+                                  "minimumShouldMatch": 1
+                                }
+                              }
+                            }
+                            """;
+
   private static java.util.stream.Stream<Arguments>
       provideShouldReturnExpectedDocumentsWithCorrectOrder() {
     return java.util.stream.Stream.of(
@@ -513,6 +535,16 @@ public class QueryNGramStringTest extends AbstractItTest {
                 "QueryNGramStringTest_3",
                 2)),
         Arguments.of(
+            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start123"),
             Map.of(
                 "QueryNGramStringTest_1",
@@ -541,6 +573,11 @@ public class QueryNGramStringTest extends AbstractItTest {
                 0,
                 "QueryNGramStringTest_3",
                 2)),
+        Arguments.of(
+            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stART123"),
+            // Correct case for CONTAINS !!!!!
+            Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sta"),
             Map.of("QueryNGramStringTest_2", 0)),
