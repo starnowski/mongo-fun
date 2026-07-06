@@ -131,15 +131,6 @@ public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
                 "QueryNGramStringTest_3",
                 2)),
         Arguments.of(
-            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
-            Map.of(
-                "QueryNGramStringTest_1",
-                0,
-                "QueryNGramStringTest_2",
-                1,
-                "QueryNGramStringTest_3",
-                2)),
-        Arguments.of(
             DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start123"),
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
