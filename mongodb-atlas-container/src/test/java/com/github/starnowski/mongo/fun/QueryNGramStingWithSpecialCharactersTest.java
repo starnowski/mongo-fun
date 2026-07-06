@@ -243,13 +243,16 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStringTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start"),
-            Map.of("QueryNGramStringTest_2", 0)),
+            Map.of("QueryNGramStringTest_2", 0, "QueryNGramStingWithSpecialCharactersTest_2", 0)),
+            Arguments.of(
+                    AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start_"),
+                    Map.of("QueryNGramStingWithSpecialCharactersTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
-            Map.of("QueryNGramStringTest_3", 0)));
+            Map.of("QueryNGramStringTest_3", 0, "QueryNGramStingWithSpecialCharactersTest_3", 0)));
   }
 
   private static java.util.stream.Stream<Arguments>
@@ -366,20 +369,34 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex")
   @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = DATABASE_NAME,
-            collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-        @MongoDocument(
-            database = DATABASE_NAME,
-            collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-        @MongoDocument(
-            database = DATABASE_NAME,
-            collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
-      })
+          mongoDocuments = {
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath =
+                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath =
+                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
+          })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
       throws InterruptedException {
@@ -395,20 +412,34 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramLowercaseIndex")
   @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = DATABASE_NAME,
-            collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-        @MongoDocument(
-            database = DATABASE_NAME,
-            collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-        @MongoDocument(
-            database = DATABASE_NAME,
-            collection = COLLECTION_NAME,
-            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
-      })
+          mongoDocuments = {
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath = "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath =
+                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match.json"),
+                  @MongoDocument(
+                          database = DATABASE_NAME,
+                          collection = COLLECTION_NAME,
+                          bsonFilePath =
+                                  "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
+          })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForTextNgramLowercaseIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
       throws InterruptedException {
