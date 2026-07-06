@@ -18,6 +18,7 @@ public class QueryNGramStringTest extends AbstractItTest {
 
   private static final String KEYWORD_INDEX_NAME = "QueryNGramStringTest_keyword_idx";
   private static final String AUTOCOMPLETE_INDEX_NAME = "QueryNGramStringTest_autocomplete_idx";
+  private static final String SINGLE_NGRAM_INDEX_NAME = "QueryNGramStringTest_single_ngram_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -158,6 +159,39 @@ public class QueryNGramStringTest extends AbstractItTest {
                         }
                       }
           """;
+
+  private static final String SINGLE_NGRAM_INDEX_DEF =
+      """
+                          {
+                            "mappings": {
+                              "dynamic": false,
+                              "fields": {
+                                "field1": [
+                                  {
+                                    "type": "string",
+                                    "analyzer": "custom_ngram"
+                                  }
+                                ],
+                                "field2": [
+                                  {
+                                    "type": "string",
+                                    "analyzer": "custom_ngram"
+                                  }
+                                ]
+                              }
+                            },
+                            "analyzers": [
+                                        {
+                                          "name": "custom_ngram",
+                                          "tokenizer": {
+                                            "type": "nGram",
+                                            "minGram": 3,
+                                            "maxGram": 10
+                                          }
+                                        }
+                                      ]
+                          }
+              """;
 
   private static final String PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1 =
       """
@@ -488,5 +522,9 @@ public class QueryNGramStringTest extends AbstractItTest {
 
   private void ensureSearchAutocompleteIndex(MongoCollection<Document> collection) {
     ensureSearchIndexReady(AUTOCOMPLETE_INDEX_NAME, AUTOCOMPLETE_INDEX_DEF, collection);
+  }
+
+  private void ensureSearchSingleNgramIndex(MongoCollection<Document> collection) {
+    ensureSearchIndexReady(SINGLE_NGRAM_INDEX_NAME, SINGLE_NGRAM_INDEX_DEF, collection);
   }
 }
