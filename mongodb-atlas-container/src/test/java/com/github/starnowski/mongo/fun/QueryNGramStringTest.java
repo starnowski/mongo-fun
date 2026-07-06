@@ -103,7 +103,8 @@ public class QueryNGramStringTest extends AbstractItTest {
                             }
                 """;
 
-  private static final String KEYWORD_INDEX_DEF = """
+  private static final String KEYWORD_INDEX_DEF =
+      """
           {
           	"mappings": {
           		"dynamic": false,
@@ -262,6 +263,25 @@ public class QueryNGramStringTest extends AbstractItTest {
             Map.of("QueryNGramStringTest_2", 0)));
   }
 
+  private static java.util.stream.Stream<Arguments>
+      provideShouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex() {
+    return java.util.stream.Stream.of(
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "123"),
+            Map.of("QueryNGramStringTest_1", 0)),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start123"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(KEYWORD_INDEX_NAME, "123"),
+            Map.of("QueryNGramStringTest_1", 0)),
+        Arguments.of(
+            PHRASE_OPERATOR_FIELD1_10_BOOST_FIELD2_1.formatted(KEYWORD_INDEX_NAME, "start"),
+            Map.of()));
+  }
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrder")
   @MongoSetup(
@@ -321,25 +341,26 @@ public class QueryNGramStringTest extends AbstractItTest {
   }
 
   @ParameterizedTest
-  @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForSecondIndex")
+  @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+      })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex(
-          String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
-          throws InterruptedException {
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
+    // Correct exact strategy
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
@@ -348,9 +369,6 @@ public class QueryNGramStringTest extends AbstractItTest {
 
     runTest(searchQuery, expectedIdsWithScoreIndex, collection);
   }
-
-  // TODO Add keyword index
-    // TODO Add tests with keyword index and exact match
 
   private void runTest(
       String searchQuery,
@@ -418,11 +436,7 @@ public class QueryNGramStringTest extends AbstractItTest {
         collection);
   }
 
-  private void ensureSearchKeyWordIndex(
-          MongoCollection<Document> collection) {
-    ensureSearchIndexReady(
-            KEYWORD_INDEX_NAME,
-            KEYWORD_INDEX_DEF,
-            collection);
+  private void ensureSearchKeyWordIndex(MongoCollection<Document> collection) {
+    ensureSearchIndexReady(KEYWORD_INDEX_NAME, KEYWORD_INDEX_DEF, collection);
   }
 }
