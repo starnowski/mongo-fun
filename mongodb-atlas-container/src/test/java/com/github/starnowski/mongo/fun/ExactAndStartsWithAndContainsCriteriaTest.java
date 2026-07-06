@@ -4,16 +4,16 @@ import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.Map;
 import org.bson.Document;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Map;
-
 public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
 
-  private static final String DEFAULT_INDEX_NAME = "ExactAndStartsWithAndContainsCriteriaTest_default_idx";
+  private static final String DEFAULT_INDEX_NAME =
+      "ExactAndStartsWithAndContainsCriteriaTest_default_idx";
   private static final String DATABASE_NAME = "testdb";
   private static final String COLLECTION_NAME = "filter_phrase_items";
 
@@ -85,7 +85,8 @@ public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
           }
           """;
 
-  private static final String DEFAULT_QUERY_FIELD1 = """
+  private static final String DEFAULT_QUERY_FIELD1 =
+      """
                 {
                   "$search": {
                     "index": "%1$s",
@@ -117,95 +118,73 @@ public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
                 }
                 """;
 
-
   private static java.util.stream.Stream<Arguments>
       provideShouldReturnExpectedDocumentsWithCorrectOrder() {
     return java.util.stream.Stream.of(
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
-                    Map.of(
-                            "QueryNGramStringTest_1",
-                            0,
-                            "QueryNGramStringTest_2",
-                            1,
-                            "QueryNGramStringTest_3",
-                            2)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(
-                            DEFAULT_INDEX_NAME, "123"),
-                    Map.of(
-                            "QueryNGramStringTest_1",
-                            0,
-                            "QueryNGramStringTest_2",
-                            1,
-                            "QueryNGramStringTest_3",
-                            2)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start123"),
-                    Map.of(
-                            "QueryNGramStringTest_1",
-                            1,
-                            "QueryNGramStringTest_2",
-                            0,
-                            "QueryNGramStringTest_3",
-                            2)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "START123"),
-                    // Incorrect case-sensitive
-                    Map.of(
-                            "QueryNGramStringTest_1",
-                            1,
-                            "QueryNGramStringTest_2",
-                            0,
-                            "QueryNGramStringTest_3",
-                            2)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "stART123"),
-                    // Incorrect case-sensitive
-                    Map.of(
-                            "QueryNGramStringTest_1",
-                            1,
-                            "QueryNGramStringTest_2",
-                            0,
-                            "QueryNGramStringTest_3",
-                            2)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(
-                            DEFAULT_INDEX_NAME, "stART123"),
-                    // Correct case for CONTAINS !!!!!
-                    Map.of("QueryNGramStringTest_2", 0)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "sta"),
-                    Map.of("QueryNGramStringTest_2", 0)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start"),
-                    Map.of("QueryNGramStringTest_2", 0)),
-            Arguments.of(
-                    DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "contains"),
-                    Map.of("QueryNGramStringTest_3", 0))
-    );
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "123"),
+            Map.of(
+                "QueryNGramStringTest_1",
+                0,
+                "QueryNGramStringTest_2",
+                1,
+                "QueryNGramStringTest_3",
+                2)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start123"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "START123"),
+            // Incorrect case-sensitive
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "stART123"),
+            // Incorrect case-sensitive
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "stART123"),
+            // Correct case for CONTAINS !!!!!
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "sta"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "start"),
+            Map.of("QueryNGramStringTest_2", 0)),
+        Arguments.of(
+            DEFAULT_QUERY_FIELD1.formatted(DEFAULT_INDEX_NAME, "contains"),
+            Map.of("QueryNGramStringTest_3", 0)));
   }
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedDocumentsWithCorrectOrder")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
-                  @MongoDocument(
-                          database = DATABASE_NAME,
-                          collection = COLLECTION_NAME,
-                          bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_exact_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_startsWith_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath = "bson/search/QueryNGramStringTest_contains_match.json")
+      })
   public void shouldReturnExpectedDocumentsWithCorrectOrder(
-          String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
-          throws InterruptedException {
+      String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
+      throws InterruptedException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
     MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
@@ -215,7 +194,6 @@ public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
     runTest(searchQuery, expectedIdsWithScoreIndex, collection);
   }
 
-
   private void waitForSearchIndexSync(MongoCollection<Document> collection, String indexName)
       throws InterruptedException {
     waitForSearchIndexSync(collection, indexName, "field1");
@@ -224,5 +202,4 @@ public class ExactAndStartsWithAndContainsCriteriaTest extends AbstractItTest {
   private void ensureSearchIndex(MongoCollection<Document> collection) {
     ensureSearchIndexReady(DEFAULT_INDEX_NAME, DEFAULT_INDEX_DEF, collection);
   }
-
 }
