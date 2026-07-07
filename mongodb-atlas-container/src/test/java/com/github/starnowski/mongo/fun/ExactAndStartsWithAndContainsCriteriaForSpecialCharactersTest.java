@@ -206,7 +206,22 @@ public class ExactAndStartsWithAndContainsCriteriaForSpecialCharactersTest exten
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
             bsonFilePath =
-                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json")
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_exact_match_1.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_startsWith_match_1.json"),
+        @MongoDocument(
+            database = DATABASE_NAME,
+            collection = COLLECTION_NAME,
+            bsonFilePath =
+                "bson/search/QueryNGramStingWithSpecialCharactersTest_contains_match_1.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrder(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
