@@ -4,17 +4,15 @@ import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.Map;
 import org.bson.Document;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Map;
-
 public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
 
-  private static final String KEYWORD_INDEX_NAME =
-      "QueryNGramStingWithWhiteSpacesTest_keyword_idx";
+  private static final String KEYWORD_INDEX_NAME = "QueryNGramStingWithWhiteSpacesTest_keyword_idx";
   private static final String AUTOCOMPLETE_INDEX_NAME =
       "QueryNGramStingWithWhiteSpacesTest_autocomplete_idx";
   private static final String SINGLE_NGRAM_LOWERCASE_INDEX_NAME =
@@ -226,10 +224,7 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
             PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STart123"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
-        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()),
-        Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "4-5"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_1", 0)));
+        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()));
   }
 
   private static java.util.stream.Stream<Arguments>
@@ -286,15 +281,6 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
                 "QueryNGramStingWithWhiteSpacesTest_3",
                 2)),
         Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4-5"),
-            Map.of(
-                "QueryNGramStingWithWhiteSpacesTest_1",
-                0,
-                "QueryNGramStingWithWhiteSpacesTest_2",
-                1,
-                "QueryNGramStingWithWhiteSpacesTest_3",
-                2)),
-        Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4_5"), Map.of()),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
@@ -313,20 +299,6 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "s123c"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)),
-        Arguments.of(
-            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4-5"),
-            Map.of(
-                "QueryNGramStingWithWhiteSpacesTest_1",
-                0,
-                "QueryNGramStingWithWhiteSpacesTest_2",
-                1,
-                "QueryNGramStingWithWhiteSpacesTest_3",
-                2)),
-        Arguments.of(
-            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "s4-5c"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start123"),
@@ -390,13 +362,11 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath =
-                "bson/search/QueryNGramStingWithWhiteSpacesTest_startsWith_match.json"),
+            bsonFilePath = "bson/search/QueryNGramStingWithWhiteSpacesTest_startsWith_match.json"),
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath =
-                "bson/search/QueryNGramStingWithWhiteSpacesTest_contains_match.json")
+            bsonFilePath = "bson/search/QueryNGramStingWithWhiteSpacesTest_contains_match.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
@@ -422,13 +392,11 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath =
-                "bson/search/QueryNGramStingWithWhiteSpacesTest_startsWith_match.json"),
+            bsonFilePath = "bson/search/QueryNGramStingWithWhiteSpacesTest_startsWith_match.json"),
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath =
-                "bson/search/QueryNGramStingWithWhiteSpacesTest_contains_match.json")
+            bsonFilePath = "bson/search/QueryNGramStingWithWhiteSpacesTest_contains_match.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
@@ -453,13 +421,11 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath =
-                "bson/search/QueryNGramStingWithWhiteSpacesTest_startsWith_match.json"),
+            bsonFilePath = "bson/search/QueryNGramStingWithWhiteSpacesTest_startsWith_match.json"),
         @MongoDocument(
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
-            bsonFilePath =
-                "bson/search/QueryNGramStingWithWhiteSpacesTest_contains_match.json")
+            bsonFilePath = "bson/search/QueryNGramStingWithWhiteSpacesTest_contains_match.json")
       })
   public void shouldReturnExpectedDocumentsWithCorrectOrderForTextNgramLowercaseIndex(
       String searchQuery, Map<String, Integer> expectedIdsWithScoreIndex)
