@@ -238,6 +238,8 @@ public class QueryNGramStingWithSpecialCharactersTest extends AbstractItTest {
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "123"),
             Map.of("QueryNGramStringTest_1", 0)),
         Arguments.of(
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "12"), Map.of()),
+        Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start123"),
             Map.of("QueryNGramStringTest_2", 0)),
         Arguments.of(
