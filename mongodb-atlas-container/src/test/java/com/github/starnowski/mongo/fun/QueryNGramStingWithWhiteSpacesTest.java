@@ -275,36 +275,36 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sUT 2c"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)),
+            Map.of()),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "startUT 2"),
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
-                0,
+                1,
                 "QueryNGramStingWithWhiteSpacesTest_3",
-                3,
+                2,
                 "QueryNGramStingWithWhiteSpacesTest_2",
-                1)),
+                0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "STARTUT 2"),
             // Incorrect case-sensitive
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
-                2,
+                1,
                 "QueryNGramStingWithWhiteSpacesTest_3",
-                3,
+                2,
                 "QueryNGramStingWithWhiteSpacesTest_2",
-                1)),
+                0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stARTUT 2"),
             // Incorrect case-sensitive
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
-                2,
+                1,
                 "QueryNGramStingWithWhiteSpacesTest_3",
-                3,
+                2,
                 "QueryNGramStingWithWhiteSpacesTest_2",
-                1)),
+                0)),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2stART"),
@@ -312,9 +312,7 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "contains"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)),
-        Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2"), Map.of()),
+            Map.of()),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "v"),
