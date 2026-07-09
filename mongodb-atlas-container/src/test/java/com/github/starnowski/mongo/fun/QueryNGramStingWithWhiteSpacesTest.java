@@ -230,7 +230,13 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
     return java.util.stream.Stream.of(
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "UT 2"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_1", 0)),
+            Map.of(
+                "QueryNGramStingWithWhiteSpacesTest_3",
+                0,
+                "QueryNGramStingWithWhiteSpacesTest_2",
+                1,
+                "QueryNGramStingWithWhiteSpacesTest_1",
+                1)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "12"), Map.of()),
         Arguments.of(
@@ -241,8 +247,7 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "UT 2stART"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0))
-    );
+            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)));
   }
 
   private static java.util.stream.Stream<Arguments>
