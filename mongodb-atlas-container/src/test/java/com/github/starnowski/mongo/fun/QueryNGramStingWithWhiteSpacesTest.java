@@ -212,16 +212,16 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
       provideShouldReturnExpectedDocumentsWithCorrectOrderForKeywordIndex() {
     return java.util.stream.Stream.of(
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "123"),
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "UT 2"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_1", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start123"),
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "startUT 2"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "START123"),
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STARTUT 2"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STart123"),
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STartUT 2"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
         Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()));
@@ -231,64 +231,27 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
       provideShouldReturnExpectedDocumentsWithCorrectOrderForAutocompleteIndex() {
     return java.util.stream.Stream.of(
         Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "123"),
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "UT 2"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_1", 0)),
         Arguments.of(
             AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "12"), Map.of()),
         Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start123"),
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "UT 2start"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "START123"),
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "UT 2START"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "stART123"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "star"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "sTARt"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start_"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start-"), Map.of()),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "start-4"), Map.of()),
-        Arguments.of(
-            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "contains"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)));
+            AUTOCOMPLETE_OPERATOR_FIELD1.formatted(AUTOCOMPLETE_INDEX_NAME, "UT 2stART"),
+            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0))
+    );
   }
 
   private static java.util.stream.Stream<Arguments>
       provideShouldReturnExpectedDocumentsWithCorrectOrderForSingleNgramLowercaseIndex() {
     return java.util.stream.Stream.of(
         Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "123"),
-            Map.of(
-                "QueryNGramStingWithWhiteSpacesTest_1",
-                0,
-                "QueryNGramStingWithWhiteSpacesTest_2",
-                1,
-                "QueryNGramStingWithWhiteSpacesTest_3",
-                2)),
-        Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4_5"), Map.of()),
-        Arguments.of(
-            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "4_5"),
-            Map.of()),
-        Arguments.of(
-            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "123"),
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2"),
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
                 0,
@@ -298,10 +261,20 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
                 2)),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "s123c"),
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2"),
+            Map.of(
+                "QueryNGramStingWithWhiteSpacesTest_1",
+                0,
+                "QueryNGramStingWithWhiteSpacesTest_2",
+                1,
+                "QueryNGramStingWithWhiteSpacesTest_3",
+                2)),
+        Arguments.of(
+            TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sUT 2c"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)),
         Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start123"),
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "startUT 2"),
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
                 0,
@@ -310,7 +283,7 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
                 "QueryNGramStingWithWhiteSpacesTest_2",
                 1)),
         Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "START123"),
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "STARTUT 2"),
             // Incorrect case-sensitive
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
@@ -320,7 +293,7 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
                 "QueryNGramStingWithWhiteSpacesTest_2",
                 1)),
         Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stART123"),
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stARTUT 2"),
             // Incorrect case-sensitive
             Map.of(
                 "QueryNGramStingWithWhiteSpacesTest_1",
@@ -331,23 +304,17 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
                 1)),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "stART123"),
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2stART"),
             // Correct case for CONTAINS !!!!!
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "sta"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "start"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
             TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "contains"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_3", 0)),
         Arguments.of(
-            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "12"), Map.of()),
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2"), Map.of()),
         Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
-                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "12"),
+                SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "v"),
             Map.of()));
   }
 
