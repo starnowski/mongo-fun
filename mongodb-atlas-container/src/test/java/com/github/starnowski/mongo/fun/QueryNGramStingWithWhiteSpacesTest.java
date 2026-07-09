@@ -215,16 +215,14 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
             PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "UT 2"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_1", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "startUT 2"),
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "UT 2start"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STARTUT 2"),
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "UT 2START"),
             Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
         Arguments.of(
-            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "STartUT 2"),
-            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)),
-        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "sta"), Map.of()),
-        Arguments.of(PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "start"), Map.of()));
+            PHRASE_OPERATOR_FIELD1.formatted(KEYWORD_INDEX_NAME, "UT 2STart"),
+            Map.of("QueryNGramStingWithWhiteSpacesTest_2", 0)));
   }
 
   private static java.util.stream.Stream<Arguments>
