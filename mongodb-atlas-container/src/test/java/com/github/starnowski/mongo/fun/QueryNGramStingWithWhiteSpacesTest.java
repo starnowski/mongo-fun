@@ -263,6 +263,15 @@ public class QueryNGramStingWithWhiteSpacesTest extends AbstractItTest {
                 "QueryNGramStingWithWhiteSpacesTest_3",
                 2)),
         Arguments.of(
+            TEXT_OPERATOR_FIELD1.formatted(SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT "),
+            Map.of(
+                "QueryNGramStingWithWhiteSpacesTest_1",
+                0,
+                "QueryNGramStingWithWhiteSpacesTest_2",
+                1,
+                "QueryNGramStingWithWhiteSpacesTest_3",
+                2)),
+        Arguments.of(
             TEXT_OPERATOR_ALL_CRITERIA_MATCH_FIELD1.formatted(
                 SINGLE_NGRAM_LOWERCASE_INDEX_NAME, "UT 2"),
             Map.of(
