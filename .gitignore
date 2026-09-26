@@ -31,3 +31,6 @@ hs_err_pid*
 *.iml
 
 **/node_modules/*
+
+# python virtual environment
+**/.venv/
