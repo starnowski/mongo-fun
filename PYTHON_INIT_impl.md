@@ -5,10 +5,10 @@
   - [x] Set up the basic project structure (e.g., `src/`, `tests/`).
   - [x] Configure standard Python tooling (e.g., `ruff` which pairs well with `uv`).
 
-- [ ] **Step 2: Dependency Management**
-  - [ ] Install the MongoDB Python driver (`pymongo`) using `uv add`.
-  - [ ] Install the testing framework (`pytest`) using `uv add --dev`.
-  - [ ] Install `testcontainers` for managing the MongoDB Atlas local Docker container during tests using `uv add --dev`.
+- [x] **Step 2: Dependency Management**
+  - [x] Install the MongoDB Python driver (`pymongo`) using `uv add`.
+  - [x] Install the testing framework (`pytest`) using `uv add --dev`.
+  - [x] Install `testcontainers` for managing the MongoDB Atlas local Docker container during tests using `uv add --dev`.
 
 - [ ] **Step 3: Test Infrastructure Setup**
   - [ ] Create a pytest fixture (e.g., in `tests/conftest.py`) to manage the lifecycle of the `mongodb/mongodb-atlas-local:7.0.11` Docker container.
