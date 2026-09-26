@@ -10,9 +10,9 @@
   - [x] Install the testing framework (`pytest`) using `uv add --dev`.
   - [x] Install `testcontainers` for managing the MongoDB Atlas local Docker container during tests using `uv add --dev`.
 
-- [ ] **Step 3: Test Infrastructure Setup**
-  - [ ] Create a pytest fixture (e.g., in `tests/conftest.py`) to manage the lifecycle of the `mongodb/mongodb-atlas-local:7.0.11` Docker container.
-  - [ ] Create a pytest fixture to provide an authenticated and connected `MongoClient` instance to the running container.
+- [x] **Step 3: Test Infrastructure Setup**
+  - [x] Create a pytest fixture (e.g., in `tests/conftest.py`) to manage the lifecycle of the `mongodb/mongodb-atlas-local:7.0.11` Docker container.
+  - [x] Create a pytest fixture to provide an authenticated and connected `MongoClient` instance to the running container.
 
 - [ ] **Step 4: Vector Search Integration Test**
   - [ ] Create a test file (e.g., `tests/test_vector_search_index.py`).
