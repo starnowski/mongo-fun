@@ -14,8 +14,8 @@
   - [x] Create a pytest fixture (e.g., in `tests/conftest.py`) to manage the lifecycle of the `mongodb/mongodb-atlas-local:7.0.11` Docker container.
   - [x] Create a pytest fixture to provide an authenticated and connected `MongoClient` instance to the running container.
 
-- [ ] **Step 4: Vector Search Integration Test**
-  - [ ] Create a test file (e.g., `tests/test_vector_search_index.py`).
-  - [ ] Implement an integration test that creates a vector search index using PyMongo's `create_search_index` (or similar) functionality.
-  - [ ] Define the index configuration to use auto-embedding, as requested.
-  - [ ] Verify the index creation by listing the search indexes and asserting the new index exists.
+- [x] **Step 4: Vector Search Integration Test**
+  - [x] Create a test file (e.g., `tests/test_vector_search_index.py`).
+  - [x] Implement an integration test that creates a vector search index using PyMongo's `create_search_index` (or similar) functionality.
+  - [x] Define the index configuration to use auto-embedding, as requested.
+  - [x] Verify the index creation by listing the search indexes and asserting the new index exists.
