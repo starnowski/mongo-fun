@@ -1,9 +1,9 @@
 # Implementation Plan: Python MongoDB Vector Search Project
 
-- [ ] **Step 1: Project Initialization**
-  - [ ] Initialize a new Python project using `uv` (e.g., `uv init`).
-  - [ ] Set up the basic project structure (e.g., `src/`, `tests/`).
-  - [ ] Configure standard Python tooling (e.g., `ruff` which pairs well with `uv`).
+- [x] **Step 1: Project Initialization**
+  - [x] Initialize a new Python project using `uv` (e.g., `uv init`).
+  - [x] Set up the basic project structure (e.g., `src/`, `tests/`).
+  - [x] Configure standard Python tooling (e.g., `ruff` which pairs well with `uv`).
 
 - [ ] **Step 2: Dependency Management**
   - [ ] Install the MongoDB Python driver (`pymongo`) using `uv add`.
